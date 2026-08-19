@@ -1,26 +1,28 @@
 # skills
 
 Personal [Cursor Agent Skills](https://cursor.com/docs/skills). Clone this
-repository to `~/.cursor/skills` so every folder that contains a `SKILL.md`
-is discovered automatically.
+repository anywhere, open **this folder** in Cursor, and work. Skills live
+in `.cursor/skills/` so they load with the repo. No install step, no
+symlinks, no copy into `~/.cursor`.
 
 ```bash
-git clone git@github.com:isArman/skills.git ~/.cursor/skills
+git clone git@github.com:isArman/skills.git
 ```
 
-If that path already exists, add this repo as a remote there or merge the
-contents. After `git pull`, reload Cursor or type `/scientific-fa-translation`
-in Agent chat to confirm the skill is visible.
+Open the cloned directory in Cursor as the workspace. In Agent chat,
+ask to translate (or type `/scientific-fa-translation`). If the slash
+menu is empty — common on Cloud Agent follow-ups — write it in prose:
+“use the scientific-fa-translation skill”.
 
-Each skill is a directory named after its `name` frontmatter field. Cursor
-walks `~/.cursor/skills` recursively; keep `SKILL.md` in the skill folder,
-not at the repo root.
+After `git pull` on a new machine, start a **new** Agent on branch
+`main`. Follow-ups in an already-running Cloud Agent do not reliably
+reload project skills.
 
 ## Skills
 
 | Skill | Invoke | Purpose |
 | --- | --- | --- |
-| [scientific-fa-translation](scientific-fa-translation/SKILL.md) | `/scientific-fa-translation` | Academic English → Persian translation; print PDF with precise RTL at `~/Documents/books` |
+| [scientific-fa-translation](.cursor/skills/scientific-fa-translation/SKILL.md) | `/scientific-fa-translation` | Academic English → Persian translation; print PDF with precise RTL at `~/Documents/books` |
 
 ### scientific-fa-translation
 
@@ -57,7 +59,7 @@ ambiguity.
 Layout:
 
 ```text
-scientific-fa-translation/
+.cursor/skills/scientific-fa-translation/
   SKILL.md
   assets/rtl-document.tex
   assets/rtl-document.html
