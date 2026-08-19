@@ -1,25 +1,33 @@
 # Glossary
 
-Living list for this skill. Classify every token against the two
-columns below, then add a row if it is new.
+Living list for this skill. Classify against Keep English vs Translate,
+then add a row if it is new. Multi-word technical collocations are
+atomic: store and emit the **whole phrase**, not the pieces.
 
 ## Rules
 
 1. **Keep English:** algorithm / library / protocol / product names;
    acronyms (`API`, `PCR`, `GPU`, `CI`, …); formulas, code, units,
-   statistics (`p`, `n`, `SD`, …); people’s names, journals, DOIs.
-   Output the exact English form in an LTR isolate. Never substitute a
-   Persian neologism.
+   statistics (`p`, `n`, `SD`, …); people’s names, journals, DOIs;
+   **multi-word technical collocations as whole phrases**.
+   Output the exact English form in one LTR isolate. Never substitute a
+   Persian neologism. Never calque or half-translate a collocation.
 2. **Write in Persian:** verbs and sentence structure; general words
-   (روش، نتایج، بررسی); section titles (مقدمه، بحث، …); conceptual
-   explanation for the reader. Never leave those in English.
-3. If a *name* is missing from **Keep English**, keep English and add
-   a row. If a *general word* is missing from **Translate**, write
-   Persian and add a row.
-4. Do not add فرهنگستان coinages for named artifacts unless the user
+   (روش، نتایج، بررسی) when they are not inside a keep-English
+   collocation; section titles (مقدمه، بحث، …); conceptual explanation
+   for the reader. Never leave those in English.
+3. If a *name* or a *collocation* is missing from **Keep English**, keep
+   the whole English NP and add a row. If a *general word* is missing
+   from **Translate** and it is not part of a collocation, write Persian
+   and add a row.
+4. A Translate row for one word does not split a longer English NP that
+   contains it.
+5. Do not add فرهنگستان coinages for named artifacts unless the user
    puts them in this file.
-5. Matching is case-sensitive only when the source is (e.g. `BERT` vs
+6. Matching is case-sensitive only when the source is (e.g. `BERT` vs
    a generic `bert` identifier in code — follow the source).
+7. No Persian morphology on English tokens (`APIها`, `Goی`). Plural is
+   English inside the isolate (`APIs`).
 
 ## Translate (Persian)
 
@@ -77,11 +85,26 @@ English.
 | steganography | پنهان‌نگاری |
 
 `dataset` as a named corpus (`ImageNet`, `GLUE`) is a product/name and
-stays English.
+stays English. A Translate row (`deployment` → استقرار) does not split
+`deployment and configuration`; that collocation stays English.
 
 ## Keep English
 
 Non-exhaustive. Anything of this kind stays English even if unlisted.
+
+### Atomic collocations
+
+Keep the **entire source phrase** in one isolate. Do not calque or
+half-translate. Add new document NPs here as whole rows.
+
+| Term | Notes |
+| --- | --- |
+| composable APIs | not «APIهای ترکیب‌پذیر» |
+| reusable Go packages | not «بسته‌های Go» |
+| Kubernetes cluster | not «خوشه Kubernetes» |
+| deployment and configuration | not «استقرار و پیکربندی» when used as a domain label |
+| Continuous Delivery workflows | not «جریان‌های کاری پیوسته» |
+| version-controlled approach to operations | not a word-for-word calque |
 
 ### Algorithms, libraries, protocols, products
 

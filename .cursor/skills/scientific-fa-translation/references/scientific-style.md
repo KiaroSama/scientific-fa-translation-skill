@@ -7,8 +7,10 @@ faithfulness to the source science first, then readable فارسی معیار.
 
 - Formal written Persian. No spoken reductions: not `میشه`, `می‌خواد`,
   `چونکه` as a default, `اصلاً` as filler.
-- Prefer clear scientific prose over calques. Do not copy English
-  word order when it produces unreadable Persian.
+- Prefer clear scientific prose over sentence-level calques. Do not
+  copy English *clause* word order when it produces unreadable Persian.
+  Do not “fix” a technical NP by translating it word-by-word either:
+  that is a collocation calque and is forbidden (see Terminology).
 - Keep the author's epistemic stance. `may` / `might` / `suggest` /
   `appear to` / `remain unknown` must not become certainty.
 - Do not add background, examples, or conclusions the source lacks.
@@ -32,7 +34,8 @@ faithfulness to the source science first, then readable فارسی معیار.
 
 ## Terminology
 
-Policy lives in `glossary.md`. Two columns only:
+Policy lives in `glossary.md`. Named artifacts and **atomic multi-word
+collocations** stay English. Ordinary scholarly language is Persian.
 
 **Keep English** (LTR-isolated). Do not coin فرهنگستان equivalents.
 
@@ -40,20 +43,29 @@ Policy lives in `glossary.md`. Two columns only:
 - Acronyms (`API`, `PCR`, `GPU`, `CI`, and the same class)
 - Formulas, code, units, statistics (`p`, `n`, `SD`, …)
 - People’s names, journal names, DOIs (and bibliography entries)
+- Multi-word technical collocations: a 2–5 word domain label in the
+  source is one English unit. Do not calque. Do not half-translate
+  (`خوشه Kubernetes`, `APIهای ترکیب‌پذیر`). No Persian affixes on
+  English tokens. If unsure, keep the whole NP in English.
 
 **Write in Persian.** Do not leave these in English.
 
 - Verbs and sentence structure
-- General words: روش، نتایج، بررسی
+- General words: روش، نتایج، بررسی — only when they are *not* inside
+  a keep-English collocation
 - Section titles: مقدمه، بحث، …
-- Conceptual explanation for the reader (the prose around a term)
+- Conceptual explanation for the reader (the clause around a term)
 
 One English form per named concept for the whole document. On first
 use, do not add a gloss like `نزول گرادیان (gradient descent)` unless
 the glossary says to.
 
-When unsure, classify against those two columns. Do not default a
-general word to English. Ask only if the class is still unclear.
+A Translate row for a single word (`deployment` → استقرار) does not
+authorize splitting `deployment and configuration`. Collocation wins.
+
+When unsure whether a short NP is a term of art, keep it English and
+add the whole phrase to Keep English. Do not default a collocation to
+Persian word-by-word.
 
 ## What not to translate
 
@@ -61,6 +73,7 @@ Leave unchanged (aside from LTR markup):
 
 - Names of algorithms, libraries, protocols, and products
 - Acronyms (`API`, `PCR`, `GPU`, `CI`, …)
+- Multi-word technical collocations (whole NP, one isolate)
 - Formulas, code, units, statistical symbols (`p`, `n`, `SD`, …)
 - People’s names; journal, conference, and DOI/URL strings
 - Bibliography entries: authors, article titles, journals, years

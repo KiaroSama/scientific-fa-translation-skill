@@ -41,6 +41,8 @@ via `@font-face` when the font is not installed on the system.
 
 - Algorithm, library, protocol, and product names
 - Acronyms such as `API`, `PCR`, `GPU`, `CI`
+- Multi-word technical collocations as one English unit (no calque,
+  no half-translation: `Kubernetes cluster`, not «خوشه Kubernetes»)
 - Formulas, code, units, and statistics (`p`, `n`, `SD`)
 - People’s names, journal names, and DOIs
 

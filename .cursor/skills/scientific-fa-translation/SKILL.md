@@ -35,7 +35,7 @@ Override only when the user says so.
 | --- | --- |
 | Direction | English → فارسی علمی |
 | Register | Formal فارسی معیار. No colloquial forms. |
-| Technical terms | Named artifacts stay English. General scholarly language is Persian. See below. |
+| Technical terms | Named artifacts stay English. Multi-word technical collocations stay English as one unit. General scholarly language is Persian. |
 | First mention | Named English terms: English only, no gloss, unless `references/glossary.md` says so. |
 | Output | Printable PDF at `~/Documents/books/<slug>.pdf`. Chat is a short pointer, not RTL. |
 | PDF RTL | Maximum precision via XeLaTeX + `xepersian`. See `references/pdf-output.md`. |
@@ -61,8 +61,9 @@ conversation and do not paste the article into chat.
    footnotes, citations. Copy every source image into the working
    tree (`figures/` next to the `.tex`) and keep the same sequence
    relative to the surrounding text.
-4. Scan domain terms. Check `references/glossary.md`. New *names*
-   stay English; new general words get a Persian row. Append both.
+4. Scan domain terms. Check `references/glossary.md`. New *names* and
+   new multi-word technical collocations stay English (whole NP);
+   new general words get a Persian row. Append both.
 5. Translate section by section. Do not add, omit, or soften claims.
    Preserve hedge language (`may`, `might`, `suggest`, `remain unknown`).
 6. RTL pass on the print source (`.tex` with `\lr` / `latin`, or HTML
@@ -89,6 +90,18 @@ Persianize. Do not invent فرهنگستان equivalents.
 - Formulas, code, units, and statistics (`p`, `n`, `SD`, …)
 - People’s names, journal names, and DOIs
   (also conference names, URLs, and bibliography titles)
+- **Multi-word technical collocations (atomic).** A 2–5 word domain
+  label in the source is one English unit. Do not calque it. Do not
+  half-translate it. If unsure whether it is a term of art or ordinary
+  prose, keep the **whole NP** in English and add it to the glossary.
+
+  Isolate the entire phrase in one `\lr{…}` / `\en{…}`. Do not attach
+  Persian morphology (`APIها`, `Goی`).
+
+  Forbidden: `apiهای ترکیب‌پذیر`, `خوشه Kubernetes`, `بسته‌های Go`,
+  `استقرار و پیکربندی` when the source is `deployment and configuration`.
+  Required: `composable APIs`, `Kubernetes cluster`,
+  `reusable Go packages`, `deployment and configuration`.
 
 **Write in Persian.** Translate these out of English. Never leave the
 English word in the Persian sentence.
@@ -98,13 +111,17 @@ English word in the Persian sentence.
   vocabulary: مقاله، روش‌ها، بحث، …)
 - Section titles: مقدمه، بحث، and the rest of the heading table in
   `references/scientific-style.md`
-- Conceptual explanation for the reader: the surrounding prose that
-  *says what a term means* is Persian. The named term inside it stays
-  English.
+- Conceptual explanation for the reader: the surrounding *clause* that
+  *says what a term means* is Persian. The term itself — including a
+  multi-word collocation — stays English. A glossary Translate row for
+  a single word does **not** split a collocation that contains it.
 
 Example: «در این روش از \en{gradient descent} برای کمینه کردن تابع
 هزینه استفاده می‌شود.» — روش / کمینه کردن / استفاده می‌شود are
 Persian; `gradient descent` stays English.
+
+Example: «\en{GitOps Toolkit} مجموعه‌ای از \en{composable APIs} و
+\en{reusable Go packages} است.» — not «APIهای ترکیب‌پذیر».
 
 ## Persian mechanics
 
@@ -125,8 +142,9 @@ Chat does not need to be RTL.
 On the **PDF** (non-negotiable when producing a printable file):
 
 - Prefer XeLaTeX + `xepersian` from `assets/rtl-document.tex`.
-- Isolate every English term, number cluster, formula, URL, and inline
-  code with `\lr{…}` (or `<span dir="ltr">` on the HTML fallback).
+- Isolate every English term, **whole technical collocation**, number
+  cluster, formula, URL, and inline code with `\lr{…}` (or
+  `<span dir="ltr">` on the HTML fallback).
   Slash-, arrow-, or parenthesis-joined English (`OP_IF/OP_NOTIF`,
   `STARTED -> LOCKED_IN`, `1.0.1 (2026-08-09)`) is **one** isolate, not
   two spans with punctuation between them.
@@ -169,6 +187,7 @@ the Chromium / WeasyPrint fallback in `references/pdf-output.md`.
 - [ ] No added, omitted, or softened scientific claims
 - [ ] Hedge language preserved
 - [ ] Names/acronyms/formulas/units/stats/people/journals/DOIs stay English
+- [ ] Multi-word technical collocations are one English isolate; no calque or half-translation
 - [ ] Verbs, general words, section titles, and explanations are Persian
 - [ ] Citations, equations, numbers, and units unchanged
 - [ ] `ک`/`ی` Persian; نیم‌فاصله present; no colloquial forms

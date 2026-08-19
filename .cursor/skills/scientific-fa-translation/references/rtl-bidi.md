@@ -72,8 +72,14 @@ Also:
 
 ## Isolate every LTR run
 
-Wrap each English term, acronym, number cluster, citation key, formula,
-URL, file path, and inline code:
+Wrap each English term, **whole technical collocation**, acronym, number
+cluster, citation key, formula, URL, file path, and inline code. A
+collocation is one isolate, not one span per word:
+
+```html
+<span dir="ltr">composable APIs</span>
+<span dir="ltr">Kubernetes cluster</span>
+```
 
 ```html
 <span dir="ltr">gradient descent</span>
