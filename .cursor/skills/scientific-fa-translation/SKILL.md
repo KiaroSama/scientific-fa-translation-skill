@@ -91,30 +91,50 @@ Persianize. Do not invent فرهنگستان equivalents.
 - People’s names, journal names, and DOIs
   (also conference names, URLs, and bibliography titles)
 - **Multi-word technical collocations (atomic).** A 2–5 word domain
-  label in the source is one English unit. Do not calque it. Do not
-  half-translate it. If unsure whether it is a term of art or ordinary
-  prose, keep the **whole NP** in English and add it to the glossary.
+  label in the source is one English unit. Possessive of, *X of Y*,
+  and *Adjective + Name* are still one NP (`OpenStack services`,
+  `Ubuntu Cloud archive repository`, `controller node`). Do not
+  calque. Do not half-translate. If unsure whether it is a term of
+  art or ordinary prose, keep the **whole NP** in English and add it
+  to the glossary.
 
   Isolate the entire phrase in one `\lr{…}` / `\en{…}`. Do not attach
-  Persian morphology (`APIها`, `Goی`).
+  Persian morphology (`APIها`, `Goی`). Do not wrap an English name
+  with a Persian head noun (`خوشه …`, `بسته‌های …`, `سرویس‌های …`,
+  `مخزن …`, `گره‌های …`).
 
   Forbidden: `apiهای ترکیب‌پذیر`, `خوشه Kubernetes`, `بسته‌های Go`,
-  `استقرار و پیکربندی` when the source is `deployment and configuration`.
+  `بسته‌های OpenStack`, `سرویس‌های OpenStack`,
+  `مخزن Ubuntu Cloud archive`, `گره‌های دیگر` when the source is
+  `Other nodes`, `استقرار و پیکربندی` when the source is
+  `deployment and configuration`, `نصب و پیکربندی مؤلفه‌ها` when
+  the source is `Install and configure components`.
   Required: `composable APIs`, `Kubernetes cluster`,
-  `reusable Go packages`, `deployment and configuration`.
+  `reusable Go packages`, `OpenStack packages`, `OpenStack services`,
+  `Ubuntu Cloud archive repository`, `Other nodes`,
+  `deployment and configuration`, `Install and configure components`.
 
 **Write in Persian.** Translate these out of English. Never leave the
 English word in the Persian sentence.
 
 - Verbs and sentence structure
 - General scholarly words: روش، نتایج، بررسی (also مقدمه-level
-  vocabulary: مقاله، روش‌ها، بحث، …)
-- Section titles: مقدمه، بحث، and the rest of the heading table in
-  `references/scientific-style.md`
+  vocabulary: مقاله، روش‌ها، بحث، …) — only when they are *not*
+  inside a keep-English collocation
+- Generic IMRAD / book headings in the table in
+  `references/scientific-style.md` (مقدمه، بحث، چکیده، …)
 - Conceptual explanation for the reader: the surrounding *clause* that
   *says what a term means* is Persian. The term itself — including a
   multi-word collocation — stays English. A glossary Translate row for
   a single word does **not** split a collocation that contains it.
+
+**Headings.** Generic article headings (`Abstract`, `Introduction`)
+are Persian. If the source heading *is* a named artifact or a
+technical collocation (`The OpenStack services`,
+`Conceptual architecture`, `Get started with OpenStack`,
+`Host networking`), keep the **entire heading** English in one
+isolate. Do not Persianize the generic word and leave the name
+(`سرویس‌های OpenStack`).
 
 Example: «در این روش از \en{gradient descent} برای کمینه کردن تابع
 هزینه استفاده می‌شود.» — روش / کمینه کردن / استفاده می‌شود are
@@ -122,6 +142,10 @@ Persian; `gradient descent` stays English.
 
 Example: «\en{GitOps Toolkit} مجموعه‌ای از \en{composable APIs} و
 \en{reusable Go packages} است.» — not «APIهای ترکیب‌پذیر».
+
+Example: «\en{OpenStack} از طریق مجموعه‌ای از سرویس‌های مرتبط یک
+راه‌حل \en{Infrastructure-as-a-Service (IaaS)} فراهم می‌کند.» Then
+name the set as \en{OpenStack services}, not «سرویس‌های OpenStack».
 
 ## Persian mechanics
 
@@ -188,7 +212,9 @@ the Chromium / WeasyPrint fallback in `references/pdf-output.md`.
 - [ ] Hedge language preserved
 - [ ] Names/acronyms/formulas/units/stats/people/journals/DOIs stay English
 - [ ] Multi-word technical collocations are one English isolate; no calque or half-translation
-- [ ] Verbs, general words, section titles, and explanations are Persian
+- [ ] No Persian head + English name (`خوشه Kubernetes`, `سرویس‌های OpenStack`, `بسته‌های OpenStack`, `مخزن …`)
+- [ ] Domain headings that are collocations/names stay entirely English; only generic IMRAD headings are Persian
+- [ ] Verbs, general words, and conceptual explanations are Persian
 - [ ] Citations, equations, numbers, and units unchanged
 - [ ] `ک`/`ی` Persian; نیم‌فاصله present; no colloquial forms
 - [ ] Every mixed LTR run is isolated (`\lr` / `dir="ltr"`); punctuation attaches correctly
