@@ -32,42 +32,50 @@ faithfulness to the source science first, then readable فارسی معیار.
 
 ## Terminology
 
-Policy lives in `glossary.md`. Summary:
+Policy lives in `glossary.md`. Two columns only:
 
-- Specialized terms, names, and acronyms stay English, LTR-isolated.
-- Do not coin or apply فرهنگستان equivalents unless the glossary
-  already lists that Persian form as required.
-- Ordinary method/result language is Persian (`روش`, `نتایج`, `بررسی`).
-- One English form per concept for the whole document.
-- On first use, do not add a gloss like `نزول گرادیان (gradient descent)`
-  unless the glossary says to.
+**Keep English** (LTR-isolated). Do not coin فرهنگستان equivalents.
 
-If a term is genuinely common Persian in that field and already in the
-glossary with a Persian form, follow the glossary. When unsure, keep
-English and ask.
+- Algorithm, library, protocol, and product names
+- Acronyms (`API`, `PCR`, `GPU`, `CI`, and the same class)
+- Formulas, code, units, statistics (`p`, `n`, `SD`, …)
+- People’s names, journal names, DOIs (and bibliography entries)
+
+**Write in Persian.** Do not leave these in English.
+
+- Verbs and sentence structure
+- General words: روش، نتایج، بررسی
+- Section titles: مقدمه، بحث، …
+- Conceptual explanation for the reader (the prose around a term)
+
+One English form per named concept for the whole document. On first
+use, do not add a gloss like `نزول گرادیان (gradient descent)` unless
+the glossary says to.
+
+When unsure, classify against those two columns. Do not default a
+general word to English. Ask only if the class is still unclear.
 
 ## What not to translate
 
 Leave unchanged (aside from LTR markup):
 
-- Bibliography entries: authors, article titles, journals, proceedings,
-  publishers, years, DOIs, URLs
-- Author names in the body (Latin script)
-- Code, commands, identifiers, file names (listings stay LTR; see
-  `rtl-bidi.md`)
+- Names of algorithms, libraries, protocols, and products
+- Acronyms (`API`, `PCR`, `GPU`, `CI`, …)
+- Formulas, code, units, statistical symbols (`p`, `n`, `SD`, …)
+- People’s names; journal, conference, and DOI/URL strings
+- Bibliography entries: authors, article titles, journals, years
 - Raster and vector figures: same files as the source
-- Mathematics and chemical formulas
-- Standard statistical symbols (`n`, `p`, `M`, `SD`, `SE`, `CI`, `df`)
-- Product, library, protocol, and model names
-- Binomial species names and gene symbols
 
-Translate:
+## What must be Persian
 
-- Body prose, including the abstract
-- Section titles (`Introduction` → `مقدمه`, and so on)
-- Figure and table captions (not the identifiers, not the image files)
-- Footnotes that explain the text
-- Quotes from the source, in the same scientific register
+Translate; do not keep the English wording:
+
+- Verbs and clause structure
+- General scholarly words (`method` → روش, `results` → نتایج,
+  `analysis` / `study` → بررسی)
+- Section titles (`Introduction` → مقدمه, `Discussion` → بحث, …)
+- Conceptual explanation for the reader, including abstract, captions
+  (not image files), footnotes, and quotes in the scientific register
 
 ## Cross-references and labels
 

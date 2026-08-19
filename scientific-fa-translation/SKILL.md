@@ -35,8 +35,8 @@ Override only when the user says so.
 | --- | --- |
 | Direction | English → فارسی علمی |
 | Register | Formal فارسی معیار. No colloquial forms. |
-| Technical terms | Keep English. Do not invent فرهنگستان equivalents. |
-| First mention | English only. No Persian gloss unless `references/glossary.md` says so. |
+| Technical terms | Named artifacts stay English. General scholarly language is Persian. See below. |
+| First mention | Named English terms: English only, no gloss, unless `references/glossary.md` says so. |
 | Output | Printable PDF at `~/Documents/books/<slug>.pdf`. Chat is a short pointer, not RTL. |
 | PDF RTL | Maximum precision via XeLaTeX + `xepersian`. See `references/pdf-output.md`. |
 | HTML | Only if the user asks for HTML, or as the Chromium-print fallback. |
@@ -61,8 +61,8 @@ conversation and do not paste the article into chat.
    footnotes, citations. Copy every source image into the working
    tree (`figures/` next to the `.tex`) and keep the same sequence
    relative to the surrounding text.
-4. Scan domain terms. Check `references/glossary.md`. New terms stay
-   English; append them to the glossary.
+4. Scan domain terms. Check `references/glossary.md`. New *names*
+   stay English; new general words get a Persian row. Append both.
 5. Translate section by section. Do not add, omit, or soften claims.
    Preserve hedge language (`may`, `might`, `suggest`, `remain unknown`).
 6. RTL pass on the print source (`.tex` with `\lr` / `latin`, or HTML
@@ -76,25 +76,34 @@ isolate LTR spans; say that print RTL will be weaker than PDF. Reverse
 translation (FA→EN) only on explicit request; then drop RTL rules and
 keep technical terms in English.
 
-## What stays English
+## Keep English vs write Persian
 
-Leave these in an LTR isolate. Do not Persianize them.
+House split. Full lists: `references/glossary.md`.
 
-- Algorithm, library, protocol, product, and model names
-- Acronyms (`API`, `PCR`, `GPU`, `CI`, `RMSE`)
-- Code, commands, file paths, identifiers
-- LaTeX/math, chemical formulas, gene names, binomial species names
-- Units and statistics (`p`, `n`, `M`, `SD`, `CI`, SI units)
-- Author names, journal and conference names, DOIs, URLs
-- Paper titles inside the reference list
+**Keep English** (LTR isolate: `\lr` / `<span dir="ltr">`). Do not
+Persianize. Do not invent فرهنگستان equivalents.
 
-Translate ordinary prose: methods, results, discussion, captions (except
-identifiers and the image files themselves), and structural headings
-(`مقدمه`, `روش‌ها`, `نتایج`, `بحث`).
+- Names of algorithms, libraries, protocols, and products
+- Acronyms: `API`, `PCR`, `GPU`, `CI`, and others of that kind
+- Formulas, code, units, and statistics (`p`, `n`, `SD`, …)
+- People’s names, journal names, and DOIs
+  (also conference names, URLs, and bibliography titles)
 
-Do not translate filler words into English. `paper` → مقاله, `method` →
-روش, `result` → نتیجه — unless the glossary marks that token as a proper
-name.
+**Write in Persian.** Translate these out of English. Never leave the
+English word in the Persian sentence.
+
+- Verbs and sentence structure
+- General scholarly words: روش، نتایج، بررسی (also مقدمه-level
+  vocabulary: مقاله، روش‌ها، بحث، …)
+- Section titles: مقدمه، بحث، and the rest of the heading table in
+  `references/scientific-style.md`
+- Conceptual explanation for the reader: the surrounding prose that
+  *says what a term means* is Persian. The named term inside it stays
+  English.
+
+Example: «در این روش از \en{gradient descent} برای کمینه کردن تابع
+هزینه استفاده می‌شود.» — روش / کمینه کردن / استفاده می‌شود are
+Persian; `gradient descent` stays English.
 
 ## Persian mechanics
 
@@ -150,7 +159,8 @@ the Chromium-print fallback in `references/pdf-output.md`.
 
 - [ ] No added, omitted, or softened scientific claims
 - [ ] Hedge language preserved
-- [ ] Terms match the glossary; no silent Persianization of jargon
+- [ ] Names/acronyms/formulas/units/stats/people/journals/DOIs stay English
+- [ ] Verbs, general words, section titles, and explanations are Persian
 - [ ] Citations, equations, numbers, and units unchanged
 - [ ] `ک`/`ی` Persian; نیم‌فاصله present; no colloquial forms
 - [ ] Every mixed LTR run is isolated (`\lr` / `dir="ltr"`); punctuation attaches correctly
