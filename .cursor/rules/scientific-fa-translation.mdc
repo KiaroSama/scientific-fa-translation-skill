@@ -10,5 +10,9 @@ Persian, or mentions RTL, راست‌چین, PDF, or چاپ, read that SKILL.md 
 follow it. Do not wait for a slash command. Cursor chat is not the RTL
 surface; write a PDF to `~/Documents/books`.
 
+Keep multi-word technical collocations as one English isolate. Never
+half-translate (`خوشه Kubernetes`, `سرویس‌های OpenStack`,
+`بسته‌های OpenStack`). Domain headings that are names stay English.
+
 Skip this for coding, commits, UI copy, literary translation, and casual
 Persian chat.

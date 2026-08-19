@@ -44,16 +44,23 @@ collocations** stay English. Ordinary scholarly language is Persian.
 - Formulas, code, units, statistics (`p`, `n`, `SD`, …)
 - People’s names, journal names, DOIs (and bibliography entries)
 - Multi-word technical collocations: a 2–5 word domain label in the
-  source is one English unit. Do not calque. Do not half-translate
-  (`خوشه Kubernetes`, `APIهای ترکیب‌پذیر`). No Persian affixes on
-  English tokens. If unsure, keep the whole NP in English.
+  source is one English unit, including *X of Y* and *Name + common
+  noun* (`OpenStack services`, `OpenStack packages`,
+  `Kubernetes cluster`, `controller node`). Do not calque. Do not
+  half-translate (`خوشه Kubernetes`, `APIهای ترکیب‌پذیر`,
+  `سرویس‌های OpenStack`, `بسته‌های OpenStack`,
+  `مخزن Ubuntu Cloud archive`). No Persian affixes on English
+  tokens. If unsure, keep the whole NP in English.
 
 **Write in Persian.** Do not leave these in English.
 
 - Verbs and sentence structure
 - General words: روش، نتایج، بررسی — only when they are *not* inside
   a keep-English collocation
-- Section titles: مقدمه، بحث، …
+- Generic IMRAD / book section titles: مقدمه، بحث، … (table below)
+- Headings that *are* a product name or technical collocation stay
+  English as one isolate (`The OpenStack services`,
+  `Conceptual architecture`, `Get started with OpenStack`)
 - Conceptual explanation for the reader (the clause around a term)
 
 One English form per named concept for the whole document. On first
@@ -86,9 +93,14 @@ Translate; do not keep the English wording:
 - Verbs and clause structure
 - General scholarly words (`method` → روش, `results` → نتایج,
   `analysis` / `study` → بررسی)
-- Section titles (`Introduction` → مقدمه, `Discussion` → بحث, …)
+- Generic section titles (`Introduction` → مقدمه, `Discussion` → بحث، …)
 - Conceptual explanation for the reader, including abstract, captions
   (not image files), footnotes, and quotes in the scientific register
+
+Do **not** Persianize a heading that is itself a collocation or named
+artifact. `The OpenStack services` stays `The OpenStack services`,
+not «سرویس‌های OpenStack». `Install and configure components` stays
+English; do not emit «نصب و پیکربندی مؤلفه‌ها».
 
 ## Cross-references and labels
 
@@ -137,6 +149,10 @@ Do not translate `et al.` Do not convert Harvard to Vancouver or the
 reverse.
 
 ## Headings (typical article)
+
+Use these **only** for generic IMRAD / book labels. If the source
+heading is a domain NP (`Host networking`, `Conceptual architecture`,
+`The OpenStack services`), keep it English in one isolate.
 
 Use these unless the source uses a different scheme; then stay parallel.
 

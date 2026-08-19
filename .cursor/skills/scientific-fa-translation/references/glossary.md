@@ -14,8 +14,10 @@ atomic: store and emit the **whole phrase**, not the pieces.
    Persian neologism. Never calque or half-translate a collocation.
 2. **Write in Persian:** verbs and sentence structure; general words
    (روش، نتایج، بررسی) when they are not inside a keep-English
-   collocation; section titles (مقدمه، بحث، …); conceptual explanation
-   for the reader. Never leave those in English.
+   collocation; **generic** IMRAD headings (مقدمه، بحث، …);
+   conceptual explanation for the reader. Never leave those in
+   English. Domain headings that are names or collocations stay
+   English (see Headings in `scientific-style.md`).
 3. If a *name* or a *collocation* is missing from **Keep English**, keep
    the whole English NP and add a row. If a *general word* is missing
    from **Translate** and it is not part of a collocation, write Persian
@@ -84,9 +86,12 @@ English.
 | grandfathering | معافیت عطف‌به‌ماسبق |
 | steganography | پنهان‌نگاری |
 
-`dataset` as a named corpus (`ImageNet`, `GLUE`) is a product/name and
-stays English. A Translate row (`deployment` → استقرار) does not split
-`deployment and configuration`; that collocation stays English.
+`node` as a lone generic word may be گره. That row does **not**
+split `controller node`, `compute node`, `Other nodes`, or
+`Kubernetes cluster`. `dataset` as a named corpus (`ImageNet`,
+`GLUE`) is a product/name and stays English. A Translate row
+(`deployment` → استقرار) does not split `deployment and
+configuration`; that collocation stays English.
 
 ## Keep English
 
@@ -101,7 +106,16 @@ half-translate. Add new document NPs here as whole rows.
 | --- | --- |
 | composable APIs | not «APIهای ترکیب‌پذیر» |
 | reusable Go packages | not «بسته‌های Go» |
-| Kubernetes cluster | not «خوشه Kubernetes» |
+| Kubernetes cluster | not «خوشه Kubernetes»; also `Kubernetes clusters` |
+| OpenStack services | not «سرویس‌های OpenStack»; also `OpenStack packages`, `OpenStack architecture` |
+| Ubuntu Cloud archive repository | not «مخزن Ubuntu Cloud archive»; also `RDO repository` |
+| Other nodes | not «گره‌های دیگر» when that is the source heading/NP |
+| controller node | also `compute node`, `Block Storage node` |
+| Identity service | also `Image service`, `Compute service`, `Networking service` |
+| provider networks | also `provider network`, `self-service networks` |
+| Install and configure components | heading; not «نصب و پیکربندی مؤلفه‌ها» |
+| Get started with OpenStack | domain heading; keep English |
+| Conceptual architecture | also `Logical architecture`, `The OpenStack architecture` |
 | deployment and configuration | not «استقرار و پیکربندی» when used as a domain label |
 | Continuous Delivery workflows | not «جریان‌های کاری پیوسته» |
 | version-controlled approach to operations | not a word-for-word calque |
