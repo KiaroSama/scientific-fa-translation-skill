@@ -30,8 +30,10 @@ the output path. It is not the RTL surface.
 
 **Deliverable.** A printable PDF at `~/Documents/books/<slug>.pdf`,
 created if needed. Preferred engine: XeLaTeX + `xepersian`
-(`assets/rtl-document.tex`). Fallback: Chromium print of the RTL HTML
-template. HTML is produced only when asked for, or as that fallback.
+(`assets/rtl-document.tex`). Fallbacks: Chromium print of the RTL HTML
+template, then WeasyPrint on the same HTML. HTML is produced only when
+asked for, or as that fallback. Embed Vazirmatn Regular/Bold (not UI-FD)
+via `@font-face` when the font is not installed on the system.
 
 **Keep English** (LTR-isolated; no فرهنگستان coinages):
 
@@ -64,6 +66,7 @@ scientific-fa-translation/
   references/pdf-output.md
   references/glossary.md
   scripts/build-pdf.sh
+  scripts/fetch-vazirmatn.sh
 ```
 
 ## License

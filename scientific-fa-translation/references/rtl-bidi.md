@@ -11,8 +11,8 @@ PDF (`references/pdf-output.md`) with maximum bidi precision.
 
 When the print engine is XeLaTeX, isolate with `\lr{…}` / `\en{…}` and
 put listings in a `latin` environment (see `assets/rtl-document.tex`).
-The HTML rules below apply to an explicit HTML ask or the Chromium
-print fallback (`assets/rtl-document.html`).
+The HTML rules below apply to an explicit HTML ask or the Chromium /
+WeasyPrint print fallback (`assets/rtl-document.html`).
 
 ## Document root
 
@@ -97,6 +97,38 @@ parentheses, punctuation, or digits.
 A whole English bibliography, code listing, or equation block gets
 `dir="ltr"` on the HTML container, or a `latin` environment in TeX,
 not a token-by-token wrap.
+
+## Joined LTR runs (one isolate)
+
+If two English tokens are linked by `/`, `-`, `->`, or parentheses, wrap
+the **whole** cluster. A slash or parenthesis sitting in RTL between two
+`<span dir="ltr">` islands reverses the visible order.
+
+```html
+<!-- Wrong: renders as OP_NOTIF/OP_IF and :)2026-08-09( 1.0.1 -->
+<span dir="ltr">OP_IF</span>/<span dir="ltr">OP_NOTIF</span>
+<strong><span dir="ltr">1.0.1</span></strong> (<span dir="ltr">2026-08-09</span>)
+
+<!-- Right -->
+<span dir="ltr">OP_IF/OP_NOTIF</span>
+<span dir="ltr">1.0.1 (2026-08-09)</span>
+<span dir="ltr">STARTED -&gt; LOCKED_IN</span>
+<span dir="ltr">1109/2016 (55%)</span>
+<span dir="ltr">256/257</span>
+```
+
+```tex
+\en{OP_IF/OP_NOTIF}
+\en{1.0.1 (2026-08-09)}
+\en{STARTED -> LOCKED_IN}
+```
+
+Same rule for `Taproot/P2TR`, `300-400`, `2017–2024`, and
+`Adam (Kingma \& Ba, 2015)`. Persian separators between Persian words
+(`سیاست/پالایه`, `و/یا`) stay outside LTR spans.
+
+Do not treat `pdftotext` as visual truth on an RTL PDF. Rasterize a page
+(`pdftoppm -png -f 1 -l 1 file.pdf /tmp/p`) and look at the PNG.
 
 ## Wrong vs right
 
@@ -197,11 +229,14 @@ Never reverse English letter order by hand. Never rewrite `(Adam)` as
 
 ## Self-check
 
-1. Open the HTML file, not the chat transcript.
+1. Open the HTML file or a rasterized PDF page, not the chat transcript
+   and not `pdftotext` alone.
 2. Scan every English island: parentheses enclose the English, not the
    Persian.
 3. Sentence-final periods sit at the right edge of the Persian sentence.
-4. Code blocks are LTR, left-aligned, and optically identical to the
+4. Slash- or date-joined English still reads left-to-right
+   (`OP_IF/OP_NOTIF`, `1.0.1 (2026-08-09)`).
+5. Code blocks are LTR, left-aligned, and optically identical to the
    source listing. Images are the source files, unmirrored, in source
    order.
-5. No `ك` / `ي` introduced while editing markup.
+6. No `ك` / `ي` introduced while editing markup.

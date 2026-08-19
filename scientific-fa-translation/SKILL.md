@@ -39,7 +39,7 @@ Override only when the user says so.
 | First mention | Named English terms: English only, no gloss, unless `references/glossary.md` says so. |
 | Output | Printable PDF at `~/Documents/books/<slug>.pdf`. Chat is a short pointer, not RTL. |
 | PDF RTL | Maximum precision via XeLaTeX + `xepersian`. See `references/pdf-output.md`. |
-| HTML | Only if the user asks for HTML, or as the Chromium-print fallback. |
+| HTML | Only if the user asks for HTML, or as the Chromium / WeasyPrint fallback. |
 | Digits | Western (`3.14`, not `۳٫۱۴`). |
 | Figures/tables | `شکل 3`, `جدول 2` — label translated, number unchanged. |
 | Images | Same files, order, size, and placement as the source. Do not mirror, crop, redraw, or drop. |
@@ -68,7 +68,8 @@ conversation and do not paste the article into chat.
 6. RTL pass on the print source (`.tex` with `\lr` / `latin`, or HTML
    isolation if falling back). See `references/rtl-bidi.md`.
 7. Consistency pass: same English term for the same concept throughout.
-8. Compile the PDF to `~/Documents/books/<slug>.pdf`. Run the checklist.
+8. Compile the PDF to `~/Documents/books/<slug>.pdf` with
+   `scripts/build-pdf.sh` (`.tex` or `.html`). Run the checklist.
 
 If the user asks for HTML only, use `assets/rtl-document.html`. If they
 ask for Markdown, wrap the body in `<div lang="fa" dir="rtl">` and still
@@ -126,6 +127,9 @@ On the **PDF** (non-negotiable when producing a printable file):
 - Prefer XeLaTeX + `xepersian` from `assets/rtl-document.tex`.
 - Isolate every English term, number cluster, formula, URL, and inline
   code with `\lr{…}` (or `<span dir="ltr">` on the HTML fallback).
+  Slash-, arrow-, or parenthesis-joined English (`OP_IF/OP_NOTIF`,
+  `STARTED -> LOCKED_IN`, `1.0.1 (2026-08-09)`) is **one** isolate, not
+  two spans with punctuation between them.
 - Code listings are LTR and left-aligned: `latin` + `verbatim` /
   `Verbatim`, or `<pre dir="ltr">`. Never RTL, never right-aligned.
 - Math stays LTR. Do not reverse English letters or hand-flip
@@ -151,9 +155,14 @@ directory if needed. Report that absolute path in chat.
 5. Bibliography in a `latin` section, source language.
 6. `scripts/build-pdf.sh path/to/doc.tex <slug>`
    → `$HOME/Documents/books/<slug>.pdf`.
+   If `xelatex` is missing, still write the `.tex`, then compile
+   `assets/rtl-document.html` (filled in) with the same script:
+   `scripts/build-pdf.sh path/to/doc.html <slug>`.
+   Embed Vazirmatn via `@font-face` (`scripts/fetch-vazirmatn.sh`).
+   Do not use the UI-FD / Farsi-digits cut of that family.
 
 HTML (`assets/rtl-document.html`) is only for an explicit HTML ask or
-the Chromium-print fallback in `references/pdf-output.md`.
+the Chromium / WeasyPrint fallback in `references/pdf-output.md`.
 
 ## Quality checklist
 
@@ -164,6 +173,8 @@ the Chromium-print fallback in `references/pdf-output.md`.
 - [ ] Citations, equations, numbers, and units unchanged
 - [ ] `ک`/`ی` Persian; نیم‌فاصله present; no colloquial forms
 - [ ] Every mixed LTR run is isolated (`\lr` / `dir="ltr"`); punctuation attaches correctly
+- [ ] Joined English (`a/b`, `a -> b`, `1.0.1 (2026-08-09)`) is a single isolate
+- [ ] HTML-engine PDFs embed a real `fa` font (not missing-glyph boxes); digits stay Western
 - [ ] Every code block is LTR, left-aligned, source text unchanged
 - [ ] Every source image is present, unmirrored, in the same place
 - [ ] Bibliography, DOIs, and URLs not translated

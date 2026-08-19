@@ -31,6 +31,8 @@ the workspace. They are not the deliverable.
 ## Engine order
 
 Use the first that works. Check with `command -v` before compiling.
+`scripts/build-pdf.sh` walks this list: XeLaTeX for `.tex`, then Chromium,
+then WeasyPrint for `.html` (or a sibling `.html` if `xelatex` is missing).
 
 | Priority | Engine | When |
 | --- | --- | --- |
@@ -64,6 +66,7 @@ Start from `assets/rtl-document.tex`. Load `hyperref`, `graphicx`, and
    source. Do not mirror.
 6. Compile with `scripts/build-pdf.sh path/to/doc.tex <slug>`
    (runs `xelatex` twice, then copies to `~/Documents/books`).
+   If `xelatex` is missing, the same script accepts `path/to/doc.html`.
 
 ### Bidi mapping
 
@@ -83,11 +86,32 @@ with a horizontal flip.
 Western digits: `\setdigitfont` to a Latin font, and `\lr{3}` / `\lr{3.14}`
 for numbers that sit inside Persian sentences.
 
+## HTML font (Chromium and WeasyPrint)
+
+The HTML template names Vazirmatn. A family name is not enough: if that
+font is not installed, the PDF will show missing-glyph boxes.
+
+1. Detect a Persian-capable font: `fc-list :lang=fa family | head`.
+2. If Vazirmatn (or another `fa` face) is not installed, run
+   `scripts/fetch-vazirmatn.sh path/to/fonts` next to the HTML file.
+   Copy **Regular** and **Bold** only. Never the `UI-FD` / Farsi-digits
+   cut — that family draws `۳٫۱۴` and violates the Western-digit lock.
+3. Keep the template's `@font-face` `url("fonts/Vazirmatn-Regular.ttf")`
+   (and Bold) so Chromium and WeasyPrint embed the files. Relative URLs
+   must resolve from the HTML directory; `build-pdf.sh` `cd`s there.
+4. Latin fallback for `pre`/`code`: DejaVu Sans Mono or Liberation Mono.
+
 ## Chromium fallback
 
-Only when XeLaTeX is unavailable. Build the HTML from
-`assets/rtl-document.html` with full isolation (see `rtl-bidi.md`),
-using `file://` URLs or relative paths that resolve on disk. Then:
+Only when XeLaTeX is unavailable. Fill `assets/rtl-document.html` with
+full isolation (see `rtl-bidi.md`), using `file://` URLs or relative
+paths that resolve on disk. Prefer:
+
+```bash
+scripts/build-pdf.sh path/to/translation.html <slug>
+```
+
+Manual equivalent:
 
 ```bash
 mkdir -p "$HOME/Documents/books"
@@ -99,6 +123,19 @@ chromium --headless --disable-gpu --no-pdf-header-footer \
 Try `chromium`, `chromium-browser`, `google-chrome`, or
 `google-chrome-stable`. A4 via CSS `@page { size: A4; margin: 2.2cm; }`
 (already in the HTML template when printing).
+
+## WeasyPrint fallback
+
+When there is no XeLaTeX and no Chrome. Same HTML as Chromium. The
+script tries `weasyprint`, then `python3 -c "import weasyprint"`.
+
+Needs Pango/Cairo (typical on Debian: `libpango-1.0-0`, `libcairo2`).
+Install the Python package in a venv, or with
+`pip install --user --break-system-packages weasyprint` if the OS
+blocks system-site pip (PEP 668). Do not use sudo.
+
+WeasyPrint reads `@font-face` from disk. Run it with the HTML file's
+directory as cwd (the build script does this).
 
 ## Chat after success
 

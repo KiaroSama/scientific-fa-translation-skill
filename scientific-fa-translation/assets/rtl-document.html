@@ -12,6 +12,20 @@
       size: A4;
       margin: 2.2cm;
     }
+    /* Copy Vazirmatn-Regular.ttf and Vazirmatn-Bold.ttf into fonts/
+       next to this file (scripts/fetch-vazirmatn.sh fonts). Never UI-FD. */
+    @font-face {
+      font-family: "Vazirmatn";
+      src: url("fonts/Vazirmatn-Regular.ttf") format("truetype");
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Vazirmatn";
+      src: url("fonts/Vazirmatn-Bold.ttf") format("truetype");
+      font-weight: 700;
+      font-style: normal;
+    }
     body {
       margin: 1.5rem auto;
       max-width: 46rem;
@@ -96,6 +110,8 @@
   <!--
     Isolate every English term, number cluster, formula, URL, and citation:
     <span dir="ltr">Adam (Kingma &amp; Ba, 2015)</span>
+    <span dir="ltr">OP_IF/OP_NOTIF</span>
+    <span dir="ltr">1.0.1 (2026-08-09)</span>
     شکل <span dir="ltr">3</span>
 
     Code listings must keep dir="ltr" on <pre>, never RTL:

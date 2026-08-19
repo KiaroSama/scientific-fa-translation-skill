@@ -49,6 +49,32 @@ English.
 | experiment | آزمایش |
 | dataset (generic prose) | مجموعه داده |
 | limitation | محدودیت |
+| specification | مشخصات |
+| copyright | حق نشر |
+| motivation | انگیزه |
+| rationale | استدلال |
+| tradeoffs | بده‌بستان‌ها |
+| alternatives | جایگزین‌ها |
+| backwards compatibility | سازگاری پس‌رو |
+| reference implementation | پیاده‌سازی مرجع |
+| test vectors | بردارهای آزمون |
+| deployment | استقرار |
+| credits | سپاسگزاری |
+| changelog | تاریخچه تغییرات |
+| consensus | اجماع |
+| soft fork / softfork | فورک نرم |
+| hard fork / hardfork | فورک سخت |
+| node | گره |
+| miner | استخراج‌کننده |
+| transaction | تراکنش |
+| block | بلوک |
+| fee | کارمزد |
+| spam | هرزنامه |
+| policy | سیاست |
+| activation | فعال‌سازی |
+| invalid | نامعتبر |
+| grandfathering | معافیت عطف‌به‌ماسبق |
+| steganography | پنهان‌نگاری |
 
 `dataset` as a named corpus (`ImageNet`, `GLUE`) is a product/name and
 stays English.
@@ -67,6 +93,16 @@ Non-exhaustive. Anything of this kind stays English even if unlisted.
 | Adam | optimizer name |
 | BERT, GPT, ResNet, YOLO | model / product names |
 | PyTorch, NumPy, TensorFlow | libraries |
+| Bitcoin | network / product |
+| Taproot, Tapleaf, Tapscript, Taptree | Bitcoin script / output family |
+| Segwit | protocol name |
+| BitVM | protocol / product |
+| Miniscript | compiler / language name |
+| Nostr, IPFS, BitTorrent | products / protocols |
+| inscription | named embedding technique |
+| pay-to-contract | named commitment scheme |
+| blobspace | named scheme |
+| GetBlockTemplate, GBT | protocol / API name |
 
 ### Acronyms
 
@@ -74,6 +110,10 @@ Non-exhaustive. Anything of this kind stays English even if unlisted.
 | --- | --- |
 | API, PCR, GPU, CI | keep as-is |
 | CPU, TPU, RMSE, BLEU | same class |
+| BIP, UTXO, P2WPKH, P2WSH, P2TR, P2A | Bitcoin |
+| NUMS | nothing-up-my-sleeve |
+| RAM | |
+| OP_RETURN, OP_PUSHDATA, OP_SUCCESS, OP_IF, OP_NOTIF | opcodes |
 
 ### Formulas, code, units, statistics
 
@@ -82,6 +122,8 @@ Non-exhaustive. Anything of this kind stays English even if unlisted.
 | p, n, SD | also `M`, `SE`, `df` |
 | SI units | `km`, `ms`, `°C`, … |
 | code / identifiers | never translate listings |
+| scriptPubKey, scriptSig, redeemScript | identifiers |
+| witness, annex, control block, keypath | named stack / spend artifacts |
 
 ### People, journals, DOIs
 
@@ -91,11 +133,16 @@ Non-exhaustive. Anything of this kind stays English even if unlisted.
 | journal / conference names | |
 | DOI, URL | |
 | et al. | inside citations |
+| Dathon Ohm | BIP 110 author |
+| Luke-Jr | credit |
 
 ### Unsorted names
 
 | Term | Notes |
 | --- | --- |
-| | |
+| BSD-3-Clause | license |
+| reduced_data | BIP 9 deployment name |
+| LOCKED_IN, ACTIVE, DEFINED, STARTED, EXPIRED, FAILED | BIP 9 states |
+| BIP9, BIP8, BIP16, BIP141, BIP341, BIP342, BIP433, BIP-3 | BIP identifiers |
 
 Add rows as documents are translated.
