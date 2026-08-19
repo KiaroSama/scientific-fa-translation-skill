@@ -1,112 +1,73 @@
 # Academic Persian style
 
-House style for this skill. It is stricter than general translation:
-faithfulness to the source science first, then readable فارسی معیار.
+Register, orthography, and document mechanics. Terminology is not decided
+here — `terminology.md` owns the keep-English split, and bidi is
+`rtl-bidi.md`.
 
 ## Register
 
 - Formal written Persian. No spoken reductions: not `میشه`, `می‌خواد`,
   `چونکه` as a default, `اصلاً` as filler.
-- Prefer clear scientific prose over sentence-level calques. Do not
-  copy English *clause* word order when it produces unreadable Persian.
-  Do not “fix” a technical NP by translating it word-by-word either:
-  that is a collocation calque and is forbidden (see Terminology).
+- Prefer clear scientific prose over sentence-level calques. Do not copy
+  English *clause* order when it produces unreadable Persian.
 - Keep the author's epistemic stance. `may` / `might` / `suggest` /
   `appear to` / `remain unknown` must not become certainty.
 - Do not add background, examples, or conclusions the source lacks.
 - Do not drop hedges, limitations, negative results, or sample-size
   caveats to sound smoother.
 
+## Common EN→FA failures
+
+Faithfulness is the first rule, but these five patterns produce prose that
+is technically accurate and still unreadable.
+
+1. **English passive kept as Persian passive.** `The model was trained on…`
+   → «مدل روی … آموزش داده شد» is fine; a chain of three passives in one
+   sentence is not. Recast the middle one as active when the agent of the
+   sentence is obvious.
+2. **Ezafe chains.** More than three linked اضافه constructions
+   («بررسی نتایج ارزیابی کارایی سیستم») force the reader to re-parse.
+   Break the chain with a verb or a preposition.
+3. **Over-nominalisation.** English science nominalises freely; Persian
+   reads better with the verb restored. `perform an evaluation of` →
+   «ارزیابی می‌کنیم», not «انجام یک ارزیابی از».
+4. **Bidi-heavy sentences.** With this skill's terminology policy a
+   sentence can end up more English than Persian. Never *start* a Persian
+   sentence with an LTR isolate — put a Persian subject or preposition
+   first, because a line that begins left-to-right reads as a layout bug
+   in print. If more than about half a sentence is isolates, split it.
+5. **First person.** Keep the source's stance: `we trained` → «آموزش
+   دادیم», `it is assumed` → «فرض می‌شود». Do not promote an impersonal
+   source to first person or the reverse.
+
 ## Orthography
 
-- Encoding: UTF-8.
-- Persian letters: `ک` not `ك`, `ی` not `ي`. Normalize Arabic forms if
-  they appear in a draft.
-- نیم‌فاصله (U+200C) where Persian orthography requires it, including
-  `می‌شود`, `می‌توان`, `نمی‌کند`, `شده‌اند`, and standard adjectival
-  compounds.
-- Punctuation: `،` `؛` `؟` `!` `«»`. Use `…` sparingly. Do not use Latin
-  `,` `;` `?` or `"` for Persian prose.
-- Scientific numbers stay Western digits: `3.14`, `2e-5`, `95%`. Do not
-  convert to `۳٫۱۴`.
-- Decimal point stays `.` inside numbers. Persian `٫` is not used here.
+- Encoding UTF-8.
+- Persian letters: `ک` not `ك`, `ی` not `ي`. Normalise Arabic forms that
+  appear in a draft.
+- نیم‌فاصله (U+200C) where Persian orthography requires it: `می‌شود`,
+  `می‌توان`, `نمی‌کند`, `شده‌اند`, plural `داده‌ها`, and standard
+  adjectival compounds.
+- Punctuation `،` `؛` `؟` `!` `«»`. Not Latin `,` `;` `?` `"` in Persian
+  prose. `…` sparingly.
+- Scientific numbers stay Western: `3.14`, `2e-5`, `95%`. Never `۳٫۱۴`.
+- Decimal point stays `.`; Persian `٫` is not used.
 - SI units stay SI (`km`, `ms`, `°C`). Do not convert unit systems.
 
-## Terminology
+`scripts/check-fa.py` enforces every rule in this section, so an
+orthography slip is a build failure rather than a review note.
 
-Policy lives in `glossary.md`. Named artifacts, **domain terms of
-art** (including one-word field nouns), and **atomic multi-word
-collocations** stay English. Ordinary scholarly language is Persian.
+## Dates and numerals
 
-**Keep English** (LTR-isolated). Do not coin فرهنگستان equivalents.
-
-- Algorithm, library, protocol, and product names
-- Acronyms (`API`, `PCR`, `GPU`, `CI`, and the same class)
-- Formulas, code, units, statistics (`p`, `n`, `SD`, …)
-- People’s names, journal names, DOIs (and bibliography entries)
-- Domain terms of art: if the token belongs in that field’s glossary
-  or man page, keep English even as one word, and keep the operation
-  verb of the same term (`node`, `deployment`, `configure`,
-  `implement`, `firewalls`, `encryption`). Never گره / استقرار /
-  پیکربندی / پیاده‌سازی for those sources. A Translate row does not
-  override this.
-- Multi-word technical collocations: a 2–5 word domain label in the
-  source is one English unit, including *X of Y* and *Name + common
-  noun* (`OpenStack services`, `OpenStack packages`,
-  `Kubernetes cluster`, `controller node`). Do not calque. Do not
-  half-translate (`خوشه Kubernetes`, `APIهای ترکیب‌پذیر`,
-  `سرویس‌های OpenStack`, `بسته‌های OpenStack`,
-  `مخزن Ubuntu Cloud archive`). No Persian affixes on English
-  tokens. If unsure, keep the whole NP in English.
-
-**Write in Persian.** Do not leave these in English.
-
-- Narrative verbs and sentence structure (پوشش می‌دهد، استفاده کنید)
-  — not `configure` / `implement` when those are the field operations
-- General words: روش، نتایج، بررسی — only when they are *not* a field
-  term of art and *not* inside a keep-English collocation
-- Generic IMRAD / book section titles: مقدمه، بحث، … (table below)
-- Headings that *are* a product name or technical collocation stay
-  English as one isolate (`The OpenStack services`,
-  `Conceptual architecture`, `Get started with OpenStack`)
-- Conceptual explanation for the reader (the clause around a term)
-
-One English form per named concept for the whole document. On first
-use, do not add a gloss like `نزول گرادیان (gradient descent)` unless
-the glossary says to. Do not mix `node` and گره.
-
-When unsure whether a token is a term of art, keep it English and add
-it to Keep English. Do not default a field noun to Persian.
-
-## What not to translate
-
-Leave unchanged (aside from LTR markup):
-
-- Names of algorithms, libraries, protocols, and products
-- Acronyms (`API`, `PCR`, `GPU`, `CI`, …)
-- Domain terms of art, including one-word field nouns and their
-  operation verbs (`node`, `configure`, `deployment`)
-- Multi-word technical collocations (whole NP, one isolate)
-- Formulas, code, units, statistical symbols (`p`, `n`, `SD`, …)
-- People’s names; journal, conference, and DOI/URL strings
-- Bibliography entries: authors, article titles, journals, years
-- Raster and vector figures: same files as the source
-
-## What must be Persian
-
-Translate; do not keep the English wording:
-
-- Narrative verbs and clause structure (not field-operation verbs)
-- Generic scholarly words (`method` → روش, `results` → نتایج,
-  `analysis` / `study` → بررسی) when they are not field terms of art
-- Generic section titles (`Introduction` → مقدمه, `Discussion` → بحث، …)
-- Conceptual explanation for the reader, including abstract, captions
-  (not image files), footnotes, and quotes in the scientific register
-
-Do **not** Persianize a heading that is itself a collocation or named
-artifact. `The OpenStack services` stays `The OpenStack services`,
-not «سرویس‌های OpenStack». `Install and configure components` stays
-English; do not emit «نصب و پیکربندی مؤلفه‌ها».
+- Dates stay in the source calendar and format: `2026-08-09` remains
+  `2026-08-09`, isolated as one LTR run. Do not convert to Jalali unless
+  the user asks; if they do, add the Gregorian in parentheses inside the
+  same isolate on first mention.
+- Version strings, RFC numbers, and port numbers are identifiers, not
+  quantities. Never reformat them.
+- Ranges keep the source dash and are one isolate: `2017–2024`,
+  `300-400`.
+- Percentages keep the Latin sign: `55%`.
 
 ## Cross-references and labels
 
@@ -117,69 +78,82 @@ English; do not emit «نصب و پیکربندی مؤلفه‌ها».
 | Equation (4) | معادله (4) |
 | Section 3.2 | بخش 3.2 |
 | Appendix A | پیوست A |
-| Theorem / Lemma / Proof | قضیه / لم / اثبات — keep the number LTR |
+| Theorem / Lemma / Proof | قضیه / لم / اثبات |
 
-Do not localize the numeral.
+Do not localise the numeral, and keep it in an LTR isolate. Prefer real
+`\ref` / `\label` over typed numbers when the translation renumbers
+anything; a hand-typed number silently rots.
 
-## Images and figures
+## Headings
+
+Generic labels take the Persian in `glossary.md`. A heading that *is* a
+named artifact or a technical label stays English in one isolate — `The
+OpenStack services`, `Conceptual architecture`, `Host networking`, `Get
+started with OpenStack`. Do not Persianise the generic word and leave the
+name behind.
+
+## Figures
 
 The translation must *show* the same figures the source shows.
 
-- Copy the original files (PNG, JPEG, SVG, PDF page extract, etc.).
-  Point `\includegraphics` or `img src` at those copies. Do not redraw,
-  screenshot-replace, or generate a new figure.
-- Keep document order: if Figure 3 follows the paragraph that cites
-  it, the translation does the same.
-- Keep subfigure layout (`a`/`b`/`c`), aspect ratio, and resolution.
-  Do not crop, pad, or scale in a way that changes what is visible.
-- Do not mirror or rotate for RTL. Plots, UI captures, anatomy, and
-  diagrams stay optically identical to the source.
-- Labels *inside* the image (axis text, legends baked into a PNG)
-  stay as in the source. Do not edit pixels to Persianize them.
-- Translate only the caption and any prose that refers to the figure.
-- `alt` may be a short Persian description for accessibility; it
-  must not replace the image.
-- If an image file is missing or unreadable, insert a visible comment
-  in the `.tex` or HTML and tell the user. Do not invent a substitute
-  figure.
+- Copy the original files (PNG, JPEG, SVG, extracted PDF page). Point
+  `\includegraphics` or `img src` at those copies. Do not redraw,
+  screenshot-replace, or generate a substitute.
+- Keep document order, subfigure layout (`a`/`b`/`c`), aspect ratio, and
+  resolution. Do not crop or pad in a way that changes what is visible.
+- Never mirror or rotate for RTL.
+- Text baked into the image stays as in the source. Do not edit pixels to
+  Persianise axis labels or legends.
+- Translate the caption and the prose that refers to the figure.
+- `alt` may be a short Persian description; it must not replace the image.
+- If a file is missing or unreadable, leave a visible comment at that spot
+  and tell the user. Do not invent a figure. The checker fails on an
+  `\includegraphics` target that is not on disk.
 
-## Citations in the body
+## Tables
 
-Keep citation keys in source form, isolated as LTR:
+- Persian prose cells are RTL; numeric cells are LTR and left-aligned.
+- Do not reverse column order unless the user asks.
+- A table that runs past one page needs `longtable` with a repeated
+  header, not a manually split table. Real documents (port lists,
+  requirement matrices) hit this constantly.
+- A caption that is a technical label stays English whole; only the
+  `جدول N.` prefix is Persian.
 
-- `(Smith et al., 2021)` stays `(Smith et al., 2021)`
-- `[12]` stays `[12]`
-- `DOI` links stay URLs
+## Footnotes, quotes, and links
 
-Do not translate `et al.` Do not convert Harvard to Vancouver or the
-reverse.
+- Footnote markers follow the Persian text direction; the note body
+  follows its own content. An English-only note stays in a `latin`
+  environment.
+- Quote Persian prose with `«»`. An English title inside Persian prose
+  keeps its own quoting from the source and sits in one isolate.
+- URLs are isolates and must be allowed to break, or they overflow the
+  page silently: `\url` plus `xurl` in TeX, `overflow-wrap: break-word` in
+  CSS. Note `word-break: break-word` is not a valid CSS value and
+  WeasyPrint drops it.
+- A long URL broken mid-string inside a Persian paragraph is legible but
+  reads badly — the `https://` fragment ends up alone at the far end of
+  the previous line. Prefer giving a long URL its own block-level line, a
+  footnote, or the bibliography, rather than burying it in running RTL
+  prose.
 
-## Headings (typical article)
+## Citations
 
-Use these **only** for generic IMRAD / book labels. If the source
-heading is a domain NP (`Host networking`, `Conceptual architecture`,
-`The OpenStack services`), keep it English in one isolate.
+Keep citation keys in source form, isolated as LTR: `(Smith et al., 2021)`,
+`[12]`, DOI links. Do not translate `et al.`, and do not convert Harvard to
+Vancouver or the reverse.
 
-Use these unless the source uses a different scheme; then stay parallel.
-
-| English | Persian |
-| --- | --- |
-| Abstract | چکیده |
-| Introduction | مقدمه |
-| Related work | کارهای مرتبط |
-| Methods / Materials and methods | روش‌ها / مواد و روش‌ها |
-| Results | نتایج |
-| Discussion | بحث |
-| Conclusion | نتیجه‌گیری |
-| Acknowledgments | سپاسگزاری |
-| References / Bibliography | منابع |
-| Appendix | پیوست |
+Bibliography entries are not translated: authors, titles, journals, years,
+publishers, DOIs, URLs.
 
 ## Ambiguity
 
-If a pronoun, scope of negation, or technical reading would change the
-science, stop and ask. Do not pick the “more fluent” reading.
+If a pronoun, the scope of a negation, or a technical reading would change
+the science, stop and ask. Do not pick the more fluent reading.
 
-If the source is truncated, OCR-garbled, or a formula is unreadable,
-leave a short HTML comment at that spot and tell the user. Do not
-invent the missing science.
+For a document long enough that stopping forty times is impractical, use
+the queue in `long-documents.md`: a claim-changing ambiguity blocks, and
+everything else is recorded and reported once at the end.
+
+If the source is truncated, OCR-garbled, or a formula is unreadable, leave a
+comment at that spot and tell the user. Do not invent the missing science.

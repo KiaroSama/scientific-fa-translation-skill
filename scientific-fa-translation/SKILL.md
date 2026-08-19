@@ -3,7 +3,8 @@ name: scientific-fa-translation
 description: >
   Translate scientific documents, papers, articles, books, and technical
   docs into academic Persian (Farsi) with strict RTL/bidi and untranslated
-  English technical terms. Use when the user asks to ترجمه, translate a
+  English technical terms. Also reviews an existing Persian translation
+  against these rules. Use when the user asks to ترجمه, translate a
   paper/article/book/docs, راست‌چین, RTL, PDF, چاپ, or Persian scientific
   translation.
   Do NOT use for coding, explaining code, commit messages, UI copy,
@@ -13,19 +14,18 @@ description: >
 # Scientific Persian translation
 
 English → academic Persian for papers, articles, books, and technical
-documentation. Accuracy, consistent terminology, and print-ready RTL
-outrank literary fluency. Cursor chat is not the RTL surface.
+documentation. Accuracy, consistent terminology, and print-ready RTL outrank
+literary fluency. Cursor chat is not the RTL surface.
 
 ## When to use
 
 - Translate a scientific or technical document into Persian.
-- User mentions ترجمه علمی, راست‌چین, RTL, PDF, چاپ, paper, article, or book.
+- Review a finished Persian translation against these rules
+  (`references/review.md`).
+- User mentions ترجمه علمی, راست‌چین, RTL, PDF, چاپ, paper, article, book.
 
-## When not to use
-
-- Writing, explaining, or reviewing code.
-- Commit messages, PRs, UI copy, literary or marketing translation.
-- Casual Persian conversation that is not a translation request.
+Not for: writing or explaining code, commit messages, PRs, UI copy, literary
+or marketing translation, casual Persian conversation.
 
 ## Locked defaults
 
@@ -35,227 +35,126 @@ Override only when the user says so.
 | --- | --- |
 | Direction | English → فارسی علمی |
 | Register | Formal فارسی معیار. No colloquial forms. |
-| Technical terms | Named artifacts stay English. Multi-word technical collocations stay English as one unit. Domain terms of art stay English even as one word. Generic scholarly language is Persian. |
-| First mention | Named English terms: English only, no gloss, unless `references/glossary.md` says so. |
+| Terminology | Decision procedure in `references/terminology.md`, level `system-docs` |
+| First mention | No gloss for English terms unless the level or glossary says otherwise |
 | Output | Printable PDF at `~/Documents/books/<slug>.pdf`. Chat is a short pointer, not RTL. |
-| PDF RTL | Maximum precision via XeLaTeX + `xepersian`. See `references/pdf-output.md`. |
-| HTML | Only if the user asks for HTML, or as the Chromium / WeasyPrint fallback. |
-| Digits | Western (`3.14`, not `۳٫۱۴`). |
-| Figures/tables | `شکل 3`, `جدول 2` — label translated, number unchanged. |
-| Images | Same files, order, size, and placement as the source. Do not mirror, crop, redraw, or drop. |
-| Code blocks | Always LTR and left-aligned. Never RTL, never `text-align: right`. |
-| Abstract/footnotes | Translate. |
-| Bibliography | Do not translate (authors, titles, journals, DOIs, URLs). |
-| Ambiguity | Ask. Do not guess a scientific claim. |
-
-Chat is a short status note plus the PDF path. Do not right-align the
-conversation and do not paste the article into chat.
+| PDF engine | XeLaTeX + `xepersian`; Chromium then WeasyPrint on the HTML template when TeX is absent |
+| HTML | Only on request, or as that fallback |
+| Digits | Western (`3.14`, not `۳٫۱۴`) |
+| Dates | Source calendar and format, one isolate. No Jalali conversion unless asked. |
+| Figures/tables | `شکل 3`, `جدول 2` — label translated, number unchanged |
+| Images | Same files, order, size, placement. Never mirror, crop, redraw, or drop. |
+| Code blocks | Always LTR and left-aligned |
+| Abstract/footnotes | Translate |
+| Bibliography | Do not translate (authors, titles, journals, DOIs, URLs) |
+| Ambiguity | Claim-changing ambiguity blocks and is asked; the rest is queued (`references/long-documents.md`) |
 
 ## Workflow
 
-1. Confirm source and target (default EN→FA). Default deliverable is a
-   PDF. Read `references/pdf-output.md` before compiling.
-2. Read `references/scientific-style.md` and `references/rtl-bidi.md`
-   before drafting.
-3. Inventory structure: headings, figures, tables, equations, code,
-   footnotes, citations. Copy every source image into the working
-   tree (`figures/` next to the `.tex`) and keep the same sequence
-   relative to the surrounding text.
-4. Scan domain terms. Check `references/glossary.md`. New *names*,
-   new multi-word collocations, and new *field terms of art* (including
-   one-word nouns and their operation verbs) stay English; only generic
-   scholarly words get a Persian row. Append both.
-5. Translate section by section. Do not add, omit, or soften claims.
-   Preserve hedge language (`may`, `might`, `suggest`, `remain unknown`).
-6. RTL pass on the print source (`.tex` with `\lr` / `latin`, or HTML
-   isolation if falling back). See `references/rtl-bidi.md`.
-7. Consistency pass: same English term for the same concept throughout.
-8. Compile the PDF to `~/Documents/books/<slug>.pdf` with
-   `scripts/build-pdf.sh` (`.tex` or `.html`). Run the checklist.
+1. **Preflight.** `scripts/preflight.sh` — know which engine and fonts
+   exist before promising a build. Confirm source, target, and level.
+2. **Ingest.** `references/source-ingest.md`: fetch the source, extract
+   figures, write `inventory.md` and `manifest.txt` in the working tree.
+   Never translate from memory when a fetch fails.
+3. **Terminology first.** Scan domain terms, apply
+   `references/terminology.md`, and write `terms.tsv` plus
+   `glossary.local.md` **before** drafting. For a long document show the
+   close calls to the user first.
+4. **Read** `references/scientific-style.md` and `references/rtl-bidi.md`.
+   For anything past ~15 pages also `references/long-documents.md`.
+5. **Translate** section by section. Do not add, omit, or soften claims;
+   preserve hedges (`may`, `might`, `suggest`, `remain unknown`).
+6. **Isolate** every LTR run in the print source — whole clusters, one
+   isolate each (`references/rtl-bidi.md`).
+7. **Lint.** `scripts/check-fa.py doc.tex --domains <pack>` and clear
+   every error. Lint each part as you finish it, not at the end.
+8. **Build and verify.** `scripts/build-pdf.sh doc.tex <slug> --verify`,
+   then look at the rasterised pages. Run the judgement checklist below.
 
-If the user asks for HTML only, use `assets/rtl-document.html`. If they
-ask for Markdown, wrap the body in `<div lang="fa" dir="rtl">` and still
-isolate LTR spans; say that print RTL will be weaker than PDF. Reverse
-translation (FA→EN) only on explicit request; then drop RTL rules and
-keep technical terms in English.
+If the user asks for HTML only, use `assets/rtl-document.html`. If they ask
+for Markdown, wrap the body in `<div lang="fa" dir="rtl">`, still isolate
+LTR spans, and say print RTL will be weaker than PDF. Reverse translation
+(FA→EN) only on explicit request; then drop the RTL rules and keep technical
+terms in English.
 
-## Keep English vs write Persian
+## Terminology in one paragraph
 
-House split. Full lists: `references/glossary.md`.
+Full policy and the field-term test: `references/terminology.md`. Ordered,
+first match wins: generic document chrome (`Abstract`, `Figure`) is always
+Persian; named artifacts and acronyms are English; a 2–5 word technical
+label is English as **one whole isolate**; a field term of art is English at
+`system-docs` level, including its operation verb (`node`, `deployment`,
+`configure` — never گره / استقرار / پیکربندی); everything else is Persian.
+Never half-translate (`خوشه Kubernetes`, `سرویس‌های OpenStack`), never
+attach Persian morphology to a Latin token (`APIها`), and never mix two
+forms of one concept in a document. Forbidden calques are enforced from
+`references/term-pairs.tsv`.
 
-**Keep English** (LTR isolate: `\lr` / `<span dir="ltr">`). Do not
-Persianize. Do not invent فرهنگستان equivalents.
-
-- Names of algorithms, libraries, protocols, and products
-- Acronyms: `API`, `PCR`, `GPU`, `CI`, and others of that kind
-- Formulas, code, units, and statistics (`p`, `n`, `SD`, …)
-- People’s names, journal names, and DOIs
-  (also conference names, URLs, and bibliography titles)
-- **Domain terms of art (including one word).** If the source token
-  belongs to the document’s field lexicon — the sort of word in that
-  field’s glossary or man page — it stays English even as a single
-  noun, and even as the operation verb of that same term. Examples:
-  `node` / `nodes`, `deployment` / `deploy`, `configuration` /
-  `configure`, `implementation` / `implement`, `integration`,
-  `firewalls`, `encryption`, `commands`. Do not emit گره، استقرار،
-  پیکربندی، پیاده‌سازی، یکپارچه‌سازی، دیوار آتش، رمزنگاری، فرمان‌ها
-  for those sources.
-
-  A glossary Translate row never overrides this. Translate rows cover
-  only generic scholarly prose and IMRAD labels. Once a concept is
-  English, every later mention is that same English form: never mix
-  `node` and گره in one document.
-
-  Narrative verbs stay Persian: پوشش می‌دهد، مناسب است، توصیه
-  می‌کنیم، نیاز دارد، افزایش دهید، استفاده کنید. In «increase
-  security using firewalls and encryption», ordinary-prose *security*
-  may be امنیت; `firewalls` and `encryption` stay English.
-- **Multi-word technical collocations (atomic).** A 2–5 word domain
-  label in the source is one English unit. Possessive of, *X of Y*,
-  and *Adjective + Name* are still one NP (`OpenStack services`,
-  `Ubuntu Cloud archive repository`, `controller node`). Do not
-  calque. Do not half-translate. If unsure whether it is a term of
-  art or ordinary prose, keep the **whole NP** in English and add it
-  to the glossary.
-
-  Isolate the entire phrase in one `\lr{…}` / `\en{…}`. Do not attach
-  Persian morphology (`APIها`, `Goی`). Do not wrap an English name
-  with a Persian head noun (`خوشه …`, `بسته‌های …`, `سرویس‌های …`,
-  `مخزن …`, `گره‌های …`).
-
-  Forbidden: `apiهای ترکیب‌پذیر`, `خوشه Kubernetes`, `بسته‌های Go`,
-  `بسته‌های OpenStack`, `سرویس‌های OpenStack`,
-  `مخزن Ubuntu Cloud archive`, `گره‌های دیگر` when the source is
-  `Other nodes`, `استقرار و پیکربندی` when the source is
-  `deployment and configuration`, `نصب و پیکربندی مؤلفه‌ها` when
-  the source is `Install and configure components`.
-  Required: `composable APIs`, `Kubernetes cluster`,
-  `reusable Go packages`, `OpenStack packages`, `OpenStack services`,
-  `Ubuntu Cloud archive repository`, `Other nodes`,
-  `deployment and configuration`, `Install and configure components`.
-
-**Write in Persian.** Translate these out of English. Never leave the
-English word in the Persian sentence.
-
-- Narrative verbs and sentence structure (پوشش می‌دهد، استفاده کنید)
-  — not the operation verb of a domain term (`configure`, `implement`)
-- General scholarly words: روش، نتایج، بررسی (also مقدمه-level
-  vocabulary: مقاله، روش‌ها، بحث، …) — only when they are *not* a
-  field term of art and *not* inside a keep-English collocation
-- Generic IMRAD / book headings in the table in
-  `references/scientific-style.md` (مقدمه، بحث، چکیده، …)
-- Conceptual explanation for the reader: the surrounding *clause* that
-  *says what a term means* is Persian. The term itself — a one-word
-  field term or a multi-word collocation — stays English. A glossary
-  Translate row does **not** split a collocation, and does **not**
-  Persianize a domain term of art.
-
-**Headings.** Generic article headings (`Abstract`, `Introduction`)
-are Persian. If the source heading *is* a named artifact or a
-technical collocation (`The OpenStack services`,
-`Conceptual architecture`, `Get started with OpenStack`,
-`Host networking`), keep the **entire heading** English in one
-isolate. Do not Persianize the generic word and leave the name
-(`سرویس‌های OpenStack`).
-
-Example: «در این روش از \en{gradient descent} برای کمینه کردن تابع
-هزینه استفاده می‌شود.» — روش / کمینه کردن / استفاده می‌شود are
-Persian; `gradient descent` stays English.
-
-Example: «\en{GitOps Toolkit} مجموعه‌ای از \en{composable APIs} و
-\en{reusable Go packages} است.» — not «APIهای ترکیب‌پذیر».
-
-Example: «\en{OpenStack} از طریق مجموعه‌ای از سرویس‌های مرتبط یک
-راه‌حل \en{Infrastructure-as-a-Service (IaaS)} فراهم می‌کند.» Then
-name the set as \en{OpenStack services}, not «سرویس‌های OpenStack».
+Example: «در این روش از \en{gradient descent} برای کمینه کردن تابع هزینه
+استفاده می‌شود.» — روش / کمینه کردن / استفاده می‌شود Persian, the term
+English.
 
 Example: «برای \en{configure} هر \en{node} باید از یک
-\en{account with administrative privileges} استفاده کنید.» — استفاده
-کنید is Persian; `configure`, `node`, and the privilege NP stay
-English. Not «برای پیکربندی هر گره».
-
-Example: «امنیت را با روش‌هایی مانند \en{firewalls}، \en{encryption}
-و \en{service policies} افزایش دهید.» — افزایش دهید / روش‌هایی مانند
-are Persian; the field terms stay English. Not «دیوارهای آتش» /
-«رمزنگاری».
+\en{account with administrative privileges} استفاده کنید.» — not «برای
+پیکربندی هر گره».
 
 ## Persian mechanics
 
-Full rules: `references/scientific-style.md`.
-
-- UTF-8. Persian letters only: `ک` not `ك`, `ی` not `ي`.
-- نیم‌فاصله (U+200C) in `می‌شود`, `می‌توان`, `نمی‌کند`, and standard
-  compounds.
-- Punctuation: `،` `؛` `؟` `«»`. Not Latin `,` `;` `?` `""`.
-- Formal verb forms only (`می‌شود` not `میشه`).
+Full rules: `references/scientific-style.md`. UTF-8; `ک` not `ك`, `ی` not
+`ي`; نیم‌فاصله in `می‌شود`, `می‌توان`, `نمی‌کند`, `داده‌ها`; punctuation
+`،` `؛` `؟` `«»`; formal verb forms only. All machine-checked.
 
 ## RTL
 
-Full rules: `references/rtl-bidi.md`. For PDF: `references/pdf-output.md`.
+Full rules: `references/rtl-bidi.md`; engines and measured limits:
+`references/pdf-output.md`. Chat does not need to be RTL.
 
-Chat does not need to be RTL.
-
-On the **PDF** (non-negotiable when producing a printable file):
-
-- Prefer XeLaTeX + `xepersian` from `assets/rtl-document.tex`.
-- Isolate every English term, **whole technical collocation**, number
-  cluster, formula, URL, and inline code with `\lr{…}` (or
-  `<span dir="ltr">` on the HTML fallback).
-  Slash-, arrow-, or parenthesis-joined English (`OP_IF/OP_NOTIF`,
-  `STARTED -> LOCKED_IN`, `1.0.1 (2026-08-09)`) is **one** isolate, not
-  two spans with punctuation between them.
-- Code listings are LTR and left-aligned: `latin` + `verbatim` /
-  `Verbatim`, or `<pre dir="ltr">`. Never RTL, never right-aligned.
-- Math stays LTR. Do not reverse English letters or hand-flip
-  parentheses.
-- Do not mirror images. `\includegraphics` / `<img>` the source files.
-- After an English insertion at the end of a Persian sentence, the
-  Persian period must belong to that sentence (`\lr` isolation or RLM).
+On the PDF, non-negotiable: isolate every English term, whole collocation,
+number cluster, formula, URL, and inline code with `\lr{…}` (or
+`<span dir="ltr">`). Slash-, arrow-, or parenthesis-joined English
+(`OP_IF/OP_NOTIF`, `STARTED -> LOCKED_IN`, `1.0.1 (2026-08-09)`) is **one**
+isolate — split across two spans it renders reversed on the page. Listings
+are LTR and left-aligned. Math stays LTR. Do not mirror images. After a
+trailing English insertion the Persian period must belong to the Persian
+sentence.
 
 ## Output
 
-Default: printable PDF. Always save the final file at
-`~/Documents/books/<slug>.pdf` (`$HOME/Documents/books`). Create the
-directory if needed. Report that absolute path in chat.
+Default: printable PDF at `~/Documents/books/<slug>.pdf`
+(`$HOME/Documents/books`, created if needed). Report that absolute path, the
+page count, and the engine used.
 
 1. Read `references/pdf-output.md`. Prefer `assets/rtl-document.tex`.
-2. Put Persian prose in the `.tex`. Wrap English runs with `\lr{…}`
-   or `\en{…}`.
-3. Listings in `\begin{latin}…\end{latin}`. Captions translated;
+2. Persian prose in the `.tex`; English runs in `\lr{…}` / `\en{…}`.
+3. Listings in `\begin{latin}…\end{latin}`. Captions translated,
    identifiers kept (`Figure 3` → `شکل 3`).
-4. `\includegraphics` each source image (copied into `figures/`).
-   Preserve order, aspect ratio, and subfigure layout. Do not
-   regenerate or flip artwork.
-5. Bibliography in a `latin` section, source language.
-6. `scripts/build-pdf.sh path/to/doc.tex <slug>`
-   → `$HOME/Documents/books/<slug>.pdf`.
-   If `xelatex` is missing, still write the `.tex`, then compile
-   `assets/rtl-document.html` (filled in) with the same script:
-   `scripts/build-pdf.sh path/to/doc.html <slug>`.
-   Embed Vazirmatn via `@font-face` (`scripts/fetch-vazirmatn.sh`).
-   Do not use the UI-FD / Farsi-digits cut of that family.
+4. `\includegraphics` each copied source image; order, aspect, and
+   subfigure layout preserved.
+5. Bibliography in a `latin` section, source language. Fill the colophon
+   with source, licence, and retrieval date.
+6. `scripts/build-pdf.sh path/to/doc.tex <slug> --verify`. Without TeX the
+   same script takes the filled-in `assets/rtl-document.html`; embed
+   Vazirmatn with `scripts/fetch-vazirmatn.sh` and never the UI-FD cut.
 
-HTML (`assets/rtl-document.html`) is only for an explicit HTML ask or
-the Chromium / WeasyPrint fallback in `references/pdf-output.md`.
+## Quality gate
 
-## Quality checklist
+**Machine-checked** — `scripts/check-fa.py` must exit clean. It covers
+orthography (`ک`/`ی`, نیم‌فاصله, Western digits, Persian punctuation),
+forbidden calques, half-translated noun phrases, Persian affixes on Latin
+tokens, split isolates, un-isolated Latin runs, listing direction, mirrored
+artwork, missing images, and terminology drift. Do not re-check these by
+hand.
 
-- [ ] No added, omitted, or softened scientific claims
-- [ ] Hedge language preserved
-- [ ] Names/acronyms/formulas/units/stats/people/journals/DOIs stay English
-- [ ] Domain terms of art stay English even as one word (`node`,
-      `deployment`, `configure`); no گره / استقرار / پیکربندی for those
-- [ ] Multi-word technical collocations are one English isolate; no calque or half-translation
-- [ ] No Persian head + English name (`خوشه Kubernetes`, `سرویس‌های OpenStack`, `بسته‌های OpenStack`, `مخزن …`)
-- [ ] Domain headings that are collocations/names stay entirely English; only generic IMRAD headings are Persian
-- [ ] Narrative verbs, generic scholarly words, and conceptual explanations are Persian
-- [ ] Citations, equations, numbers, and units unchanged
-- [ ] `ک`/`ی` Persian; نیم‌فاصله present; no colloquial forms
-- [ ] Every mixed LTR run is isolated (`\lr` / `dir="ltr"`); punctuation attaches correctly
-- [ ] Joined English (`a/b`, `a -> b`, `1.0.1 (2026-08-09)`) is a single isolate
-- [ ] HTML-engine PDFs embed a real `fa` font (not missing-glyph boxes); digits stay Western
-- [ ] Every code block is LTR, left-aligned, source text unchanged
-- [ ] Every source image is present, unmirrored, in the same place
-- [ ] Bibliography, DOIs, and URLs not translated
-- [ ] Chat is a short pointer, not an RTL article
-- [ ] Final PDF exists at `~/Documents/books/<slug>.pdf`
+**Judgement** — only these five, and they are the whole point:
+
+- [ ] No added, omitted, or softened scientific claim; hedges intact
+- [ ] Terminology consistent with `terms.tsv`, one form per concept
+- [ ] Every source figure present, unmirrored, in source order, with a
+      translated caption
+- [ ] Rasterised pages actually read correctly (periods, parentheses,
+      listings, no missing-glyph boxes) — not judged from `pdftotext`
+- [ ] Claim-changing ambiguities were asked, not guessed; the rest are
+      reported
+
+**Delivery** — final PDF at `~/Documents/books/<slug>.pdf`, chat is a short
+pointer with the path, page count, engine, and queued questions.

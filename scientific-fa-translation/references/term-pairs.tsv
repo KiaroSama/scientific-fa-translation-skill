@@ -1,0 +1,61 @@
+# Machine-readable half of the terminology policy.
+#
+# Each row: a source term that stays English, and the Persian calque that
+# must never appear in its place. `scripts/check-fa.py` reads this file and
+# fails the build when the forbidden form shows up in a translation.
+#
+# Columns (tab-separated):
+#   english          source form that must survive in the output
+#   forbidden_fa     Persian form that is wrong for this source term
+#   scope            `universal`, or a domain pack from glossary-domains.md
+#
+# `universal` rows are enforced on every document. Domain rows are enforced
+# only with `--domains <name>` (or `--domains all`). Add a row here at the
+# same time you add a Keep-English note in glossary.md; this file is the
+# single source of truth for the checker.
+
+english	forbidden_fa	scope
+node	گره	universal
+nodes	گره‌ها	universal
+deployment	استقرار	universal
+deploy	استقرار	universal
+configuration	پیکربندی	universal
+configure	پیکربندی	universal
+implementation	پیاده‌سازی	universal
+implement	پیاده‌سازی	universal
+integration	یکپارچه‌سازی	universal
+firewall	دیوار آتش	universal
+firewalls	دیوارهای آتش	universal
+firewalling services	خدمات دیوار آتش	universal
+encryption	رمزنگاری	universal
+commands	فرمان‌ها	universal
+command	فرمان	universal
+server	کارساز	universal
+partition	افراز	universal
+filter	پالایه	universal
+test vectors	بردارهای آزمون	universal
+reference implementation	پیاده‌سازی مرجع	universal
+underlying infrastructure	زیرساخت زیربنایی	universal
+account with administrative privileges	حسابی با امتیازهای مدیریتی	universal
+performance and redundancy requirements	نیازمندی‌های کارایی و افزونگی	universal
+interrelated services	سرویس‌های مرتبط	openstack
+supporting services	سرویس‌های پشتیبان	openstack
+complementary services	سرویس‌های مکمل	openstack
+advanced services	سرویس‌های پیشرفته	openstack
+password	گذرواژه	openstack
+passwords	گذرواژه‌ها	openstack
+Network layout	طرح شبکه	openstack
+single disk partition	افراز دیسک واحد	openstack
+physical server	کارساز فیزیکی	openstack
+cluster	خوشه	kubernetes
+clusters	خوشه‌ها	kubernetes
+Continuous Delivery workflows	جریان‌های کاری پیوسته	gitops
+fee	کارمزد	bitcoin
+transaction	تراکنش	bitcoin
+transactions	تراکنش‌ها	bitcoin
+block	بلوک	bitcoin
+blocks	بلوک‌ها	bitcoin
+miner	استخراج‌کننده	bitcoin
+consensus	اجماع	bitcoin
+activation	فعال‌سازی	bitcoin
+dataset	مجموعه داده	ml

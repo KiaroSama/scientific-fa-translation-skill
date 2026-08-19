@@ -1,27 +1,53 @@
 % !TEX program = xelatex
-% Scientific Persian print template. Compile with XeLaTeX.
-% Load graphicx, hyperref, and geometry BEFORE xepersian.
+% Scientific Persian print template. Compile with scripts/build-pdf.sh.
+%
+% For a book-length source switch the class to `report` (or `book`) and use
+% \chapter; everything else below is unchanged.
 \documentclass[a4paper,12pt]{article}
 
+% graphicx / hyperref / geometry must load BEFORE xepersian.
 \usepackage{fontspec}
 \usepackage{microtype}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage{longtable}   % tables that run past one page
 \usepackage{xcolor}
 \usepackage{fancyvrb}
 \usepackage[a4paper,margin=2.2cm]{geometry}
-\usepackage[unicode=true,colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+\usepackage[unicode=true,colorlinks=true,linkcolor=black,citecolor=black,
+            urlcolor=black,bookmarksnumbered=true]{hyperref}
+\usepackage{bookmark}
+\usepackage{xurl}        % let long URLs break instead of overflowing
 
 \usepackage{xepersian}
 
-% Agent: replace these with fonts that exist on the machine (fc-list).
-% Text font must cover Persian. Digit font must be Latin so digits stay Western.
-\settextfont[Ligatures=TeX]{Vazirmatn}
-\setlatintextfont{TeX Gyre Termes}
-\setmonofont[Scale=0.92]{TeX Gyre Cursor}
-\setdigitfont{TeX Gyre Termes}
+% Font resolution without hand-editing: first face that exists wins.
+% Persian text face.
+\IfFontExistsTF{Vazirmatn}{\settextfont[Ligatures=TeX]{Vazirmatn}}{%
+  \IfFontExistsTF{Shabnam}{\settextfont[Ligatures=TeX]{Shabnam}}{%
+    \IfFontExistsTF{Sahel}{\settextfont[Ligatures=TeX]{Sahel}}{%
+      \IfFontExistsTF{Amiri}{\settextfont[Ligatures=TeX]{Amiri}}{%
+        \settextfont[Ligatures=TeX]{DejaVu Sans}}}}}
+% Latin text and digit face — Latin, so digits stay Western.
+\IfFontExistsTF{TeX Gyre Termes}{%
+  \setlatintextfont{TeX Gyre Termes}\setdigitfont{TeX Gyre Termes}}{%
+  \IfFontExistsTF{Liberation Serif}{%
+    \setlatintextfont{Liberation Serif}\setdigitfont{Liberation Serif}}{%
+    \setlatintextfont{DejaVu Serif}\setdigitfont{DejaVu Serif}}}
+% Monospace for listings.
+\IfFontExistsTF{TeX Gyre Cursor}{\setmonofont[Scale=0.92]{TeX Gyre Cursor}}{%
+  \IfFontExistsTF{DejaVu Sans Mono}{\setmonofont[Scale=0.90]{DejaVu Sans Mono}}{%
+    \setmonofont[Scale=0.90]{Liberation Mono}}}
 
 \newcommand{\en}[1]{\lr{#1}}
+
+% \lr and \en reach hyperref bookmarks from \section and \caption and break
+% them. Strip the wrapper there; the visible text is unaffected.
+\pdfstringdefDisableCommands{\def\lr#1{#1}\def\en#1{#1}}
+
+% RTL justification with long LTR isolates needs slack, or lines overfull.
+\emergencystretch=2em
+\setlength{\parskip}{0.4em}
 
 \begin{document}
 
@@ -30,8 +56,14 @@
 \date{}
 \maketitle
 
-% Persian prose here. Isolate every English run:
-% الگوریتم \en{Adam} استفاده شد.
+% Long documents only: a table of contents, Persian heading.
+% \renewcommand{\contentsname}{فهرست مطالب}
+% \tableofcontents
+% \clearpage
+
+% Persian prose. Isolate every English run, whole collocations included:
+% الگوریتم \en{Adam (Kingma \& Ba, 2015)} استفاده شد.
+% One isolate per cluster: \en{OP_IF/OP_NOTIF}, \en{1.0.1 (2026-08-09)}.
 
 % Code: never RTL.
 \begin{latin}
@@ -40,16 +72,31 @@
 \end{Verbatim}
 \end{latin}
 
-% Figures: original files, not mirrored.
+% Figures: the source files, unmirrored, in source order.
 % \begin{figure}[ht]
 % \centering
 % \includegraphics[width=0.92\linewidth]{figures/fig-3.png}
-% \caption{معماری \en{transformer}.}
+% \caption{شکل \lr{3}. معماری \en{transformer}.}
 % \end{figure}
+
+% Tables past one page: longtable with a repeated header.
+% \begin{longtable}{ll}
+% \toprule \en{Service} & توضیح \\ \midrule \endhead
+% \en{Identity service} & احراز هویت \\
+% \bottomrule
+% \end{longtable}
 
 \begin{latin}
 \section*{References}
 % Original-language bibliography. Do not translate entries.
 \end{latin}
+
+% Colophon: source, licence, provenance. Fill from inventory.md.
+\clearpage
+\section*{یادداشت نشر}
+این متن ترجمهٔ فارسی \en{SOURCE TITLE} است.
+منبع: \en{\url{SOURCE URL}} — مجوز: \en{LICENSE} — تاریخ دریافت:
+\en{YYYY-MM-DD}.
+ترجمه با \en{scientific-fa-translation} انجام شده است.
 
 \end{document}
