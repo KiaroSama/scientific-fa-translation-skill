@@ -5,8 +5,14 @@ English terms, digits, math, and URLs are LTR. The Unicode Bidirectional
 Algorithm will misplace punctuation and parentheses unless every LTR run
 is isolated.
 
-This skill writes HTML (`lang="fa"` `dir="rtl"`). Do not rely on Cursor
-chat Markdown for the deliverable.
+**Cursor chat is not the RTL surface.** Do not right-align the
+conversation. For papers, articles, and books the deliverable is a
+PDF (`references/pdf-output.md`) with maximum bidi precision.
+
+When the print engine is XeLaTeX, isolate with `\lr{…}` / `\en{…}` and
+put listings in a `latin` environment (see `assets/rtl-document.tex`).
+The HTML rules below apply to an explicit HTML ask or the Chromium
+print fallback (`assets/rtl-document.html`).
 
 ## Document root
 
@@ -32,10 +38,20 @@ sessions, and algorithm listings stay left-to-right and left-aligned
 even though the document is Persian.
 
 ```html
-<!-- Required shape -->
+<!-- Required HTML shape (Chromium fallback) -->
 <pre dir="ltr"><code>def fit(x):
     return x @ w
 </code></pre>
+```
+
+```tex
+% Required XeLaTeX shape (PDF)
+\begin{latin}
+\begin{Verbatim}[fontsize=\small,frame=single]
+def fit(x):
+    return x @ w
+\end{Verbatim}
+\end{latin}
 ```
 
 ```html
@@ -66,11 +82,21 @@ URL, file path, and inline code:
 <span dir="ltr">https://doi.org/10.0000/example</span>
 ```
 
+XeLaTeX (PDF):
+
+```tex
+\en{gradient descent}
+\en{Adam (Kingma \& Ba, 2015)}
+\en{p < 0.05}
+```
+
 `<bdi>` is acceptable when the span is a single proper name. Prefer
-`<span dir="ltr">` for anything with parentheses, punctuation, or digits.
+`<span dir="ltr">` (HTML) or `\lr`/`\en` (TeX) for anything with
+parentheses, punctuation, or digits.
 
 A whole English bibliography, code listing, or equation block gets
-`dir="ltr"` on the container, not on every token.
+`dir="ltr"` on the HTML container, or a `latin` environment in TeX,
+not a token-by-token wrap.
 
 ## Wrong vs right
 
@@ -82,6 +108,10 @@ Parentheses and the sentence period are the usual failures.
 
 <!-- Right -->
 الگوریتم <span dir="ltr">Adam (Kingma &amp; Ba, 2015)</span> استفاده شد.
+```
+
+```tex
+الگوریتم \en{Adam (Kingma \& Ba, 2015)} استفاده شد.
 ```
 
 ```html
@@ -111,8 +141,9 @@ RLM only for a leftover end-of-sentence period.
 | Western digits and numeric ranges | `<span dir="ltr">3.14</span>`, `<span dir="ltr">2017–2024</span>` |
 | Display/inline math | `dir="ltr"` on the math container; keep LaTeX source unchanged |
 | Fenced code / `pre` | `dir="ltr"` on `<pre>` plus left-align; never RTL |
-| Inline `code` | `dir="ltr"` on `code` or its wrapper |
-| Images / SVG | unchanged files; do not set `transform` or `dir="rtl"` on `img` |
+| XeLaTeX listing | `latin` + `verbatim` / `Verbatim`; never an RTL wrap |
+| Inline `code` | `dir="ltr"` on `code`, or `\lr{\texttt{…}}` |
+| Images / SVG | unchanged files; no flip; `\includegraphics` or `<img>` |
 | URLs, DOIs, emails | `<span dir="ltr">` or `<a dir="ltr">` |
 | File paths and identifiers | `<span dir="ltr">` |
 | Reference list | a `dir="ltr"` section |

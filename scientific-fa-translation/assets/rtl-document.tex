@@ -1,0 +1,55 @@
+% !TEX program = xelatex
+% Scientific Persian print template. Compile with XeLaTeX.
+% Load graphicx, hyperref, and geometry BEFORE xepersian.
+\documentclass[a4paper,12pt]{article}
+
+\usepackage{fontspec}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{fancyvrb}
+\usepackage[a4paper,margin=2.2cm]{geometry}
+\usepackage[unicode=true,colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+
+\usepackage{xepersian}
+
+% Agent: replace these with fonts that exist on the machine (fc-list).
+% Text font must cover Persian. Digit font must be Latin so digits stay Western.
+\settextfont[Ligatures=TeX]{Vazirmatn}
+\setlatintextfont{TeX Gyre Termes}
+\setmonofont[Scale=0.92]{TeX Gyre Cursor}
+\setdigitfont{TeX Gyre Termes}
+
+\newcommand{\en}[1]{\lr{#1}}
+
+\begin{document}
+
+\title{TITLE}
+\author{}
+\date{}
+\maketitle
+
+% Persian prose here. Isolate every English run:
+% الگوریتم \en{Adam} استفاده شد.
+
+% Code: never RTL.
+\begin{latin}
+\begin{Verbatim}[fontsize=\small,frame=single,framesep=6pt,baselinestretch=1.1]
+# listing
+\end{Verbatim}
+\end{latin}
+
+% Figures: original files, not mirrored.
+% \begin{figure}[ht]
+% \centering
+% \includegraphics[width=0.92\linewidth]{figures/fig-3.png}
+% \caption{معماری \en{transformer}.}
+% \end{figure}
+
+\begin{latin}
+\section*{References}
+% Original-language bibliography. Do not translate entries.
+\end{latin}
+
+\end{document}

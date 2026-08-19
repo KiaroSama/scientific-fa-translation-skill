@@ -87,8 +87,8 @@ Do not localize the numeral.
 The translation must *show* the same figures the source shows.
 
 - Copy the original files (PNG, JPEG, SVG, PDF page extract, etc.).
-  Point `img src` at those copies. Do not redraw, screenshot-replace,
-  or generate a new figure.
+  Point `\includegraphics` or `img src` at those copies. Do not redraw,
+  screenshot-replace, or generate a new figure.
 - Keep document order: if Figure 3 follows the paragraph that cites
   it, the translation does the same.
 - Keep subfigure layout (`a`/`b`/`c`), aspect ratio, and resolution.
@@ -100,8 +100,9 @@ The translation must *show* the same figures the source shows.
 - Translate only the caption and any prose that refers to the figure.
 - `alt` may be a short Persian description for accessibility; it
   must not replace the image.
-- If an image file is missing or unreadable, insert a visible HTML
-  comment and tell the user. Do not invent a substitute figure.
+- If an image file is missing or unreadable, insert a visible comment
+  in the `.tex` or HTML and tell the user. Do not invent a substitute
+  figure.
 
 ## Citations in the body
 

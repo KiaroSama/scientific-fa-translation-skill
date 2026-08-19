@@ -12,4 +12,4 @@ git clone git@github.com:isArman/skills.git ~/.cursor/skills
 
 | Skill | Invoke | کار |
 | --- | --- | --- |
-| [scientific-fa-translation](scientific-fa-translation/SKILL.md) | `/scientific-fa-translation` | ترجمهٔ علمی به فارسی معیار، RTL دقیق، اصطلاحات تخصصی انگلیسی |
+| [scientific-fa-translation](scientific-fa-translation/SKILL.md) | `/scientific-fa-translation` | ترجمهٔ علمی به فارسی معیار؛ PDF چاپی با RTL دقیق در `~/Documents/books` |
