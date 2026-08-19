@@ -1,37 +1,35 @@
 # skills
 
-Personal [Cursor Agent Skills](https://cursor.com/docs/skills). Clone this
-repository **outside** `~/.cursor/skills`, then symlink each skill in.
-
-Do **not** clone this repo into `~/.cursor/skills`. That nests the skill
-at `~/.cursor/skills/.cursor/skills/…`, which is not the personal-skill
-path Cursor expects.
+Personal [Cursor Agent Skills](https://cursor.com/docs/skills). Each skill is
+a top-level folder. Clone this repository **as** `~/.cursor/skills`:
 
 ```bash
-git clone git@github.com:isArman/skills.git ~/Desktop/skills
+git clone git@github.com:isArman/skills.git ~/.cursor/skills
+```
+
+That is the path Cursor expects: `~/.cursor/skills/<skill-name>/SKILL.md`.
+Do not put another `.cursor/skills/` inside this repo.
+
+If the clone already lives somewhere else:
+
+```bash
 mkdir -p ~/.cursor/skills
-ln -s ~/Desktop/skills/.cursor/skills/scientific-fa-translation \
+ln -s /path/to/skills/scientific-fa-translation \
       ~/.cursor/skills/scientific-fa-translation
 ```
 
-That yields the normal path:
-`~/.cursor/skills/scientific-fa-translation/SKILL.md`.
+In Agent chat, ask to translate (or type `/scientific-fa-translation`).
+If the slash menu is empty — common on Cloud Agent follow-ups — write it
+in prose: “use the scientific-fa-translation skill”.
 
-To edit the skill, open `~/Desktop/skills` as the Cursor workspace
-(project skills still live under `.cursor/skills/`). In Agent chat,
-ask to translate (or type `/scientific-fa-translation`). If the slash
-menu is empty — common on Cloud Agent follow-ups — write it in prose:
-“use the scientific-fa-translation skill”.
-
-After `git pull` on a new machine, start a **new** Agent on branch
-`main`. Follow-ups in an already-running Cloud Agent do not reliably
-reload project skills.
+After `git pull`, start a **new** Agent on branch `main`. Follow-ups in
+an already-running Cloud Agent do not reliably reload skills.
 
 ## Skills
 
 | Skill | Invoke | Purpose |
 | --- | --- | --- |
-| [scientific-fa-translation](.cursor/skills/scientific-fa-translation/SKILL.md) | `/scientific-fa-translation` | Academic English → Persian translation; print PDF with precise RTL at `~/Documents/books` |
+| [scientific-fa-translation](scientific-fa-translation/SKILL.md) | `/scientific-fa-translation` | Academic English → Persian translation; print PDF with precise RTL at `~/Documents/books` |
 
 ### scientific-fa-translation
 
@@ -78,7 +76,7 @@ ambiguity.
 Layout:
 
 ```text
-.cursor/skills/scientific-fa-translation/
+scientific-fa-translation/
   SKILL.md
   assets/rtl-document.tex
   assets/rtl-document.html
