@@ -1,15 +1,24 @@
 # skills
 
 Personal [Cursor Agent Skills](https://cursor.com/docs/skills). Clone this
-repository anywhere, open **this folder** in Cursor, and work. Skills live
-in `.cursor/skills/` so they load with the repo. No install step, no
-symlinks, no copy into `~/.cursor`.
+repository **outside** `~/.cursor/skills`, then symlink each skill in.
+
+Do **not** clone this repo into `~/.cursor/skills`. That nests the skill
+at `~/.cursor/skills/.cursor/skills/…`, which is not the personal-skill
+path Cursor expects.
 
 ```bash
-git clone git@github.com:isArman/skills.git
+git clone git@github.com:isArman/skills.git ~/Desktop/skills
+mkdir -p ~/.cursor/skills
+ln -s ~/Desktop/skills/.cursor/skills/scientific-fa-translation \
+      ~/.cursor/skills/scientific-fa-translation
 ```
 
-Open the cloned directory in Cursor as the workspace. In Agent chat,
+That yields the normal path:
+`~/.cursor/skills/scientific-fa-translation/SKILL.md`.
+
+To edit the skill, open `~/Desktop/skills` as the Cursor workspace
+(project skills still live under `.cursor/skills/`). In Agent chat,
 ask to translate (or type `/scientific-fa-translation`). If the slash
 menu is empty — common on Cloud Agent follow-ups — write it in prose:
 “use the scientific-fa-translation skill”.
