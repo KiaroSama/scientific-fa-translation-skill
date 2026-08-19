@@ -53,7 +53,9 @@ Leave unchanged (aside from LTR markup):
 - Bibliography entries: authors, article titles, journals, proceedings,
   publishers, years, DOIs, URLs
 - Author names in the body (Latin script)
-- Code, commands, identifiers, file names
+- Code, commands, identifiers, file names (listings stay LTR; see
+  `rtl-bidi.md`)
+- Raster and vector figures: same files as the source
 - Mathematics and chemical formulas
 - Standard statistical symbols (`n`, `p`, `M`, `SD`, `SE`, `CI`, `df`)
 - Product, library, protocol, and model names
@@ -63,7 +65,7 @@ Translate:
 
 - Body prose, including the abstract
 - Section titles (`Introduction` → `مقدمه`, and so on)
-- Figure and table captions (not the identifiers)
+- Figure and table captions (not the identifiers, not the image files)
 - Footnotes that explain the text
 - Quotes from the source, in the same scientific register
 
@@ -79,6 +81,27 @@ Translate:
 | Theorem / Lemma / Proof | قضیه / لم / اثبات — keep the number LTR |
 
 Do not localize the numeral.
+
+## Images and figures
+
+The translation must *show* the same figures the source shows.
+
+- Copy the original files (PNG, JPEG, SVG, PDF page extract, etc.).
+  Point `img src` at those copies. Do not redraw, screenshot-replace,
+  or generate a new figure.
+- Keep document order: if Figure 3 follows the paragraph that cites
+  it, the translation does the same.
+- Keep subfigure layout (`a`/`b`/`c`), aspect ratio, and resolution.
+  Do not crop, pad, or scale in a way that changes what is visible.
+- Do not mirror or rotate for RTL. Plots, UI captures, anatomy, and
+  diagrams stay optically identical to the source.
+- Labels *inside* the image (axis text, legends baked into a PNG)
+  stay as in the source. Do not edit pixels to Persianize them.
+- Translate only the caption and any prose that refers to the figure.
+- `alt` may be a short Persian description for accessibility; it
+  must not replace the image.
+- If an image file is missing or unreadable, insert a visible HTML
+  comment and tell the user. Do not invent a substitute figure.
 
 ## Citations in the body
 

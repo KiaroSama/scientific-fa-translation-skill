@@ -20,8 +20,39 @@ CSS on that template:
 
 - `body`: `direction: rtl; unicode-bidi: isolate;`
 - `.ltr`, `pre`, `code`, `kbd`, `samp`, `math`: `direction: ltr; unicode-bidi: isolate;`
+- `pre`: `text-align: left;` plus `dir="ltr"` on the element
 
-Do not set `dir="rtl"` on `pre` or `code`.
+Never set `dir="rtl"` or `text-align: right` on `pre`, `code`, or a
+wrapper around a listing.
+
+## Code blocks are never RTL
+
+This is a hard rule. Fenced listings, `pre`, file dumps, REPL
+sessions, and algorithm listings stay left-to-right and left-aligned
+even though the document is Persian.
+
+```html
+<!-- Required shape -->
+<pre dir="ltr"><code>def fit(x):
+    return x @ w
+</code></pre>
+```
+
+```html
+<!-- Forbidden -->
+<pre dir="rtl">...</pre>
+<pre style="text-align: right">...</pre>
+<pre>  <!-- inherits RTL from body; still wrong without dir="ltr" -->
+```
+
+Also:
+
+- Do not translate comments, identifiers, or strings inside code.
+- Do not reorder glyphs, reverse indentation, or convert spaces.
+- Inline code in Persian prose is LTR: `<code dir="ltr">fit(x)</code>`
+  or wrap with `<span dir="ltr"><code>…</code></span>`.
+- Markdown fallback: do not leave a bare ` ``` ` fence inside a
+  `dir="rtl"` div. Wrap it in `<pre dir="ltr"><code>`.
 
 ## Isolate every LTR run
 
@@ -79,7 +110,9 @@ RLM only for a leftover end-of-sentence period.
 | Technical English terms | `<span dir="ltr">` |
 | Western digits and numeric ranges | `<span dir="ltr">3.14</span>`, `<span dir="ltr">2017–2024</span>` |
 | Display/inline math | `dir="ltr"` on the math container; keep LaTeX source unchanged |
-| Fenced code / `pre` | `dir="ltr"` (template already does this) |
+| Fenced code / `pre` | `dir="ltr"` on `<pre>` plus left-align; never RTL |
+| Inline `code` | `dir="ltr"` on `code` or its wrapper |
+| Images / SVG | unchanged files; do not set `transform` or `dir="rtl"` on `img` |
 | URLs, DOIs, emails | `<span dir="ltr">` or `<a dir="ltr">` |
 | File paths and identifiers | `<span dir="ltr">` |
 | Reference list | a `dir="ltr"` section |
@@ -93,6 +126,17 @@ RLM only for a leftover end-of-sentence period.
 - Do not reverse column order unless the user asks.
 - Figure captions: `شکل <span dir="ltr">3</span>. …` Isolate any English
   term inside the caption.
+- The `<img>` / `<svg>` itself is not RTL content. Do not mirror it
+  (`transform: scaleX(-1)` is forbidden). Place it in the same
+  relative position as the source. Width/height follow the source
+  aspect ratio.
+
+```html
+<figure>
+  <img src="figures/fig-3.png" alt="…" width="720" height="420">
+  <figcaption>شکل <span dir="ltr">3</span>. معماری <span dir="ltr">transformer</span>.</figcaption>
+</figure>
+```
 
 ## Markdown fallback
 
@@ -103,11 +147,19 @@ Only when the user demands Markdown:
 
 متن فارسی با <span dir="ltr">transformer</span>.
 
+<pre dir="ltr"><code>print(x)</code></pre>
+
+<figure>
+  <img src="figures/fig-3.png" alt="…" width="720" height="420">
+  <figcaption>شکل <span dir="ltr">3</span>. …</figcaption>
+</figure>
+
 </div>
 ```
 
 GitHub-flavored Markdown will still break some bidi cases. Say so, and
-prefer HTML.
+prefer HTML. A bare Markdown fence inside a RTL container is not
+enough; wrap listings in `<pre dir="ltr">`.
 
 Never reverse English letter order by hand. Never rewrite `(Adam)` as
 `)Adam(` to “fix” RTL.
@@ -118,5 +170,7 @@ Never reverse English letter order by hand. Never rewrite `(Adam)` as
 2. Scan every English island: parentheses enclose the English, not the
    Persian.
 3. Sentence-final periods sit at the right edge of the Persian sentence.
-4. Code and math blocks read left-to-right.
+4. Code blocks are LTR, left-aligned, and optically identical to the
+   source listing. Images are the source files, unmirrored, in source
+   order.
 5. No `ك` / `ي` introduced while editing markup.

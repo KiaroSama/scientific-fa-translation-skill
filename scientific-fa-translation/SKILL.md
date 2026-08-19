@@ -39,6 +39,8 @@ Override only when the user says so.
 | Output | UTF-8 HTML file from `assets/rtl-document.html` (`lang="fa"` `dir="rtl"`). |
 | Digits | Western (`3.14`, not `۳٫۱۴`). |
 | Figures/tables | `شکل 3`, `جدول 2` — label translated, number unchanged. |
+| Images | Same files, order, size, and placement as the source. Do not mirror, crop, redraw, or drop. |
+| Code blocks | Always LTR and left-aligned. Never RTL, never `text-align: right`. |
 | Abstract/footnotes | Translate. |
 | Bibliography | Do not translate (authors, titles, journals, DOIs, URLs). |
 | Ambiguity | Ask. Do not guess a scientific claim. |
@@ -53,7 +55,8 @@ note that points to the file is enough.
 2. Read `references/scientific-style.md` and `references/rtl-bidi.md`
    before drafting.
 3. Inventory structure: headings, figures, tables, equations, code,
-   footnotes, citations.
+   footnotes, citations. Copy every source image into the output
+   tree and keep the same sequence relative to the surrounding text.
 4. Scan domain terms. Check `references/glossary.md`. New terms stay
    English; append them to the glossary.
 5. Translate section by section. Do not add, omit, or soften claims.
@@ -80,7 +83,8 @@ Leave these in an LTR isolate. Do not Persianize them.
 - Paper titles inside the reference list
 
 Translate ordinary prose: methods, results, discussion, captions (except
-identifiers), and structural headings (`مقدمه`, `روش‌ها`, `نتایج`, `بحث`).
+identifiers and the image files themselves), and structural headings
+(`مقدمه`, `روش‌ها`, `نتایج`, `بحث`).
 
 Do not translate filler words into English. `paper` → مقاله, `method` →
 روش, `result` → نتیجه — unless the glossary marks that token as a proper
@@ -102,11 +106,15 @@ Full rules: `references/rtl-bidi.md`. Non-negotiable.
 
 - Root element: `lang="fa"` `dir="rtl"`.
 - Start from `assets/rtl-document.html`.
-- Isolate every English term, number cluster, formula, URL, and code
-  span with `<span dir="ltr">…</span>` or `<bdi>`.
-- `pre`, `code`, and math blocks are LTR.
+- Isolate every English term, number cluster, formula, URL, and inline
+  code with `<span dir="ltr">…</span>` or `<bdi>`.
+- Code blocks (`pre`, fenced listings, `code` blocks) are LTR and
+  left-aligned. Put `dir="ltr"` on the `<pre>` itself. Never inherit
+  RTL from `body`. Never right-align code.
+- Math blocks are LTR.
 - Do not reverse English letters. Do not hand-flip parentheses; isolate
   the LTR span instead.
+- Do not mirror images for RTL. Figures keep the source pixels/SVG.
 - After an English insertion at the end of a Persian sentence, the
   Persian period must belong to that sentence (isolation or RLM).
 
@@ -116,7 +124,10 @@ Full rules: `references/rtl-bidi.md`. Non-negotiable.
 2. Set `<title>` and keep the CSS.
 3. Put translation in `<body>`. Headings, lists, and footnotes stay.
 4. Translate captions; keep identifiers (`Figure 3` → `شکل 3`).
-5. Leave the reference list in the source language, in an LTR section.
+5. Embed each source image with the original `src` (or a copied asset
+   of the same file). Preserve order, aspect ratio, and subfigure
+   layout. Do not regenerate or flip artwork.
+6. Leave the reference list in the source language, in an LTR section.
 
 ## Quality checklist
 
@@ -126,5 +137,7 @@ Full rules: `references/rtl-bidi.md`. Non-negotiable.
 - [ ] Citations, equations, numbers, and units unchanged
 - [ ] `ک`/`ی` Persian; نیم‌فاصله present; no colloquial forms
 - [ ] Every mixed LTR run is isolated; punctuation attaches correctly
+- [ ] Every code block is `dir="ltr"`, left-aligned, source text unchanged
+- [ ] Every source image is present, unmirrored, in the same place
 - [ ] Bibliography, DOIs, and URLs not translated
 - [ ] Deliverable is a `dir="rtl"` file, not chat-only Markdown

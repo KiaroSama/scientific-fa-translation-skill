@@ -25,6 +25,7 @@
     }
     .ltr,
     pre,
+    pre code,
     code,
     kbd,
     samp,
@@ -32,10 +33,13 @@
       direction: ltr;
       unicode-bidi: isolate;
     }
+    pre,
+    pre code {
+      text-align: left;
+    }
     pre {
       overflow-x: auto;
       padding: 0.75rem 1rem;
-      text-align: left;
     }
     code {
       font-family: ui-monospace, "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -46,6 +50,13 @@
     }
     figure {
       margin: 1.5rem 0;
+    }
+    figure img,
+    figure svg {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      transform: none;
     }
     figcaption, caption {
       font-size: 0.95em;
@@ -82,6 +93,15 @@
     Isolate every English term, number cluster, formula, URL, and citation:
     <span dir="ltr">Adam (Kingma &amp; Ba, 2015)</span>
     شکل <span dir="ltr">3</span>
+
+    Code listings must keep dir="ltr" on <pre>, never RTL:
+    <pre dir="ltr"><code>…</code></pre>
+
+    Figures use the original image files; do not mirror:
+    <figure>
+      <img src="figures/fig-3.png" alt="…" width="720" height="420">
+      <figcaption>شکل <span dir="ltr">3</span>. …</figcaption>
+    </figure>
   -->
 
   <section class="refs">
