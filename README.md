@@ -1,20 +1,17 @@
 # skills
 
-Personal [Cursor Agent Skills](https://cursor.com/docs/skills). Each skill
-lives in `.cursor/skills/<name>/SKILL.md` so it loads in this workspace.
-
-To use the same skills in every project, link them into the user skills
-directory:
+Personal [Cursor Agent Skills](https://cursor.com/docs/skills). Clone this
+repository anywhere, open **this folder** in Cursor, and work. Skills live
+in `.cursor/skills/` so they load with the repo. No install step, no
+symlinks, no copy into `~/.cursor`.
 
 ```bash
-git clone git@github.com:isArman/skills.git ~/src/skills
-mkdir -p ~/.cursor/skills
-ln -s ~/src/skills/.cursor/skills/scientific-fa-translation \
-  ~/.cursor/skills/scientific-fa-translation
+git clone git@github.com:isArman/skills.git
 ```
 
-After pulling, reload Cursor or type `/scientific-fa-translation` in Agent
-chat to confirm the skill is visible.
+Open the cloned directory in Cursor. Type `/scientific-fa-translation` in
+Agent chat. After `git pull`, reload the window if a new skill does not
+appear.
 
 ## Skills
 
