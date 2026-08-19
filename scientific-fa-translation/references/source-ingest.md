@@ -43,17 +43,49 @@ silently missing section is worse than a late one.
 
 ```bash
 pdftotext -layout source/doc.pdf source/doc.txt   # text, reading order kept
-pdfimages -png -p source/doc.pdf figures/img      # embedded raster images
-pdftoppm -png -r 150 -f 12 -l 12 source/doc.pdf figures/page-12  # a page
 pdfinfo source/doc.pdf                            # page count for inventory
 ```
 
-`-layout` matters: without it, two-column papers interleave. `pdfimages`
-gives the original rasters; use `pdftoppm` on a page only when a figure is
-vector-drawn and cannot be extracted, and crop nothing.
+`-layout` matters: without it, two-column papers interleave. Do not treat
+`pdftotext` output of an RTL document as visual truth — that applies to
+checking your own output, not to reading an English source.
 
-Do not treat `pdftotext` output of an RTL document as visual truth — that
-applies to checking your own output, not to reading an English source.
+## Extracting figures
+
+The destination PDF must show the **same pixels the reader sees on the
+source page**. That is not the same as dumping every embedded stream.
+
+1. **Prefer the original asset.** If the source is HTML, or the PDF has an
+   HTML companion, copy the `<img src>` / SVG files. Those are the figures.
+2. **`pdfimages` is last resort**, and it lies. It emits Decode-inverted
+   samples (a light diagram becomes a black rectangle) and leftover
+   grayscale soft-masks that are not printed figures. Skip mask/smask
+   companions. Never ship those.
+3. **Rasterise the source page** (`pdftoppm -png -r 150 -f N -l N`) and
+   compare each extracted file with that page. If the extract is a
+   photographic negative of the figure, it is wrong.
+4. **Flatten before the print build:**
+
+   ```bash
+   scripts/prepare-figures.py figures/ --check
+   ```
+
+   `--check` fails on leftover alpha (WeasyPrint/Cairo and xepersian paint
+   it onto black) and on mostly-black dumps. After confirming against the
+   source page that a dark dump is inverted, not a real dark photograph:
+
+   ```bash
+   scripts/prepare-figures.py figures/ --invert-dark
+   ```
+
+```bash
+pdfimages -png -p source/doc.pdf figures/img      # last-resort rasters
+pdftoppm -png -r 150 -f 12 -l 12 source/doc.pdf figures/page-12  # ground truth
+scripts/prepare-figures.py figures/ --check
+```
+
+Use `pdftoppm` on a page when a figure is vector-drawn and cannot be
+extracted, and crop nothing.
 
 ## Structure inventory
 

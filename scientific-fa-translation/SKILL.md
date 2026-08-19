@@ -43,7 +43,7 @@ Override only when the user says so.
 | Digits | Western (`3.14`, not `۳٫۱۴`) |
 | Dates | Source calendar and format, one isolate. No Jalali conversion unless asked. |
 | Figures/tables | `شکل 3`, `جدول 2` — label translated, number unchanged |
-| Images | Same files, order, size, placement. Never mirror, crop, redraw, or drop. |
+| Images | Same pixels as the source page, order, size, placement. Flatten alpha. `dir="ltr"` / `LTR`. Never mirror, crop, redraw, drop, or ship a pdfimages negative. |
 | Code blocks | Always LTR and left-aligned |
 | Abstract/footnotes | Translate |
 | Bibliography | Do not translate (authors, titles, journals, DOIs, URLs) |
@@ -54,8 +54,10 @@ Override only when the user says so.
 1. **Preflight.** `scripts/preflight.sh` — know which engine and fonts
    exist before promising a build. Confirm source, target, and level.
 2. **Ingest.** `references/source-ingest.md`: fetch the source, extract
-   figures, write `inventory.md` and `manifest.txt` in the working tree.
-   Never translate from memory when a fetch fails.
+   figures, run `scripts/prepare-figures.py figures/ --check`, write
+   `inventory.md` and `manifest.txt` in the working tree.
+   Never translate from memory when a fetch fails. Never ship a black
+   pdfimages dump.
 3. **Terminology first.** Scan domain terms, apply
    `references/terminology.md`, and write `terms.tsv` plus
    `glossary.local.md` **before** drafting. For a long document show the
@@ -111,12 +113,12 @@ Full rules: `references/rtl-bidi.md`; engines and measured limits:
 
 On the PDF, non-negotiable: isolate every English term, whole collocation,
 number cluster, formula, URL, and inline code with `\lr{…}` (or
-`<span dir="ltr">`). Slash-, arrow-, or parenthesis-joined English
-(`OP_IF/OP_NOTIF`, `STARTED -> LOCKED_IN`, `1.0.1 (2026-08-09)`) is **one**
-isolate — split across two spans it renders reversed on the page. Listings
-are LTR and left-aligned. Math stays LTR. Do not mirror images. After a
-trailing English insertion the Persian period must belong to the Persian
-sentence.
+`<span dir="ltr">`). Slash-, space-, arrow-, or parenthesis-joined English
+(`OP_IF/OP_NOTIF`, `3.1 The OpenStack services`, `STARTED -> LOCKED_IN`,
+`1.0.1 (2026-08-09)`) is **one** isolate — split across two spans it
+renders reversed on the page. Listings are LTR and left-aligned. Math
+stays LTR. Do not mirror images. After a trailing English insertion the
+Persian period must belong to the Persian sentence.
 
 ## Output
 
@@ -128,8 +130,8 @@ page count, and the engine used.
 2. Persian prose in the `.tex`; English runs in `\lr{…}` / `\en{…}`.
 3. Listings in `\begin{latin}…\end{latin}`. Captions translated,
    identifiers kept (`Figure 3` → `شکل 3`).
-4. `\includegraphics` each copied source image; order, aspect, and
-   subfigure layout preserved.
+4. `\includegraphics` each copied source image inside `LTR`; HTML `<img dir="ltr">`.
+   Flatten alpha. Order, aspect, and subfigure layout preserved.
 5. Bibliography in a `latin` section, source language. Fill the colophon
    with source, licence, and retrieval date.
 6. `scripts/build-pdf.sh path/to/doc.tex <slug> --verify`. Without TeX the
@@ -142,15 +144,15 @@ page count, and the engine used.
 orthography (`ک`/`ی`, نیم‌فاصله, Western digits, Persian punctuation),
 forbidden calques, half-translated noun phrases, Persian affixes on Latin
 tokens, split isolates, un-isolated Latin runs, listing direction, mirrored
-artwork, missing images, and terminology drift. Do not re-check these by
-hand.
+artwork, missing images, figure direction, and terminology drift. Do not
+re-check these by hand.
 
 **Judgement** — only these five, and they are the whole point:
 
 - [ ] No added, omitted, or softened scientific claim; hedges intact
 - [ ] Terminology consistent with `terms.tsv`, one form per concept
 - [ ] Every source figure present, unmirrored, in source order, with a
-      translated caption
+      translated caption, and matching the source page (not a black box)
 - [ ] Rasterised pages actually read correctly (periods, parentheses,
       listings, no missing-glyph boxes) — not judged from `pdftotext`
 - [ ] Claim-changing ambiguities were asked, not guessed; the rest are

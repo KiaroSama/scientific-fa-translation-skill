@@ -69,6 +69,13 @@ for t in pdftotext pdfimages pdftoppm pdfinfo pdffonts curl unzip; do
 done
 have python3 && ok "python3" "required by scripts/check-fa.py" \
              || no "python3" "check-fa.py will not run"
+if python3 -c "import PIL.Image" >/dev/null 2>&1; then
+  ok "Pillow" "scripts/prepare-figures.py"
+elif have magick || have convert; then
+  ok "ImageMagick" "scripts/prepare-figures.py fallback"
+else
+  no "Pillow/ImageMagick" "figures cannot be flattened; pip install pillow"
+fi
 
 echo
 echo "Verdict"

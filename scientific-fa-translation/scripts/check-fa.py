@@ -354,15 +354,23 @@ def check(src: Source, pairs: list[tuple[str, str, str]],
             f"Persian suffix {m.group(1)!r} attached to an English token; "
             "pluralise inside the isolate instead (APIs, nodes)")
 
+    # Adjacent LTR isolates reverse on an RTL page, whether the gap is a
+    # slash (`OP_IF/OP_NOTIF` → `OP_NOTIF/OP_IF`) or only a space
+    # (`3.1 Title` → `Title 3.1`). Optional joiner, so whitespace is enough.
     joiner = r"->|[/(){}\[\]:.,+=<>~-]|–|—|&nbsp;"
     if src.kind == "tex":
-        split_re = rf"\}}\s*(?:{joiner})\s*\\(?:lr|en|textenglish)\s*\{{"
+        split_re = (
+            rf"\}}\s*(?:(?:{joiner})\s*)?\\(?:lr|en|textenglish)\s*\{{"
+        )
     else:
-        split_re = rf"</(?:span|bdi)>\s*(?:{joiner})\s*<(?:span|bdi)\b"
+        split_re = (
+            rf"</(?:span|bdi)>\s*(?:(?:{joiner})\s*)?<(?:span|bdi)\b"
+        )
     for m in live_finditer(split_re):
         add(ERROR, "split-isolate", m.start(),
-            "two LTR isolates joined by punctuation; make the whole cluster "
-            "one isolate (OP_IF/OP_NOTIF, 1.0.1 (2026-08-09))")
+            "two LTR isolates with only space or punctuation between them; "
+            "wrap the whole cluster in one isolate "
+            "(3.1 Title, OP_IF/OP_NOTIF, 1.0.1 (2026-08-09))")
 
     # 3. Isolation of Latin runs -----------------------------------------
     for m in prose_finditer(r"[A-Za-z][A-Za-z0-9._/+-]{2,}"):
@@ -408,8 +416,16 @@ def check(src: Source, pairs: list[tuple[str, str, str]],
         for m in live_finditer(r"scaleX\(\s*-1\s*\)"):
             add(ERROR, "mirrored-image", m.start(),
                 "horizontal flip on artwork is forbidden")
-        images = [(m.start(), m.group(1)) for m in
-                  live_finditer(r"<img[^>]*\bsrc\s*=\s*[\"']([^\"']+)[\"']")]
+        images = []
+        for m in live_finditer(r"<img\b[^>]*>"):
+            tag = m.group(0)
+            srcm = re.search(r"\bsrc\s*=\s*[\"']([^\"']+)[\"']", tag)
+            if srcm:
+                images.append((m.start(), srcm.group(1)))
+            if not re.search(r"\bdir\s*=\s*[\"']ltr[\"']", tag):
+                add(ERROR, "figure-direction", m.start(),
+                    "<img> without dir=\"ltr\"; RTL layout can recell or "
+                    "paint the figure black")
     else:
         for env in ("verbatim", "Verbatim", "lstlisting"):
             for m in live_finditer(r"\\begin\{" + env + r"\}"):
@@ -428,6 +444,21 @@ def check(src: Source, pairs: list[tuple[str, str, str]],
         images = [(m.start(), m.group(1)) for m in
                   live_finditer(
                       r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}")]
+        for pos, _ref in images:
+            before = text[:pos]
+            last_begin = max(
+                before.rfind("\\begin{LTR}"),
+                before.rfind("\\begin{latin}"),
+                before.rfind("\\LR{"),
+            )
+            last_end = max(
+                before.rfind("\\end{LTR}"),
+                before.rfind("\\end{latin}"),
+            )
+            if last_begin < 0 or last_begin < last_end:
+                add(ERROR, "figure-direction", pos,
+                    "\\includegraphics is not inside LTR/latin; xepersian "
+                    "can paint the figure black or mirrored")
 
     base = src.path.parent
     found: list[str] = []

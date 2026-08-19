@@ -41,6 +41,9 @@
       line-height: 1.45;
       break-after: avoid;
       page-break-after: avoid;
+      /* English-only headings are one LTR isolate; without an explicit
+         right align WeasyPrint packs them to the physical left. */
+      text-align: right;
     }
     p {
       margin: 0.85em 0;
@@ -94,7 +97,14 @@
       display: block;
       max-width: 100%;
       height: auto;
+      direction: ltr;
+      unicode-bidi: isolate;
       transform: none;
+      /* Alpha composited onto black is the usual “the figure turned
+         black” failure. White backing plus a flattened RGB file. */
+      background: #fff;
+      mix-blend-mode: normal;
+      filter: none;
     }
     figcaption, caption {
       font-size: 0.95em;
@@ -154,11 +164,13 @@
     Listings keep dir="ltr" on <pre>, never RTL:
       <pre dir="ltr"><code>…</code></pre>
 
-    Figures use the original files; never mirror:
+    Figures use the original files, flattened RGB, never mirrored:
       <figure>
-        <img src="figures/fig-3.png" alt="…" width="720" height="420">
+        <img dir="ltr" src="figures/fig-3.png" alt="…" width="720" height="420">
         <figcaption>شکل <span dir="ltr">3</span>. …</figcaption>
       </figure>
+    A numbered English heading is one isolate, not two:
+      <h2><span dir="ltr">3.1 The OpenStack services</span></h2>
 
     Tables that break across pages need a real <thead>.
   -->

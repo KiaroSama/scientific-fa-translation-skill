@@ -77,7 +77,7 @@ face for listings.
 | Inline code | `\lr{\texttt{…}}` |
 | Math | math mode (LTR) |
 | Bibliography | `latin` environment, source language |
-| Figure | `\includegraphics`, Persian caption with `\en` on terms |
+| Figure | `\includegraphics` inside `LTR`, Persian caption with `\en` on terms; flatten PNG alpha first |
 
 Numbers inside Persian sentences get `\lr{3}` / `\lr{3.14}` even with a
 Latin `\setdigitfont`; the wrap is what makes the result independent of the
@@ -92,6 +92,10 @@ Two traps the template already handles, worth knowing why:
   missing.
 - A table that runs past one page needs `longtable`, not a hand-split
   `tabular`. Port lists and requirement matrices always hit this.
+- `\includegraphics` in an RTL context is painted black or mirrored by
+  `xepersian` unless it sits in `LTR` (or `latin`). The template's figure
+  example wraps it. Flatten PNG alpha with `scripts/prepare-figures.py`
+  before compiling — leftover transparency composites onto black.
 
 ## HTML engines: measured behaviour
 
@@ -151,14 +155,16 @@ budget Chromium can print before webfonts finish loading:
 
 ```bash
 mkdir -p "$HOME/Documents/books"
-chromium --headless --disable-gpu --no-pdf-header-footer \
+chromium --headless=new --no-pdf-header-footer \
   --virtual-time-budget=10000 \
+  --run-all-compositor-stages-before-draw \
   --print-to-pdf="$HOME/Documents/books/<slug>.pdf" \
   "file://$(realpath translation.html)"
 ```
 
 Try `chromium`, `chromium-browser`, `google-chrome`, `google-chrome-stable`.
-A4 comes from the template's `@page`.
+A4 comes from the template's `@page`. Do **not** pass `--disable-gpu`:
+headless Chrome then paints raster images as black rectangles.
 
 ## WeasyPrint
 
@@ -179,7 +185,9 @@ pdftoppm -png -r 110 -f 1 -l 2 out.pdf /tmp/check-p
 ```
 
 Then **look at the PNG**. Do not treat `pdftotext` as visual truth on an RTL
-PDF; it reorders. What to look for is in `review.md`.
+PDF; it reorders. What to look for is in `review.md`. Figures must match
+the source page — a black rectangle is a failed extract or unflattened
+alpha, not “the figure”.
 
 Digit smoke test, once per document: put `3.14` in a Persian sentence, build,
 rasterise, and confirm the glyphs are `3.14` and not `۳٫۱۴`.

@@ -36,8 +36,9 @@ Use `assets/rtl-document.html`. The root must be:
 CSS on that template:
 
 - `body`: `direction: rtl; unicode-bidi: isolate;`
-- `.ltr`, `pre`, `code`, `kbd`, `samp`, `math`: `direction: ltr; unicode-bidi: isolate;`
-- `pre`: `text-align: left;` plus `dir="ltr"` on the element
+- `.ltr`, `pre`, `code`, `kbd`, `samp`, `math`, `img`, `svg`: `direction: ltr; unicode-bidi: isolate;`
+- `h1–h4`: `text-align: right` so an English-only heading isolate stays
+  on the right edge of a Persian page
 - `pre`: `white-space: pre-wrap; word-break: break-word;` — on paper,
   `overflow-x: auto` does nothing and long listing lines are simply cut
   off at the margin
@@ -120,25 +121,31 @@ not a token-by-token wrap.
 
 ## Joined LTR runs (one isolate)
 
-If two English tokens are linked by `/`, `-`, `->`, or parentheses, wrap
-the **whole** cluster. A slash or parenthesis sitting in RTL between two
-`<span dir="ltr">` islands reverses the visible order.
+If two English tokens are linked by `/`, `-`, `->`, parentheses, **or a
+space**, wrap the **whole** cluster. Two LTR isolates with only a space
+between them reverse on an RTL page the same way a slash does: a heading
+marked up as `3.1` + `The OpenStack services` prints as
+`The OpenStack services 3.1`.
 
 This is the one bidi rule confirmed to break real output rather than
 merely being risky. Rendered on a Persian page, two spans around `OP_IF`
 and `OP_NOTIF` with a slash between them print as `OP_NOTIF/OP_IF`; a
-single span around `OP_IF/OP_NOTIF` prints correctly. Other cases in the
-same test — a trailing acronym before the sentence period, a parenthesised
+single span around `OP_IF/OP_NOTIF` prints correctly. Two spans around
+`3.1` and `The OpenStack services` print reversed; one span around
+`3.1 The OpenStack services` prints correctly. Other cases in the same
+test — a trailing acronym before the sentence period, a parenthesised
 citation, an arrow inside one span — came out right either way. Spend the
 attention here.
 
 ```html
-<!-- Wrong: renders as OP_NOTIF/OP_IF and :)2026-08-09( 1.0.1 -->
+<!-- Wrong: renders as OP_NOTIF/OP_IF, Title 3.1, and :)2026-08-09( 1.0.1 -->
 <span dir="ltr">OP_IF</span>/<span dir="ltr">OP_NOTIF</span>
+<h2><span dir="ltr">3.1</span> <span dir="ltr">The OpenStack services</span></h2>
 <strong><span dir="ltr">1.0.1</span></strong> (<span dir="ltr">2026-08-09</span>)
 
 <!-- Right -->
 <span dir="ltr">OP_IF/OP_NOTIF</span>
+<h2><span dir="ltr">3.1 The OpenStack services</span></h2>
 <span dir="ltr">1.0.1 (2026-08-09)</span>
 <span dir="ltr">STARTED -&gt; LOCKED_IN</span>
 <span dir="ltr">1109/2016 (55%)</span>
@@ -147,13 +154,15 @@ attention here.
 
 ```tex
 \en{OP_IF/OP_NOTIF}
+\en{3.1 The OpenStack services}
 \en{1.0.1 (2026-08-09)}
 \en{STARTED -> LOCKED_IN}
 ```
 
-Same rule for `Taproot/P2TR`, `300-400`, `2017–2024`, and
-`Adam (Kingma \& Ba, 2015)`. Persian separators between Persian words
-(`سیاست/پالایه`, `و/یا`) stay outside LTR spans.
+Same rule for `Taproot/P2TR`, `300-400`, `2017–2024`,
+`Adam (Kingma \& Ba, 2015)`, and a numbered English heading
+(`3.2.1 Conceptual architecture`). Persian separators between Persian
+words (`سیاست/پالایه`, `و/یا`) stay outside LTR spans.
 
 Do not treat `pdftotext` as visual truth on an RTL PDF. Rasterize a page
 (`pdftoppm -png -f 1 -l 1 file.pdf /tmp/p`) and look at the PNG.
@@ -203,28 +212,36 @@ RLM only for a leftover end-of-sentence period.
 | Fenced code / `pre` | `dir="ltr"` on `<pre>` plus left-align; never RTL |
 | XeLaTeX listing | `latin` + `verbatim` / `Verbatim`; never an RTL wrap |
 | Inline `code` | `dir="ltr"` on `code`, or `\lr{\texttt{…}}` |
-| Images / SVG | unchanged files; no flip; `\includegraphics` or `<img>` |
+| Images / SVG | unchanged pixels; `dir="ltr"` on `<img>`; flatten alpha |
 | URLs, DOIs, emails | `<span dir="ltr">` or `<a dir="ltr">` |
 | File paths and identifiers | `<span dir="ltr">` |
 | Reference list | a `dir="ltr"` section |
 
 ## Headings, lists, tables, figures
 
-- Headings are RTL prose. Isolate LTR fragments inside them the same way.
+- Headings are RTL prose and stay physically right-aligned, even when the
+  title is an English isolate. A numbered English title is **one** isolate:
+  `<h2><span dir="ltr">3.1 The OpenStack services</span></h2>`,
+  never `3.1` in one span and the title in another. Two spans reverse on
+  the page; WeasyPrint also packs a lone LTR heading to the left unless
+  the heading has `text-align: right` (the HTML template sets that).
 - Lists inherit RTL from `body`. Isolate LTR items or fragments per item.
 - Table captions are RTL (`جدول 2. …`). Isolate the number: `جدول <span dir="ltr">2</span>.`
 - Numeric table cells are LTR. Persian prose cells stay RTL.
 - Do not reverse column order unless the user asks.
 - Figure captions: `شکل <span dir="ltr">3</span>. …` Isolate any English
   term inside the caption.
-- The `<img>` / `<svg>` itself is not RTL content. Do not mirror it
+- The `<img>` / `<svg>` itself is not RTL content. Give it `dir="ltr"`
+  (HTML) or wrap `\includegraphics` in `LTR` (XeLaTeX). Do not mirror it
   (`transform: scaleX(-1)` is forbidden). Place it in the same
   relative position as the source. Width/height follow the source
-  aspect ratio.
+  aspect ratio. Flatten PNG alpha onto white before the print build
+  (`scripts/prepare-figures.py`); engines composite leftover alpha onto
+  black.
 
 ```html
 <figure>
-  <img src="figures/fig-3.png" alt="…" width="720" height="420">
+  <img dir="ltr" src="figures/fig-3.png" alt="…" width="720" height="420">
   <figcaption>شکل <span dir="ltr">3</span>. معماری <span dir="ltr">transformer</span>.</figcaption>
 </figure>
 ```
@@ -241,7 +258,7 @@ Only when the user demands Markdown:
 <pre dir="ltr"><code>print(x)</code></pre>
 
 <figure>
-  <img src="figures/fig-3.png" alt="…" width="720" height="420">
+  <img dir="ltr" src="figures/fig-3.png" alt="…" width="720" height="420">
   <figcaption>شکل <span dir="ltr">3</span>. …</figcaption>
 </figure>
 
@@ -264,9 +281,9 @@ Never reverse English letter order by hand. Never rewrite `(Adam)` as
 2. Scan every English island: parentheses enclose the English, not the
    Persian.
 3. Sentence-final periods sit at the right edge of the Persian sentence.
-4. Slash- or date-joined English still reads left-to-right
-   (`OP_IF/OP_NOTIF`, `1.0.1 (2026-08-09)`).
+4. Slash-, space-, or date-joined English still reads left-to-right
+   (`OP_IF/OP_NOTIF`, `3.1 The OpenStack services`, `1.0.1 (2026-08-09)`).
 5. Code blocks are LTR, left-aligned, and optically identical to the
-   source listing. Images are the source files, unmirrored, in source
-   order.
+   source listing. Images are the source pixels, unmirrored, uninverted,
+   in source order — not a black rectangle.
 6. No `ك` / `ي` introduced while editing markup.

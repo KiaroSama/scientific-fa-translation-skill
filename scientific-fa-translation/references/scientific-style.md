@@ -99,6 +99,12 @@ The translation must *show* the same figures the source shows.
 - Copy the original files (PNG, JPEG, SVG, extracted PDF page). Point
   `\includegraphics` or `img src` at those copies. Do not redraw,
   screenshot-replace, or generate a substitute.
+- Run `scripts/prepare-figures.py figures/ --check` after ingest. Flatten
+  PNG alpha onto white. If a file is a near-black dump, compare it with a
+  `pdftoppm` of the source page; invert only when that page is light
+  (`--invert-dark`).
+- HTML: `dir="ltr"` on every `<img>`. XeLaTeX: `\includegraphics` inside
+  `LTR`. The checker fails without those.
 - Keep document order, subfigure layout (`a`/`b`/`c`), aspect ratio, and
   resolution. Do not crop or pad in a way that changes what is visible.
 - Never mirror or rotate for RTL.

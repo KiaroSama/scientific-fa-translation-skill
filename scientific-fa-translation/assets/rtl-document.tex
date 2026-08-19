@@ -63,7 +63,9 @@
 
 % Persian prose. Isolate every English run, whole collocations included:
 % الگوریتم \en{Adam (Kingma \& Ba, 2015)} استفاده شد.
-% One isolate per cluster: \en{OP_IF/OP_NOTIF}, \en{1.0.1 (2026-08-09)}.
+% One isolate per cluster, including a space:
+% \en{OP_IF/OP_NOTIF}, \en{1.0.1 (2026-08-09)},
+% \en{3.1 The OpenStack services} — not \en{3.1} \en{The OpenStack services}.
 
 % Code: never RTL.
 \begin{latin}
@@ -72,10 +74,14 @@
 \end{Verbatim}
 \end{latin}
 
-% Figures: the source files, unmirrored, in source order.
+% Figures: the source files, unmirrored, in source order. Wrap in LTR so
+% xepersian cannot invert or paint the artwork black. Flatten PNG alpha
+% first (scripts/prepare-figures.py).
 % \begin{figure}[ht]
 % \centering
+% \begin{LTR}
 % \includegraphics[width=0.92\linewidth]{figures/fig-3.png}
+% \end{LTR}
 % \caption{شکل \lr{3}. معماری \en{transformer}.}
 % \end{figure}
 

@@ -70,12 +70,65 @@ expect_no_errors "$here/../assets/rtl-document.html"
 expect_checks "$fixtures/bad.tex" \
   arabic-letters eastern-digits zwnj-verb zwnj-plural latin-punct \
   forbidden-fa half-translation fa-morphology split-isolate \
-  unisolated-latin code-direction missing-image bookmark-guard
+  unisolated-latin code-direction missing-image bookmark-guard \
+  figure-direction
 
 expect_checks "$fixtures/bad.html" \
   arabic-letters eastern-digits zwnj-verb forbidden-fa half-translation \
   fa-morphology split-isolate unisolated-latin code-direction html-root \
-  mirrored-image missing-image print-css
+  mirrored-image missing-image print-css figure-direction
+
+# prepare-figures.py: flatten alpha onto white so print engines cannot
+# composite it as a black rectangle.
+if python3 -c "import PIL.Image" 2>/dev/null; then
+  alpha="$fixtures/figures/alpha.png"
+  python3 - "$alpha" <<'PY'
+import struct, zlib, sys
+from pathlib import Path
+path = Path(sys.argv[1])
+w, h = 4, 2
+# RGBA: first pixel transparent black (the Cairo/WeasyPrint trap), rest white.
+row = bytes([
+    0,  # filter
+    0, 0, 0, 0,
+    255, 255, 255, 255,
+    255, 255, 255, 255,
+    255, 255, 255, 255,
+])
+raw = b"".join(row for _ in range(h))
+
+def chunk(tag, data):
+    c = tag + data
+    return struct.pack(">I", len(data)) + c + struct.pack(">I", zlib.crc32(c) & 0xffffffff)
+
+path.write_bytes(
+    b"\x89PNG\r\n\x1a\n"
+    + chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 6, 0, 0, 0))
+    + chunk(b"IDAT", zlib.compress(raw))
+    + chunk(b"IEND", b"")
+)
+PY
+  prep="$here/../scripts/prepare-figures.py"
+  check_out=$(python3 "$prep" "$alpha" --check 2>&1) || check_rc=$?
+  if [[ ${check_rc:-0} -ne 0 ]] && grep -q alpha <<<"$check_out"; then
+    echo "ok   prepare-figures --check reports alpha"
+  else
+    echo "FAIL prepare-figures --check missed alpha"
+    echo "$check_out" | sed 's/^/    /'
+    fail=1
+  fi
+  python3 "$prep" "$alpha" >/tmp/prep.out 2>&1 || true
+  mode=$(python3 -c "from PIL import Image; print(Image.open('$alpha').mode)")
+  if [[ $mode == RGB ]]; then
+    echo "ok   prepare-figures flattened alpha to RGB"
+  else
+    echo "FAIL prepare-figures left mode=$mode"
+    fail=1
+  fi
+  rm -f "$alpha" "$alpha.orig"
+else
+  echo "skip prepare-figures (no Pillow)"
+fi
 
 if [[ $fail -eq 0 ]]; then
   echo "all tests passed"

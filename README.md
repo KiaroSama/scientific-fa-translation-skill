@@ -61,8 +61,9 @@ the policy, so there is one place to change it.
 **Enforcement.** `scripts/check-fa.py` fails the build on the mechanical
 rules — orthography, forbidden Persian calques, half-translated noun phrases,
 Persian affixes on Latin tokens, split isolates, un-isolated Latin runs, RTL
-listings, mirrored artwork, missing images, terminology drift. The checklist
-left in `SKILL.md` is only the five items a machine cannot judge.
+listings, mirrored artwork, missing images, figure direction, terminology
+drift. The checklist left in `SKILL.md` is only the five items a machine
+cannot judge.
 `tests/run.sh` keeps the checker honest with clean and deliberately broken
 fixtures.
 
@@ -91,6 +92,7 @@ scientific-fa-translation/
   references/review.md           reviewing a finished translation
   scripts/preflight.sh           what this machine can build
   scripts/check-fa.py            mechanical checker
+  scripts/prepare-figures.py     flatten alpha; catch pdfimages negatives
   scripts/build-pdf.sh           compile and verify
   scripts/fetch-vazirmatn.sh     font for the HTML path
   tests/                         checker regression tests

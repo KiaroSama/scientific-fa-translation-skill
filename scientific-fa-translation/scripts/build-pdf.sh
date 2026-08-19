@@ -105,8 +105,10 @@ html_to_pdf() {
     log "engine: $chrome --print-to-pdf"
     # Without a virtual-time budget Chromium can print before the webfonts
     # finish loading, which produces fallback boxes for Persian.
-    "$chrome" --headless --disable-gpu --no-pdf-header-footer \
+    # --disable-gpu paints raster images as black rectangles; do not pass it.
+    "$chrome" --headless=new --no-pdf-header-footer \
       --virtual-time-budget=10000 \
+      --run-all-compositor-stages-before-draw \
       --print-to-pdf="$out" "file://$(realpath "$html")" || return 2
     return 0
   fi

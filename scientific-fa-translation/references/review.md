@@ -36,9 +36,11 @@ that the check was visual and therefore partial.
    ```
 
    Look for: sentence-final periods on the correct side, parentheses that
-   enclose the English rather than the Persian, listings left-aligned,
-   figures unmirrored and in source order, tables whose headers repeat
-   across pages, no missing-glyph boxes.
+   enclose the English rather than the Persian, numbered English headings
+   that still read `3.1 Title` (not `Title 3.1`), listings left-aligned,
+   figures matching the source page (not black, not mirrored) and in
+   source order, tables whose headers repeat across pages, no
+   missing-glyph boxes.
 
 3. **Terminology consistency.** Compare the output against `terms.tsv` if
    it exists. Without it, extract every isolate and look for two forms of
