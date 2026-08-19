@@ -3,7 +3,7 @@ description: Load scientific Persian translation skill for papers, RTL, and PDFs
 alwaysApply: true
 ---
 
-This workspace ships `.cursor/skills/scientific-fa-translation/SKILL.md`.
+This workspace ships `scientific-fa-translation/SKILL.md`.
 
 If the user asks to translate a scientific document, article, or book into
 Persian, or mentions RTL, راست‌چین, PDF, or چاپ, read that SKILL.md and
