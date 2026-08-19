@@ -1,12 +1,13 @@
 ---
-name: scientific-fa-translation
+name: scientific-fa-translation-skill
 description: >
   Translate scientific documents, papers, articles, books, and technical
   docs into academic Persian (Farsi) with strict RTL/bidi and untranslated
   English technical terms. Also reviews an existing Persian translation
   against these rules. Use when the user asks to ترجمه, translate a
-  paper/article/book/docs, راست‌چین, RTL, PDF, چاپ, or Persian scientific
-  translation.
+  paper/article/book/docs, راست‌چین, RTL, PDF, چاپ, Persian scientific
+  translation, or invokes scientific-fa-translation /
+  scientific-fa-translation-skill.
   Do NOT use for coding, explaining code, commit messages, UI copy,
   literary translation, or casual Persian chat.
 ---
