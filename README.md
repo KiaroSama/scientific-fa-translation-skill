@@ -9,9 +9,14 @@ symlinks, no copy into `~/.cursor`.
 git clone git@github.com:isArman/skills.git
 ```
 
-Open the cloned directory in Cursor. Type `/scientific-fa-translation` in
-Agent chat. After `git pull`, reload the window if a new skill does not
-appear.
+Open the cloned directory in Cursor as the workspace. In Agent chat,
+ask to translate (or type `/scientific-fa-translation`). If the slash
+menu is empty — common on Cloud Agent follow-ups — write it in prose:
+“use the scientific-fa-translation skill”.
+
+After `git pull` on a new machine, start a **new** Agent on branch
+`main`. Follow-ups in an already-running Cloud Agent do not reliably
+reload project skills.
 
 ## Skills
 
