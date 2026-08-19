@@ -1,0 +1,43 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Lint shell scripts
+        run: shellcheck -S warning $(git ls-files '*.sh')
+
+      - name: Byte-compile python
+        run: python3 -m py_compile $(git ls-files '*.py')
+
+      - name: Checker regression tests
+        run: bash scientific-fa-translation/tests/run.sh
+
+      - name: Skill files referenced by SKILL.md exist
+        run: |
+          set -e
+          cd scientific-fa-translation
+          missing=0
+          for ref in $(grep -oE '(references|scripts|assets)/[A-Za-z0-9._-]+' \
+                       SKILL.md README.md 2>/dev/null | sort -u); do
+            if [ ! -e "$ref" ]; then
+              echo "SKILL.md references a missing path: $ref"
+              missing=1
+            fi
+          done
+          exit $missing
+
+      - name: Install script is idempotent
+        run: |
+          ./skills-install.sh
+          ./skills-install.sh --check

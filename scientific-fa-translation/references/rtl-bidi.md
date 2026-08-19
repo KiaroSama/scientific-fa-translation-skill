@@ -14,6 +14,17 @@ put listings in a `latin` environment (see `assets/rtl-document.tex`).
 The HTML rules below apply to an explicit HTML ask or the Chromium /
 WeasyPrint print fallback (`assets/rtl-document.html`).
 
+Most of this file is machine-checked. Run
+`scripts/check-fa.py doc.tex` before reading further — it reports
+un-isolated Latin runs, split clusters, RTL listings, mirrored artwork, and
+Persian affixes on English tokens, so the reading below is for the cases
+that need judgement.
+
+**Engine caveat.** WeasyPrint does not implement `unicode-bidi: isolate`
+and warns about it on every run. The `dir="ltr"` **attribute** is what
+actually does the work there; keep the CSS property as well for Chromium
+and browsers. See the measured cases in `pdf-output.md`.
+
 ## Document root
 
 Use `assets/rtl-document.html`. The root must be:
@@ -27,6 +38,9 @@ CSS on that template:
 - `body`: `direction: rtl; unicode-bidi: isolate;`
 - `.ltr`, `pre`, `code`, `kbd`, `samp`, `math`: `direction: ltr; unicode-bidi: isolate;`
 - `pre`: `text-align: left;` plus `dir="ltr"` on the element
+- `pre`: `white-space: pre-wrap; word-break: break-word;` — on paper,
+  `overflow-x: auto` does nothing and long listing lines are simply cut
+  off at the margin
 
 Never set `dir="rtl"` or `text-align: right` on `pre`, `code`, or a
 wrapper around a listing.
@@ -109,6 +123,14 @@ not a token-by-token wrap.
 If two English tokens are linked by `/`, `-`, `->`, or parentheses, wrap
 the **whole** cluster. A slash or parenthesis sitting in RTL between two
 `<span dir="ltr">` islands reverses the visible order.
+
+This is the one bidi rule confirmed to break real output rather than
+merely being risky. Rendered on a Persian page, two spans around `OP_IF`
+and `OP_NOTIF` with a slash between them print as `OP_NOTIF/OP_IF`; a
+single span around `OP_IF/OP_NOTIF` prints correctly. Other cases in the
+same test — a trailing acronym before the sentence period, a parenthesised
+citation, an arrow inside one span — came out right either way. Spend the
+attention here.
 
 ```html
 <!-- Wrong: renders as OP_NOTIF/OP_IF and :)2026-08-09( 1.0.1 -->
@@ -235,6 +257,8 @@ Never reverse English letter order by hand. Never rewrite `(Adam)` as
 
 ## Self-check
 
+0. Run `scripts/check-fa.py` on the source file and clear every error.
+   Steps 1–6 are the part it cannot see.
 1. Open the HTML file or a rasterized PDF page, not the chat transcript
    and not `pdftotext` alone.
 2. Scan every English island: parentheses enclose the English, not the
