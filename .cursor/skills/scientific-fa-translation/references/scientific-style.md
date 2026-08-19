@@ -34,7 +34,8 @@ faithfulness to the source science first, then readable فارسی معیار.
 
 ## Terminology
 
-Policy lives in `glossary.md`. Named artifacts and **atomic multi-word
+Policy lives in `glossary.md`. Named artifacts, **domain terms of
+art** (including one-word field nouns), and **atomic multi-word
 collocations** stay English. Ordinary scholarly language is Persian.
 
 **Keep English** (LTR-isolated). Do not coin فرهنگستان equivalents.
@@ -43,6 +44,12 @@ collocations** stay English. Ordinary scholarly language is Persian.
 - Acronyms (`API`, `PCR`, `GPU`, `CI`, and the same class)
 - Formulas, code, units, statistics (`p`, `n`, `SD`, …)
 - People’s names, journal names, DOIs (and bibliography entries)
+- Domain terms of art: if the token belongs in that field’s glossary
+  or man page, keep English even as one word, and keep the operation
+  verb of the same term (`node`, `deployment`, `configure`,
+  `implement`, `firewalls`, `encryption`). Never گره / استقرار /
+  پیکربندی / پیاده‌سازی for those sources. A Translate row does not
+  override this.
 - Multi-word technical collocations: a 2–5 word domain label in the
   source is one English unit, including *X of Y* and *Name + common
   noun* (`OpenStack services`, `OpenStack packages`,
@@ -54,9 +61,10 @@ collocations** stay English. Ordinary scholarly language is Persian.
 
 **Write in Persian.** Do not leave these in English.
 
-- Verbs and sentence structure
-- General words: روش، نتایج، بررسی — only when they are *not* inside
-  a keep-English collocation
+- Narrative verbs and sentence structure (پوشش می‌دهد، استفاده کنید)
+  — not `configure` / `implement` when those are the field operations
+- General words: روش، نتایج، بررسی — only when they are *not* a field
+  term of art and *not* inside a keep-English collocation
 - Generic IMRAD / book section titles: مقدمه، بحث، … (table below)
 - Headings that *are* a product name or technical collocation stay
   English as one isolate (`The OpenStack services`,
@@ -65,14 +73,10 @@ collocations** stay English. Ordinary scholarly language is Persian.
 
 One English form per named concept for the whole document. On first
 use, do not add a gloss like `نزول گرادیان (gradient descent)` unless
-the glossary says to.
+the glossary says to. Do not mix `node` and گره.
 
-A Translate row for a single word (`deployment` → استقرار) does not
-authorize splitting `deployment and configuration`. Collocation wins.
-
-When unsure whether a short NP is a term of art, keep it English and
-add the whole phrase to Keep English. Do not default a collocation to
-Persian word-by-word.
+When unsure whether a token is a term of art, keep it English and add
+it to Keep English. Do not default a field noun to Persian.
 
 ## What not to translate
 
@@ -80,6 +84,8 @@ Leave unchanged (aside from LTR markup):
 
 - Names of algorithms, libraries, protocols, and products
 - Acronyms (`API`, `PCR`, `GPU`, `CI`, …)
+- Domain terms of art, including one-word field nouns and their
+  operation verbs (`node`, `configure`, `deployment`)
 - Multi-word technical collocations (whole NP, one isolate)
 - Formulas, code, units, statistical symbols (`p`, `n`, `SD`, …)
 - People’s names; journal, conference, and DOI/URL strings
@@ -90,9 +96,9 @@ Leave unchanged (aside from LTR markup):
 
 Translate; do not keep the English wording:
 
-- Verbs and clause structure
-- General scholarly words (`method` → روش, `results` → نتایج,
-  `analysis` / `study` → بررسی)
+- Narrative verbs and clause structure (not field-operation verbs)
+- Generic scholarly words (`method` → روش, `results` → نتایج,
+  `analysis` / `study` → بررسی) when they are not field terms of art
 - Generic section titles (`Introduction` → مقدمه, `Discussion` → بحث، …)
 - Conceptual explanation for the reader, including abstract, captions
   (not image files), footnotes, and quotes in the scientific register

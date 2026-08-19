@@ -12,7 +12,9 @@ surface; write a PDF to `~/Documents/books`.
 
 Keep multi-word technical collocations as one English isolate. Never
 half-translate (`خوشه Kubernetes`, `سرویس‌های OpenStack`,
-`بسته‌های OpenStack`). Domain headings that are names stay English.
+`بسته‌های OpenStack`). Domain terms of art stay English even as one
+word (`node`, `deployment`, `configure` — not گره / استقرار /
+پیکربندی). Domain headings that are names stay English.
 
 Skip this for coding, commits, UI copy, literary translation, and casual
 Persian chat.

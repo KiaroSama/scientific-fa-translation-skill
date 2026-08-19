@@ -35,7 +35,7 @@ Override only when the user says so.
 | --- | --- |
 | Direction | English → فارسی علمی |
 | Register | Formal فارسی معیار. No colloquial forms. |
-| Technical terms | Named artifacts stay English. Multi-word technical collocations stay English as one unit. General scholarly language is Persian. |
+| Technical terms | Named artifacts stay English. Multi-word technical collocations stay English as one unit. Domain terms of art stay English even as one word. Generic scholarly language is Persian. |
 | First mention | Named English terms: English only, no gloss, unless `references/glossary.md` says so. |
 | Output | Printable PDF at `~/Documents/books/<slug>.pdf`. Chat is a short pointer, not RTL. |
 | PDF RTL | Maximum precision via XeLaTeX + `xepersian`. See `references/pdf-output.md`. |
@@ -61,9 +61,10 @@ conversation and do not paste the article into chat.
    footnotes, citations. Copy every source image into the working
    tree (`figures/` next to the `.tex`) and keep the same sequence
    relative to the surrounding text.
-4. Scan domain terms. Check `references/glossary.md`. New *names* and
-   new multi-word technical collocations stay English (whole NP);
-   new general words get a Persian row. Append both.
+4. Scan domain terms. Check `references/glossary.md`. New *names*,
+   new multi-word collocations, and new *field terms of art* (including
+   one-word nouns and their operation verbs) stay English; only generic
+   scholarly words get a Persian row. Append both.
 5. Translate section by section. Do not add, omit, or soften claims.
    Preserve hedge language (`may`, `might`, `suggest`, `remain unknown`).
 6. RTL pass on the print source (`.tex` with `\lr` / `latin`, or HTML
@@ -90,6 +91,25 @@ Persianize. Do not invent فرهنگستان equivalents.
 - Formulas, code, units, and statistics (`p`, `n`, `SD`, …)
 - People’s names, journal names, and DOIs
   (also conference names, URLs, and bibliography titles)
+- **Domain terms of art (including one word).** If the source token
+  belongs to the document’s field lexicon — the sort of word in that
+  field’s glossary or man page — it stays English even as a single
+  noun, and even as the operation verb of that same term. Examples:
+  `node` / `nodes`, `deployment` / `deploy`, `configuration` /
+  `configure`, `implementation` / `implement`, `integration`,
+  `firewalls`, `encryption`, `commands`. Do not emit گره، استقرار،
+  پیکربندی، پیاده‌سازی، یکپارچه‌سازی، دیوار آتش، رمزنگاری، فرمان‌ها
+  for those sources.
+
+  A glossary Translate row never overrides this. Translate rows cover
+  only generic scholarly prose and IMRAD labels. Once a concept is
+  English, every later mention is that same English form: never mix
+  `node` and گره in one document.
+
+  Narrative verbs stay Persian: پوشش می‌دهد، مناسب است، توصیه
+  می‌کنیم، نیاز دارد، افزایش دهید، استفاده کنید. In «increase
+  security using firewalls and encryption», ordinary-prose *security*
+  may be امنیت; `firewalls` and `encryption` stay English.
 - **Multi-word technical collocations (atomic).** A 2–5 word domain
   label in the source is one English unit. Possessive of, *X of Y*,
   and *Adjective + Name* are still one NP (`OpenStack services`,
@@ -117,16 +137,18 @@ Persianize. Do not invent فرهنگستان equivalents.
 **Write in Persian.** Translate these out of English. Never leave the
 English word in the Persian sentence.
 
-- Verbs and sentence structure
+- Narrative verbs and sentence structure (پوشش می‌دهد، استفاده کنید)
+  — not the operation verb of a domain term (`configure`, `implement`)
 - General scholarly words: روش، نتایج، بررسی (also مقدمه-level
-  vocabulary: مقاله، روش‌ها، بحث، …) — only when they are *not*
-  inside a keep-English collocation
+  vocabulary: مقاله، روش‌ها، بحث، …) — only when they are *not* a
+  field term of art and *not* inside a keep-English collocation
 - Generic IMRAD / book headings in the table in
   `references/scientific-style.md` (مقدمه، بحث، چکیده، …)
 - Conceptual explanation for the reader: the surrounding *clause* that
-  *says what a term means* is Persian. The term itself — including a
-  multi-word collocation — stays English. A glossary Translate row for
-  a single word does **not** split a collocation that contains it.
+  *says what a term means* is Persian. The term itself — a one-word
+  field term or a multi-word collocation — stays English. A glossary
+  Translate row does **not** split a collocation, and does **not**
+  Persianize a domain term of art.
 
 **Headings.** Generic article headings (`Abstract`, `Introduction`)
 are Persian. If the source heading *is* a named artifact or a
@@ -146,6 +168,16 @@ Example: «\en{GitOps Toolkit} مجموعه‌ای از \en{composable APIs} و
 Example: «\en{OpenStack} از طریق مجموعه‌ای از سرویس‌های مرتبط یک
 راه‌حل \en{Infrastructure-as-a-Service (IaaS)} فراهم می‌کند.» Then
 name the set as \en{OpenStack services}, not «سرویس‌های OpenStack».
+
+Example: «برای \en{configure} هر \en{node} باید از یک
+\en{account with administrative privileges} استفاده کنید.» — استفاده
+کنید is Persian; `configure`, `node`, and the privilege NP stay
+English. Not «برای پیکربندی هر گره».
+
+Example: «امنیت را با روش‌هایی مانند \en{firewalls}، \en{encryption}
+و \en{service policies} افزایش دهید.» — افزایش دهید / روش‌هایی مانند
+are Persian; the field terms stay English. Not «دیوارهای آتش» /
+«رمزنگاری».
 
 ## Persian mechanics
 
@@ -211,10 +243,12 @@ the Chromium / WeasyPrint fallback in `references/pdf-output.md`.
 - [ ] No added, omitted, or softened scientific claims
 - [ ] Hedge language preserved
 - [ ] Names/acronyms/formulas/units/stats/people/journals/DOIs stay English
+- [ ] Domain terms of art stay English even as one word (`node`,
+      `deployment`, `configure`); no گره / استقرار / پیکربندی for those
 - [ ] Multi-word technical collocations are one English isolate; no calque or half-translation
 - [ ] No Persian head + English name (`خوشه Kubernetes`, `سرویس‌های OpenStack`, `بسته‌های OpenStack`, `مخزن …`)
 - [ ] Domain headings that are collocations/names stay entirely English; only generic IMRAD headings are Persian
-- [ ] Verbs, general words, and conceptual explanations are Persian
+- [ ] Narrative verbs, generic scholarly words, and conceptual explanations are Persian
 - [ ] Citations, equations, numbers, and units unchanged
 - [ ] `ک`/`ی` Persian; نیم‌فاصله present; no colloquial forms
 - [ ] Every mixed LTR run is isolated (`\lr` / `dir="ltr"`); punctuation attaches correctly

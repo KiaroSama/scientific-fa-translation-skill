@@ -41,6 +41,9 @@ via `@font-face` when the font is not installed on the system.
 
 - Algorithm, library, protocol, and product names
 - Acronyms such as `API`, `PCR`, `GPU`, `CI`
+- Domain terms of art, including one-word field nouns and their
+  operation verbs (`node`, `deployment`, `configure` — not گره /
+  استقرار / پیکربندی)
 - Multi-word technical collocations as one English unit (no calque,
   no half-translation: `Kubernetes cluster`, not «خوشه Kubernetes»;
   `OpenStack services`, not «سرویس‌های OpenStack»)
@@ -49,8 +52,10 @@ via `@font-face` when the font is not installed on the system.
 
 **Write in Persian** (do not leave these in English):
 
-- Verbs and sentence structure
-- General scholarly words (روش، نتایج، بررسی)
+- Narrative verbs and sentence structure (not `configure` / `implement`
+  when those are the field operations)
+- General scholarly words (روش، نتایج، بررسی) when they are not field
+  terms of art
 - Generic section titles (مقدمه، بحث)
 - Domain headings that are names or collocations stay English
   (`The OpenStack services`, not «سرویس‌های OpenStack»)
