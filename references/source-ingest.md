@@ -10,7 +10,7 @@ translating a single sentence.
 One directory per job, outside the deliverable path:
 
 ```text
-~/Documents/books/_work/<slug>/
+/home/$USER/Documents/books/_work/<slug>/
   source/            fetched originals, unmodified
   figures/           images copied or extracted from the source
   inventory.md       structure count, written during ingestion
@@ -21,7 +21,7 @@ One directory per job, outside the deliverable path:
   doc.tex / doc.html the translation being built
 ```
 
-The PDF still lands at `~/Documents/books/<slug>.pdf`. Working files are not
+The PDF still lands at `/home/$USER/Documents/books/<slug>.pdf`. Working files are not
 the deliverable and never the only copy of anything.
 
 ## Fetching

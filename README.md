@@ -3,7 +3,7 @@
 A [Cursor Agent Skill](https://cursor.com/docs/skills) for academic
 English → scientific Persian, with print-ready RTL.
 
-Cursor discovers skills at `~/.cursor/skills/<skill-name>/SKILL.md`,
+Cursor discovers skills at `/home/$USER/.cursor/skills/<skill-name>/SKILL.md`,
 exactly one level deep. This repository **is** that skill: `SKILL.md`
 sits at the clone root, so the install is a clone *into* the skills
 directory — not *as* it.
@@ -11,19 +11,20 @@ directory — not *as* it.
 ## Install
 
 ```bash
-mkdir -p ~/.cursor/skills
-cd ~/.cursor/skills
-git clone https://github.com/isArman/scientific-fa-translation-skill.git
+mkdir -p /home/$USER/.cursor/skills
+cd /home/$USER/.cursor/skills
+git clone https://github.com/<owner>/scientific-fa-translation-skill.git
 ```
 
-That yields:
+`<owner>` is the GitHub account that hosts this repository (see the
+address on the repo page). That yields:
 
 ```text
-~/.cursor/skills/scientific-fa-translation-skill/SKILL.md
+/home/$USER/.cursor/skills/scientific-fa-translation-skill/SKILL.md
 ```
 
-Do **not** clone this repository as `~/.cursor/skills` itself. Then
-`SKILL.md` would sit at the skills root and Cursor would not load it.
+Do **not** clone this repository as `/home/$USER/.cursor/skills` itself.
+Then `SKILL.md` would sit at the skills root and Cursor would not load it.
 
 In Agent chat, ask to translate, or type `/scientific-fa-translation-skill`.
 If the slash menu is empty — common on Cloud Agent follow-ups — write it
@@ -38,7 +39,7 @@ formal scientific Persian, and reviews finished translations against the
 same rules. Cursor chat is only a short status note plus the output path;
 it is not the RTL surface.
 
-**Deliverable.** A printable PDF at `~/Documents/books/<slug>.pdf`.
+**Deliverable.** A printable PDF at `/home/$USER/Documents/books/<slug>.pdf`.
 Preferred engine XeLaTeX + `xepersian`; Chromium then WeasyPrint on the
 RTL HTML template when TeX is absent. Run `scripts/preflight.sh` to see
 which of those exist on the machine before planning a build.

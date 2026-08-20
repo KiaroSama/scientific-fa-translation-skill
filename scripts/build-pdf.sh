@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Compile a Persian print document and copy the PDF to ~/Documents/books.
+# Compile a Persian print document and copy the PDF to $HOME/Documents/books.
 #
 #   build-pdf.sh <file.tex|file.html> [slug] [--verify] [--engine ENGINE]
 #

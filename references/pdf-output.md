@@ -10,10 +10,10 @@ asks for PDF / چاپ.
 ## Destination (locked)
 
 ```text
-~/Documents/books/<slug>.pdf
+/home/$USER/Documents/books/<slug>.pdf
 ```
 
-Expand `~` to `$HOME/Documents/books`, create it if needed. `<slug>` is a
+That is `$HOME/Documents/books`; create it if needed. `<slug>` is a
 filesystem-safe stem from the source title (`attention-is-all-you-need`).
 Re-running the same document overwrites the same slug; a different work gets
 a different slug. Never leave the only copy in the workspace or `/tmp`.
@@ -154,11 +154,11 @@ Manual equivalent, with the flag that matters — without a virtual-time
 budget Chromium can print before webfonts finish loading:
 
 ```bash
-mkdir -p "$HOME/Documents/books"
+mkdir -p /home/$USER/Documents/books
 chromium --headless=new --no-pdf-header-footer \
   --virtual-time-budget=10000 \
   --run-all-compositor-stages-before-draw \
-  --print-to-pdf="$HOME/Documents/books/<slug>.pdf" \
+  --print-to-pdf="/home/$USER/Documents/books/<slug>.pdf" \
   "file://$(realpath translation.html)"
 ```
 

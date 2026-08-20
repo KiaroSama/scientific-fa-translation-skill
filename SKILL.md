@@ -38,7 +38,7 @@ Override only when the user says so.
 | Register | Formal فارسی معیار. No colloquial forms. |
 | Terminology | Decision procedure in `references/terminology.md`, level `system-docs` |
 | First mention | No gloss for English terms unless the level or glossary says otherwise |
-| Output | Printable PDF at `~/Documents/books/<slug>.pdf`. Chat is a short pointer, not RTL. |
+| Output | Printable PDF at `/home/$USER/Documents/books/<slug>.pdf`. Chat is a short pointer, not RTL. |
 | PDF engine | XeLaTeX + `xepersian`; Chromium then WeasyPrint on the HTML template when TeX is absent |
 | HTML | Only on request, or as that fallback |
 | Digits | Western (`3.14`, not `۳٫۱۴`) |
@@ -123,7 +123,7 @@ Persian period must belong to the Persian sentence.
 
 ## Output
 
-Default: printable PDF at `~/Documents/books/<slug>.pdf`
+Default: printable PDF at `/home/$USER/Documents/books/<slug>.pdf`
 (`$HOME/Documents/books`, created if needed). Report that absolute path, the
 page count, and the engine used.
 
@@ -159,5 +159,5 @@ re-check these by hand.
 - [ ] Claim-changing ambiguities were asked, not guessed; the rest are
       reported
 
-**Delivery** — final PDF at `~/Documents/books/<slug>.pdf`, chat is a short
+**Delivery** — final PDF at `/home/$USER/Documents/books/<slug>.pdf`, chat is a short
 pointer with the path, page count, engine, and queued questions.

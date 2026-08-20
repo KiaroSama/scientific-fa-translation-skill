@@ -54,7 +54,7 @@ that the check was visual and therefore partial.
 
 5. **Completeness.** Figure count against `manifest.txt`, section list
    against `inventory.md`, page count sanity, and the deliverable actually
-   at `~/Documents/books/<slug>.pdf`.
+   at `/home/$USER/Documents/books/<slug>.pdf`.
 
 ## Report shape
 

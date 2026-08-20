@@ -1,15 +1,15 @@
 # scientific-fa-translation-skill
 
 This repository is a single Cursor skill. `SKILL.md` is at the clone
-root so it is discoverable when cloned into `~/.cursor/skills`:
+root so it is discoverable when cloned into `/home/$USER/.cursor/skills`:
 
 ```text
-~/.cursor/skills/scientific-fa-translation-skill/SKILL.md
+/home/$USER/.cursor/skills/scientific-fa-translation-skill/SKILL.md
 ```
 
 Cursor only looks one level deep. Do not nest this clone under another
-folder inside `~/.cursor/skills`, and do not clone it *as*
-`~/.cursor/skills` itself.
+folder inside `/home/$USER/.cursor/skills`, and do not clone it *as*
+`/home/$USER/.cursor/skills` itself.
 
 When the user wants to translate a paper, article, book, or technical
 document into scientific Persian — or asks for RTL, چاپ, or a PDF, or

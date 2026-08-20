@@ -23,14 +23,14 @@ jobs:
       - name: Checker regression tests
         run: bash tests/run.sh
 
-      - name: Skill is cloneable into ~/.cursor/skills
+      - name: Skill is cloneable into /home/$USER/.cursor/skills
         run: |
           set -e
           test -f SKILL.md
           grep -q '^name: scientific-fa-translation-skill$' SKILL.md
           if [ -f scientific-fa-translation/SKILL.md ]; then
             echo "nested scientific-fa-translation/SKILL.md would be invisible"
-            echo "after: cd ~/.cursor/skills && git clone <this-repo>"
+            echo "after: cd /home/\$USER/.cursor/skills && git clone <this-repo>"
             exit 1
           fi
           missing=0
