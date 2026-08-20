@@ -39,7 +39,7 @@ if have weasyprint || python3 -c "import weasyprint" >/dev/null 2>&1; then
   echo "        note: ignores unicode-bidi: isolate — rely on dir=\"ltr\""
   echo "        attributes and keep every cluster in one isolate"
 else
-  no "weasyprint" "last-resort HTML engine"
+  no "weasyprint" "venv: python3 -m venv … && pip install weasyprint"
 fi
 
 echo

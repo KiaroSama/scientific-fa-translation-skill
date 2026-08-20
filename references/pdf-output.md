@@ -168,10 +168,19 @@ headless Chrome then paints raster images as black rectangles.
 
 ## WeasyPrint
 
-Needs Pango/Cairo (Debian: `libpango-1.0-0`, `libcairo2`). Install in a venv,
-or `pip install --user --break-system-packages weasyprint` when the OS blocks
-system pip (PEP 668). Do not use sudo. It reads `@font-face` from disk, so it
-must run with the HTML file's directory as cwd — the build script does this.
+Needs Pango/Cairo (Debian: `libpango-1.0-0`, `libcairo2`, `python3-venv`).
+Install the module in a venv, not with `--break-system-packages` and not
+with sudo. Then put that venv on `PATH` so `build-pdf.sh` can see
+`weasyprint`:
+
+```bash
+python3 -m venv /home/$USER/.venvs/weasyprint
+/home/$USER/.venvs/weasyprint/bin/pip install weasyprint
+export PATH="/home/$USER/.venvs/weasyprint/bin:$PATH"
+```
+
+It reads `@font-face` from disk, so it must run with the HTML file's
+directory as cwd — the build script does this.
 
 ## Verify the artifact
 

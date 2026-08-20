@@ -123,8 +123,8 @@ html_to_pdf() {
 HTML(sys.argv[1]).write_pdf(sys.argv[2])' "$html" "$out" || return 2
     return 0
   fi
-  log "no HTML engine: install Chromium, or weasyprint in a venv, or"
-  log "  pip install --user --break-system-packages weasyprint"
+  log "no HTML engine: install Chromium, or WeasyPrint in a venv"
+  log "  (python3 -m venv … && pip install weasyprint; see pdf-output.md)"
   return 1
 }
 
