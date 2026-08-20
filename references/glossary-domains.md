@@ -6,7 +6,7 @@ pack that matches the source. Pack names match the `scope` column of
 `term-pairs.tsv`:
 
 ```bash
-scripts/check-fa.py doc.tex --domains openstack
+scripts/check-fa.py doc.tex --level system-docs --domains openstack --strict
 ```
 
 Everything below is Keep English unless a row says otherwise. Rows are the
@@ -107,7 +107,8 @@ field nouns become Persian — so this pack is mostly named artifacts.
 
 `dataset` as a common noun is مجموعه داده at `journal` level; as a named
 corpus it is English. That split is the reason this pack exists rather than
-a universal `dataset` rule.
+a universal `dataset` rule. Lint ML papers with
+`--level journal --domains ml`.
 
 ## Adding a pack
 

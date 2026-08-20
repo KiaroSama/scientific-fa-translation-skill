@@ -96,7 +96,7 @@ is the only way to answer «is anything missing?» at the end. Then:
 
 ```bash
 ls figures/ | sed 's/.*\///' > manifest.txt
-scripts/check-fa.py doc.tex --manifest manifest.txt
+scripts/check-fa.py doc.tex --level <level> --manifest manifest.txt --strict
 ```
 
 The checker reports any manifest image that never made it into the

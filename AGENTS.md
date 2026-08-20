@@ -27,6 +27,7 @@ Do not use that skill for coding, commits, UI copy, or casual chat.
   the policy in a second file.
 - A new rule that a machine could check belongs in `scripts/check-fa.py`
   with a fixture in `tests/fixtures/`, not only in prose. Run
-  `bash tests/run.sh` after touching the checker or a fixture.
+  `bash tests/run.sh` after touching the checker or a fixture. Pass
+  `--level journal` when the fixture is a paper, not a sysadmin guide.
 - Keep `SKILL.md` short. It is loaded in full whenever the skill
   triggers; detail belongs in `references/`.

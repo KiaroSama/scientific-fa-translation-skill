@@ -2,11 +2,17 @@
 """fa-lint: mechanical checks for scientific Persian translation output.
 
 Usage:
-    check-fa.py FILE [FILE ...] [--domains a,b] [--strict] [--manifest FILE]
+    check-fa.py FILE [FILE ...] [--level system-docs|journal]
+                [--domains a,b] [--pairs FILE] [--strict] [--manifest FILE]
 
 Accepts `.tex` and `.html`/`.htm` sources. Every rule here is one of the
 mechanical items from the skill's quality checklist, so the checklist that
 stays in SKILL.md is only the part a machine cannot judge.
+
+`--level journal` drops one-word field-noun bans (`گره`, `پیاده‌سازی`,
+`مجموعه داده`, …) so a paper that follows terminology.md does not fail.
+`--pairs FILE` is added on top of `references/term-pairs.tsv`, never a
+replacement.
 
 Exit codes: 0 clean, 1 findings at error level, 2 usage error.
 
@@ -108,7 +114,7 @@ class Source:
         self.lines = self.text.splitlines()
         self.protected: list[tuple[int, int]] = []
         self.comments: list[tuple[int, int]] = []
-        self.isolates: list[tuple[int, str]] = []
+        self.isolates: list[tuple[int, int, str]] = []
         self.preamble_end = 0
         self._scan()
 
@@ -208,6 +214,22 @@ class Source:
                     "vspace", "rule", "newcommand", "renewcommand",
                     "definecolor", "geometry", "addcontentsline",
                     "pdfstringdefDisableCommands", "IfFontExistsTF")
+        # Optional arguments (`[width=0.92\linewidth]`) are plumbing, not
+        # prose; otherwise unisolated-number fires on every includegraphics.
+        for m in re.finditer(r"\\[A-Za-z@]+\*?\s*\[", self.text):
+            start = m.end() - 1
+            depth = 0
+            i = start
+            while i < len(self.text):
+                ch = self.text[i]
+                if ch == "[":
+                    depth += 1
+                elif ch == "]":
+                    depth -= 1
+                    if depth == 0:
+                        self._protect(start, i + 1)
+                        break
+                i += 1
         for m in re.finditer(r"\\([A-Za-z@]+)\s*(\[[^\]]*\])?\s*\{",
                              self.text):
             name = m.group(1)
@@ -215,7 +237,11 @@ class Source:
             close = self._match_brace(open_pos)
             if name in ("lr", "en", "textenglish", "lasttext"):
                 self._protect(open_pos + 1, close)
-                self.isolates.append((open_pos + 1,
+                if any(s <= m.start() < e for s, e in self.comments):
+                    continue
+                # Whole `\en{…}` so the gap between two isolates is only
+                # the characters *between* the constructs, not `\en{`.
+                self.isolates.append((m.start(), close + 1,
                                       self.text[open_pos + 1:close]))
             elif name in arg_only:
                 self._protect(m.start(), close + 1)
@@ -230,7 +256,8 @@ class Source:
         for m in re.finditer(r"<!--.*?-->", self.text, re.S):
             self._protect(m.start(), m.end())
             self.comments.append((m.start(), m.end()))
-        for tag in ("style", "script", "pre", "code", "kbd", "samp", "math"):
+        for tag in ("style", "script", "pre", "code", "kbd", "samp", "math",
+                    "title"):
             pattern = re.compile(r"<" + tag + r"\b.*?</" + tag + r"\s*>", re.S)
             for m in pattern.finditer(self.text):
                 self._protect(m.start(), m.end())
@@ -244,36 +271,60 @@ class Source:
                   r"|\bclass\s*=\s*[\"'][^\"']*\b(?:ltr|en|num|refs)\b)")
         for m in re.finditer(rf"<({container})\b[^>]*{marker}[^>]*>"
                              r"(.*?)</\1\s*>", self.text, re.S):
+            if any(s <= m.start() < e for s, e in self.comments):
+                continue
             self._protect(m.start(2), m.end(2))
-            self.isolates.append((m.start(2), m.group(2)))
+            self.isolates.append((m.start(), m.end(), m.group(2)))
         for m in re.finditer(r"<[^>]+>", self.text):
             self._protect(m.start(), m.end())
         for m in re.finditer(r"&[#\w]+;", self.text):
             self._protect(m.start(), m.end())
 
 
-def load_pairs(path: Path | None, domains: set[str]
+def load_pairs(paths: list[Path], domains: set[str], level: str
                ) -> list[tuple[str, str, str]]:
-    if path is None or not path.exists():
-        return [(en, fa, "universal") for en, fa in DEFAULT_PAIRS]
     rows: list[tuple[str, str, str]] = []
-    for raw in path.read_text(encoding="utf-8").splitlines():
-        line = raw.strip()
-        if not line or line.startswith("#"):
+    seen: set[tuple[str, str]] = set()
+    for path in paths:
+        if not path.exists():
             continue
-        parts = [p.strip() for p in line.split("\t") if p.strip()]
-        if len(parts) < 3 or parts[0] == "english":
-            continue
-        en, fa, scope = parts[0], parts[1], parts[2]
-        if scope == "universal" or "all" in domains or scope in domains:
+        for raw in path.read_text(encoding="utf-8").splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#"):
+                continue
+            parts = [p.strip() for p in line.split("\t") if p.strip()]
+            if len(parts) < 3 or parts[0] == "english":
+                continue
+            en, fa, scope = parts[0], parts[1], parts[2]
+            levels = parts[3] if len(parts) > 3 else "all"
+            if levels == "system-docs" and level == "journal":
+                continue
+            if scope != "universal" and "all" not in domains and scope not in domains:
+                continue
+            key = (en, fa)
+            if key in seen:
+                continue
+            seen.add(key)
             rows.append((en, fa, scope))
-    return rows
+    if rows:
+        return rows
+    return [(en, fa, "universal") for en, fa in DEFAULT_PAIRS]
 
 
 def fa_pattern(word: str) -> str:
-    """Match a Persian term whether it uses ZWNJ or a plain space."""
+    """Match a Persian term whether it uses ZWNJ or a plain space.
+
+    Bounded by non-Persian so «گره» does not fire inside «کنگره».
+    """
     escaped = [re.escape(part) for part in re.split(f"[{ZWNJ} ]", word)]
-    return f"[{ZWNJ} ]?".join(escaped)
+    body = f"[{ZWNJ} ]?".join(escaped)
+    return rf"(?<![{FA_RANGE}])(?:{body})(?![{FA_RANGE}])"
+
+
+def _joiner_gap(gap: str) -> bool:
+    """True when two LTR isolates have only space/punctuation between them."""
+    stripped = gap.replace("&nbsp;", " ").replace("->", "")
+    return re.fullmatch(r"[\s~/\(\)\[\]\{\}:.,+=<>\-–—]*", stripped) is not None
 
 
 def check(src: Source, pairs: list[tuple[str, str, str]],
@@ -304,9 +355,10 @@ def check(src: Source, pairs: list[tuple[str, str, str]],
         add(ERROR, "arabic-letters", m.start(),
             f"Arabic letter {m.group(0)!r} ({name}); use ک / ی")
 
-    for m in prose_finditer(r"[\u06f0-\u06f9\u0660-\u0669]"):
+    for m in prose_finditer(r"[\u06f0-\u06f9\u0660-\u0669\u066B\u066C]"):
         add(ERROR, "eastern-digits", m.start(),
-            f"eastern digit {m.group(0)!r}; digits stay Western (3.14)")
+            f"eastern digit or Arabic decimal {m.group(0)!r}; "
+            "digits stay Western (3.14)")
 
     for verb in ZWNJ_VERBS:
         for m in prose_finditer(rf"(?<![{FA_RANGE}]){re.escape(verb)}"):
@@ -315,15 +367,15 @@ def check(src: Source, pairs: list[tuple[str, str, str]],
                 f"{verb[:2] + ZWNJ + verb[2:]!r}")
 
     for m in prose_finditer(rf"[{FA_RANGE}]ه(ها|های|هایی)(?![{FA_RANGE}])"):
-        add(WARN, "zwnj-plural", m.start(),
+        add(ERROR, "zwnj-plural", m.start(),
             f"{m.group(0)!r} looks like a missing ZWNJ before the plural")
 
     for m in prose_finditer(rf"[{FA_RANGE}]\s?[,;]|[,;]\s?[{FA_RANGE}]"):
-        add(WARN, "latin-punct", m.start(),
+        add(ERROR, "latin-punct", m.start(),
             "Latin comma/semicolon in Persian prose; use ، or ؛")
 
     for m in prose_finditer(rf"[{FA_RANGE}]\s?\?"):
-        add(WARN, "latin-punct", m.start(),
+        add(ERROR, "latin-punct", m.start(),
             "Latin question mark in Persian prose; use ؟")
 
     # 2. Terminology -----------------------------------------------------
@@ -354,40 +406,43 @@ def check(src: Source, pairs: list[tuple[str, str, str]],
             f"Persian suffix {m.group(1)!r} attached to an English token; "
             "pluralise inside the isolate instead (APIs, nodes)")
 
-    # Adjacent LTR isolates reverse on an RTL page, whether the gap is a
-    # slash (`OP_IF/OP_NOTIF` → `OP_NOTIF/OP_IF`) or only a space
-    # (`3.1 Title` → `Title 3.1`). Optional joiner, so whitespace is enough.
-    joiner = r"->|[/(){}\[\]:.,+=<>~-]|–|—|&nbsp;"
-    if src.kind == "tex":
-        split_re = (
-            rf"\}}\s*(?:(?:{joiner})\s*)?\\(?:lr|en|textenglish)\s*\{{"
-        )
-    else:
-        split_re = (
-            rf"</(?:span|bdi)>\s*(?:(?:{joiner})\s*)?<(?:span|bdi)\b"
-        )
-    for m in live_finditer(split_re):
-        add(ERROR, "split-isolate", m.start(),
-            "two LTR isolates with only space or punctuation between them; "
-            "wrap the whole cluster in one isolate "
-            "(3.1 Title, OP_IF/OP_NOTIF, 1.0.1 (2026-08-09))")
+    # Adjacent LTR isolates reverse on an RTL page. Compare isolate *ranges*
+    # so `\textbf{درست} \en{node}` is not a false split, while
+    # `\en{1.0.1}~(\en{2026-08-09})` still is.
+    ordered = sorted(src.isolates, key=lambda r: r[0])
+    for i in range(len(ordered) - 1):
+        _start_a, end_a, _body_a = ordered[i]
+        start_b, _end_b, _body_b = ordered[i + 1]
+        if start_b <= end_a:
+            continue
+        gap = text[end_a:start_b]
+        if _joiner_gap(gap):
+            add(ERROR, "split-isolate", end_a,
+                "two LTR isolates with only space or punctuation between them; "
+                "wrap the whole cluster in one isolate "
+                "(3.1 Title, OP_IF/OP_NOTIF, 1.0.1 (2026-08-09))")
 
-    # 3. Isolation of Latin runs -----------------------------------------
+    # 3. Isolation of Latin runs and number clusters ---------------------
     for m in prose_finditer(r"[A-Za-z][A-Za-z0-9._/+-]{2,}"):
         run = m.group(0)
         if run in TEX_STOPWORDS or run.rstrip("0123456789") in TEX_STOPWORDS:
             continue
-        add(WARN, "unisolated-latin", m.start(),
+        add(ERROR, "unisolated-latin", m.start(),
             f"Latin run {run!r} is not inside an LTR isolate")
 
+    for m in prose_finditer(r"\d+(?:[.\-–/:]\d+)*"):
+        add(ERROR, "unisolated-number", m.start(),
+            f"number cluster {m.group(0)!r} is not inside an LTR isolate "
+            "(ranges and dates reverse on an RTL page)")
+
     seen: dict[str, str] = {}
-    for pos, body in src.isolates:
+    for pos, _end, body in src.isolates:
         term = " ".join(body.split())
         if not term or not re.search(r"[A-Za-z]", term):
             continue
         key = re.sub(r"s$", "", term.lower())
         if key in seen and seen[key] != term:
-            add(WARN, "terminology-drift", pos,
+            add(ERROR, "terminology-drift", pos,
                 f"isolate {term!r} also appears as {seen[key]!r}; "
                 "use one English form per concept")
         seen.setdefault(key, term)
@@ -486,24 +541,31 @@ def check(src: Source, pairs: list[tuple[str, str, str]],
 
 def main(argv: list[str]) -> int:
     here = Path(__file__).resolve().parent
+    house = here.parent / "references" / "term-pairs.tsv"
     ap = argparse.ArgumentParser(
         prog="check-fa.py",
         description="Mechanical checks for scientific Persian output.")
     ap.add_argument("files", nargs="+", type=Path)
-    ap.add_argument("--pairs", type=Path,
-                    default=here.parent / "references" / "term-pairs.tsv")
+    ap.add_argument("--level", choices=("system-docs", "journal"),
+                    default="system-docs",
+                    help="terminology.md level (default system-docs)")
+    ap.add_argument("--pairs", type=Path, default=None,
+                    help="extra TSV merged on top of term-pairs.tsv")
     ap.add_argument("--domains", default="",
                     help="comma-separated domain packs, or 'all'")
     ap.add_argument("--manifest", type=Path,
                     help="file listing expected image basenames, one per line")
     ap.add_argument("--strict", action="store_true",
-                    help="treat warnings as errors")
+                    help="treat remaining warnings as errors")
     ap.add_argument("--max", type=int, default=40,
                     help="findings printed per check (default 40)")
     args = ap.parse_args(argv)
 
     domains = {d.strip() for d in args.domains.split(",") if d.strip()}
-    pairs = load_pairs(args.pairs, domains)
+    pair_paths = [house]
+    if args.pairs is not None:
+        pair_paths.append(args.pairs)
+    pairs = load_pairs(pair_paths, domains, args.level)
     manifest = None
     if args.manifest:
         manifest = [l.strip() for l in

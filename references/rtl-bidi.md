@@ -15,10 +15,10 @@ The HTML rules below apply to an explicit HTML ask or the Chromium /
 WeasyPrint print fallback (`assets/rtl-document.html`).
 
 Most of this file is machine-checked. Run
-`scripts/check-fa.py doc.tex` before reading further — it reports
-un-isolated Latin runs, split clusters, RTL listings, mirrored artwork, and
-Persian affixes on English tokens, so the reading below is for the cases
-that need judgement.
+`scripts/check-fa.py doc.tex --level <level> --strict` before reading
+further — it reports un-isolated Latin runs, un-isolated number clusters,
+split clusters, RTL listings, mirrored artwork, and Persian affixes on
+English tokens, so the reading below is for the cases that need judgement.
 
 **Engine caveat.** WeasyPrint does not implement `unicode-bidi: isolate`
 and warns about it on every run. The `dir="ltr"` **attribute** is what
@@ -274,8 +274,8 @@ Never reverse English letter order by hand. Never rewrite `(Adam)` as
 
 ## Self-check
 
-0. Run `scripts/check-fa.py` on the source file and clear every error.
-   Steps 1–6 are the part it cannot see.
+0. Run `scripts/check-fa.py --level <level> --strict` on the source file
+   and clear every error. Steps 1–6 are the part it cannot see.
 1. Open the HTML file or a rasterized PDF page, not the chat transcript
    and not `pdftotext` alone.
 2. Scan every English island: parentheses enclose the English, not the

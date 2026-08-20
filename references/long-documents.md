@@ -48,7 +48,7 @@ for HTML, concatenate parts in order into `doc.html`.
 Lint each part as it is finished, not at the end:
 
 ```bash
-scripts/check-fa.py parts/03-*.tex --domains openstack
+scripts/check-fa.py parts/03-*.tex --level system-docs --domains openstack --strict
 ```
 
 A part that lints clean stays clean. A 174-page document linted once at the

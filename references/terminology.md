@@ -91,18 +91,21 @@ anything longer than a few pages, produce the `terms.tsv` described in
 ## Forbidden output
 
 The canonical list is `term-pairs.tsv`, not prose. Each row pairs a source
-term with the Persian calque that must never replace it, and a scope
-(`universal` or a domain pack). Add a row there in the same commit as any
-new Keep-English note, then confirm with:
+term with the Persian calque that must never replace it, a scope
+(`universal` or a domain pack), and a `levels` column: `system-docs` for
+one-word field nouns (skipped at `--level journal`) or `all` for
+multi-word labels kept English at both levels. Add a row there in the
+same commit as any new Keep-English note, then confirm with:
 
 ```bash
-scripts/check-fa.py path/to/doc.tex --domains openstack
+scripts/check-fa.py path/to/doc.tex --level system-docs --domains openstack --strict
 ```
 
-Common `universal` rows today: `node`, `deployment`, `configuration`,
+Common `system-docs` rows today: `node`, `deployment`, `configuration`,
 `implementation`, `integration`, `firewall`, `encryption`, `commands`,
-`server`, `partition`, `filter`. Domain rows cover `password` (OpenStack
-install guides), `cluster` (Kubernetes), `transaction` / `block` / `fee`
-(Bitcoin), `dataset` (ML). Scoping matters: `block` is the Bitcoin lexicon
-but ordinary prose in a materials-science paper, so it must not be a
+`server`, `partition`, `filter`. At `journal` those one-word forms are
+Persian. Domain rows cover `password` (OpenStack install guides),
+`cluster` (Kubernetes), `transaction` / `block` / `fee` (Bitcoin),
+`dataset` (ML). Scoping matters: `block` is the Bitcoin lexicon but
+ordinary prose in a materials-science paper, so it must not be a
 universal rule.

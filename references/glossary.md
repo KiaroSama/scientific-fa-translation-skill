@@ -96,8 +96,8 @@ unlisted; that is what makes step 1 of the decision procedure workable.
 
 The recurring infrastructure lexicon. These stay English in any technical
 document at `system-docs` level, including the operation verb of the same
-term. Each has a row in `term-pairs.tsv` with scope `universal`, so the
-checker fails the build on the Persian calque.
+term. Each has a row in `term-pairs.tsv` with `levels` `system-docs`, so
+the checker fails the build on the Persian calque unless `--level journal`.
 
 | Term | Also covers |
 | --- | --- |
@@ -123,8 +123,9 @@ same two-tier shape, and record the document's own names: state constants,
 opcode lists, author bylines, deployment identifiers, table captions kept
 whole. Emit `terms.tsv` alongside it (`long-documents.md`) so the choice is
 reviewable before the body is drafted, and pass a local pairs file to the
-checker when the document needs its own forbidden list:
+checker when the document needs extra forbidden forms. `--pairs` is merged
+onto `term-pairs.tsv`; it does not replace the house list:
 
 ```bash
-scripts/check-fa.py doc.tex --pairs glossary.local.tsv --domains openstack
+scripts/check-fa.py doc.tex --level system-docs --pairs glossary.local.tsv --domains openstack --strict
 ```

@@ -54,8 +54,10 @@ is technically accurate and still unreadable.
 - Decimal point stays `.`; Persian `٫` is not used.
 - SI units stay SI (`km`, `ms`, `°C`). Do not convert unit systems.
 
-`scripts/check-fa.py` enforces every rule in this section, so an
-orthography slip is a build failure rather than a review note.
+`scripts/check-fa.py` fails the build on the letters, ZWNJ verbs and
+plurals, Latin comma/semicolon/question mark, Eastern digits, and Arabic
+decimal separators in this section. SI unit conversion, hedges, and
+register are judgement — `review.md`.
 
 ## Dates and numerals
 

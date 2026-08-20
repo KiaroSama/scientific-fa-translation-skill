@@ -12,15 +12,17 @@ fixtures="$here/fixtures"
 fail=0
 
 expect_clean() {
-  local file=$1 out rc
-  out=$(python3 "$lint" "$file" 2>&1)
+  local file=$1
+  shift
+  local out rc
+  out=$(python3 "$lint" "$file" "$@" 2>&1)
   rc=$?
   if [[ $rc -ne 0 ]]; then
-    echo "FAIL $(basename "$file"): expected clean, got:"
+    echo "FAIL $(basename "$file") ${*}: expected clean, got:"
     echo "$out" | sed 's/^/    /'
     fail=1
   else
-    echo "ok   $(basename "$file") lints clean"
+    echo "ok   $(basename "$file") ${*} lints clean"
   fi
 }
 
@@ -59,24 +61,49 @@ expect_no_errors() {
   fi
 }
 
-expect_clean "$fixtures/good.tex"
-expect_clean "$fixtures/good.html"
+expect_clean "$fixtures/good.tex" --strict
+expect_clean "$fixtures/good.html" --strict
+expect_clean "$fixtures/journal.tex" --level journal --domains all --strict
 
-# The shipped templates must not trigger errors. Placeholder `TITLE` is a
-# legitimate unisolated-Latin warning, so errors only.
+# The shipped templates must not trigger errors. Placeholder TITLE sits in
+# an isolate (TeX) or in <title> (HTML).
 expect_no_errors "$here/../assets/rtl-document.tex"
 expect_no_errors "$here/../assets/rtl-document.html"
 
 expect_checks "$fixtures/bad.tex" \
   arabic-letters eastern-digits zwnj-verb zwnj-plural latin-punct \
   forbidden-fa half-translation fa-morphology split-isolate \
-  unisolated-latin code-direction missing-image bookmark-guard \
-  figure-direction
+  unisolated-latin unisolated-number code-direction missing-image \
+  bookmark-guard figure-direction
 
 expect_checks "$fixtures/bad.html" \
   arabic-letters eastern-digits zwnj-verb forbidden-fa half-translation \
-  fa-morphology split-isolate unisolated-latin code-direction html-root \
-  mirrored-image missing-image print-css figure-direction
+  fa-morphology split-isolate unisolated-latin unisolated-number \
+  code-direction html-root mirrored-image missing-image print-css \
+  figure-direction
+
+# Journal-correct field nouns must fail at the default system-docs level.
+journal_out=$(python3 "$lint" "$fixtures/journal.tex" --domains all 2>&1) || true
+if grep -q forbidden-fa <<<"$journal_out"; then
+  echo "ok   journal.tex reports forbidden-fa at system-docs"
+else
+  echo "FAIL journal.tex: expected forbidden-fa at system-docs"
+  echo "$journal_out" | sed 's/^/    /'
+  fail=1
+fi
+
+# --pairs must merge, not replace, the house list.
+extra=$(mktemp)
+printf 'english\tforbidden_fa\tscope\tlevels\nfoo\tبار\tuniversal\tall\n' >"$extra"
+merge_out=$(python3 "$lint" "$fixtures/journal.tex" --pairs "$extra" 2>&1) || true
+rm -f "$extra"
+if grep -q forbidden-fa <<<"$merge_out" && grep -q گره <<<"$merge_out"; then
+  echo "ok   --pairs merges house term-pairs.tsv"
+else
+  echo "FAIL --pairs dropped house rows"
+  echo "$merge_out" | sed 's/^/    /'
+  fail=1
+fi
 
 # prepare-figures.py: flatten alpha onto white so print engines cannot
 # composite it as a black rectangle.

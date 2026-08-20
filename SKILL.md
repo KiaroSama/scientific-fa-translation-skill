@@ -36,7 +36,7 @@ Override only when the user says so.
 | --- | --- |
 | Direction | English → فارسی علمی |
 | Register | Formal فارسی معیار. No colloquial forms. |
-| Terminology | Decision procedure in `references/terminology.md`, level `system-docs` |
+| Terminology | `journal` for papers, theses, review articles; `system-docs` for install guides, specs, RFCs, runbooks. Announce. Checker `--level` must match. |
 | First mention | No gloss for English terms unless the level or glossary says otherwise |
 | Output | Printable PDF at `/home/$USER/Documents/books/<slug>.pdf`. Chat is a short pointer, not RTL. |
 | PDF engine | XeLaTeX + `xepersian`; Chromium then WeasyPrint on the HTML template when TeX is absent |
@@ -69,8 +69,10 @@ Override only when the user says so.
    preserve hedges (`may`, `might`, `suggest`, `remain unknown`).
 6. **Isolate** every LTR run in the print source — whole clusters, one
    isolate each (`references/rtl-bidi.md`).
-7. **Lint.** `scripts/check-fa.py doc.tex --domains <pack>` and clear
-   every error. Lint each part as you finish it, not at the end.
+7. **Lint.** `scripts/check-fa.py doc.tex --level <level> --domains <pack>
+   --strict` and clear every error. Lint each part as you finish it, not
+   at the end. `--pairs glossary.local.tsv` *adds* rows; it does not
+   replace `term-pairs.tsv`.
 8. **Build and verify.** `scripts/build-pdf.sh doc.tex <slug> --verify`,
    then look at the rasterised pages. Run the judgement checklist below.
 
@@ -87,25 +89,27 @@ first match wins: generic document chrome (`Abstract`, `Figure`) is always
 Persian; named artifacts and acronyms are English; a 2–5 word technical
 label is English as **one whole isolate**; a field term of art is English at
 `system-docs` level, including its operation verb (`node`, `deployment`,
-`configure` — never گره / استقرار / پیکربندی); everything else is Persian.
-Never half-translate (`خوشه Kubernetes`, `سرویس‌های OpenStack`), never
-attach Persian morphology to a Latin token (`APIها`), and never mix two
-forms of one concept in a document. Forbidden calques are enforced from
-`references/term-pairs.tsv`.
+`configure` — never گره / استقرار / پیکربندی); at `journal` those one-word
+field nouns are Persian (`پیاده‌سازی`, `رمزنگاری`, `گره`). Everything else
+is Persian. Never half-translate (`خوشه Kubernetes`, `سرویس‌های OpenStack`),
+never attach Persian morphology to a Latin token (`APIها`), and never mix
+two forms of one concept in a document. Forbidden calques are enforced from
+`references/term-pairs.tsv` at the matching `--level`.
 
-Example: «در این روش از \en{gradient descent} برای کمینه کردن تابع هزینه
-استفاده می‌شود.» — روش / کمینه کردن / استفاده می‌شود Persian, the term
-English.
-
-Example: «برای \en{configure} هر \en{node} باید از یک
+Example (`system-docs`): «برای \en{configure} هر \en{node} باید از یک
 \en{account with administrative privileges} استفاده کنید.» — not «برای
 پیکربندی هر گره».
+
+Example (`journal`): «این پیاده‌سازی از \en{gradient descent} برای کمینه
+کردن تابع هزینه استفاده می‌کند.»
 
 ## Persian mechanics
 
 Full rules: `references/scientific-style.md`. UTF-8; `ک` not `ك`, `ی` not
 `ي`; نیم‌فاصله in `می‌شود`, `می‌توان`, `نمی‌کند`, `داده‌ها`; punctuation
-`،` `؛` `؟` `«»`; formal verb forms only. All machine-checked.
+`،` `؛` `؟` `«»`. Formal verb forms only (register is judgement). Letters,
+ZWNJ on the listed verbs and plurals, Western digits, Latin punct, and
+unisolated number clusters are machine-checked.
 
 ## RTL
 
@@ -141,12 +145,14 @@ page count, and the engine used.
 
 ## Quality gate
 
-**Machine-checked** — `scripts/check-fa.py` must exit clean. It covers
-orthography (`ک`/`ی`, نیم‌فاصله, Western digits, Persian punctuation),
-forbidden calques, half-translated noun phrases, Persian affixes on Latin
-tokens, split isolates, un-isolated Latin runs, listing direction, mirrored
-artwork, missing images, figure direction, and terminology drift. Do not
-re-check these by hand.
+**Machine-checked** — `scripts/check-fa.py --level <level> --strict` must
+exit 0. It covers orthography (`ک`/`ی`, نیم‌فاصله on listed verbs/plurals,
+Western digits, Persian punctuation), forbidden calques at that level,
+half-translated noun phrases, Persian affixes on Latin tokens, split
+isolates, un-isolated Latin runs, un-isolated number clusters (ranges and
+dates reverse on an RTL page), listing direction, mirrored artwork,
+missing images, figure direction, and terminology drift inside isolates.
+Do not re-check these by hand. `--pairs` merges onto the house list.
 
 **Judgement** — only these five, and they are the whole point:
 

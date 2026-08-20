@@ -8,54 +8,57 @@
 #   english          source form that must survive in the output
 #   forbidden_fa     Persian form that is wrong for this source term
 #   scope            `universal`, or a domain pack from glossary-domains.md
+#   levels           `system-docs` = one-word field noun, skipped at journal
+#                    `all` = multi-word label / named phrase, both levels
 #
 # `universal` rows are enforced on every document. Domain rows are enforced
-# only with `--domains <name>` (or `--domains all`). Add a row here at the
-# same time you add a Keep-English note in glossary.md; this file is the
-# single source of truth for the checker.
+# only with `--domains <name>` (or `--domains all`). `--level journal`
+# skips `system-docs` rows so a paper may use پیاده‌سازی / گره / مجموعه داده.
+# Add a row here at the same time you add a Keep-English note in
+# glossary.md; this file is the single source of truth for the checker.
 
-english	forbidden_fa	scope
-node	گره	universal
-nodes	گره‌ها	universal
-deployment	استقرار	universal
-deploy	استقرار	universal
-configuration	پیکربندی	universal
-configure	پیکربندی	universal
-implementation	پیاده‌سازی	universal
-implement	پیاده‌سازی	universal
-integration	یکپارچه‌سازی	universal
-firewall	دیوار آتش	universal
-firewalls	دیوارهای آتش	universal
-firewalling services	خدمات دیوار آتش	universal
-encryption	رمزنگاری	universal
-commands	فرمان‌ها	universal
-command	فرمان	universal
-server	کارساز	universal
-partition	افراز	universal
-filter	پالایه	universal
-test vectors	بردارهای آزمون	universal
-reference implementation	پیاده‌سازی مرجع	universal
-underlying infrastructure	زیرساخت زیربنایی	universal
-account with administrative privileges	حسابی با امتیازهای مدیریتی	universal
-performance and redundancy requirements	نیازمندی‌های کارایی و افزونگی	universal
-interrelated services	سرویس‌های مرتبط	openstack
-supporting services	سرویس‌های پشتیبان	openstack
-complementary services	سرویس‌های مکمل	openstack
-advanced services	سرویس‌های پیشرفته	openstack
-password	گذرواژه	openstack
-passwords	گذرواژه‌ها	openstack
-Network layout	طرح شبکه	openstack
-single disk partition	افراز دیسک واحد	openstack
-physical server	کارساز فیزیکی	openstack
-cluster	خوشه	kubernetes
-clusters	خوشه‌ها	kubernetes
-Continuous Delivery workflows	جریان‌های کاری پیوسته	gitops
-fee	کارمزد	bitcoin
-transaction	تراکنش	bitcoin
-transactions	تراکنش‌ها	bitcoin
-block	بلوک	bitcoin
-blocks	بلوک‌ها	bitcoin
-miner	استخراج‌کننده	bitcoin
-consensus	اجماع	bitcoin
-activation	فعال‌سازی	bitcoin
-dataset	مجموعه داده	ml
+english	forbidden_fa	scope	levels
+node	گره	universal	system-docs
+nodes	گره‌ها	universal	system-docs
+deployment	استقرار	universal	system-docs
+deploy	استقرار	universal	system-docs
+configuration	پیکربندی	universal	system-docs
+configure	پیکربندی	universal	system-docs
+implementation	پیاده‌سازی	universal	system-docs
+implement	پیاده‌سازی	universal	system-docs
+integration	یکپارچه‌سازی	universal	system-docs
+firewall	دیوار آتش	universal	system-docs
+firewalls	دیوارهای آتش	universal	system-docs
+firewalling services	خدمات دیوار آتش	universal	all
+encryption	رمزنگاری	universal	system-docs
+commands	فرمان‌ها	universal	system-docs
+command	فرمان	universal	system-docs
+server	کارساز	universal	system-docs
+partition	افراز	universal	system-docs
+filter	پالایه	universal	system-docs
+test vectors	بردارهای آزمون	universal	all
+reference implementation	پیاده‌سازی مرجع	universal	all
+underlying infrastructure	زیرساخت زیربنایی	universal	all
+account with administrative privileges	حسابی با امتیازهای مدیریتی	universal	all
+performance and redundancy requirements	نیازمندی‌های کارایی و افزونگی	universal	all
+interrelated services	سرویس‌های مرتبط	openstack	all
+supporting services	سرویس‌های پشتیبان	openstack	all
+complementary services	سرویس‌های مکمل	openstack	all
+advanced services	سرویس‌های پیشرفته	openstack	all
+password	گذرواژه	openstack	system-docs
+passwords	گذرواژه‌ها	openstack	system-docs
+Network layout	طرح شبکه	openstack	all
+single disk partition	افراز دیسک واحد	openstack	all
+physical server	کارساز فیزیکی	openstack	all
+cluster	خوشه	kubernetes	system-docs
+clusters	خوشه‌ها	kubernetes	system-docs
+Continuous Delivery workflows	جریان‌های کاری پیوسته	gitops	all
+fee	کارمزد	bitcoin	system-docs
+transaction	تراکنش	bitcoin	system-docs
+transactions	تراکنش‌ها	bitcoin	system-docs
+block	بلوک	bitcoin	system-docs
+blocks	بلوک‌ها	bitcoin	system-docs
+miner	استخراج‌کننده	bitcoin	system-docs
+consensus	اجماع	bitcoin	system-docs
+activation	فعال‌سازی	bitcoin	system-docs
+dataset	مجموعه داده	ml	system-docs

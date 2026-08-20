@@ -53,18 +53,19 @@ in [`references/terminology.md`](references/terminology.md); the lists
 are in `glossary.md` and `glossary-domains.md`. Nothing restates the
 policy, so there is one place to change it.
 
-**Enforcement.** `scripts/check-fa.py` fails the build on the mechanical
-rules — orthography, forbidden Persian calques, half-translated noun
-phrases, Persian affixes on Latin tokens, split isolates, un-isolated
-Latin runs, RTL listings, mirrored artwork, missing images, figure
-direction, terminology drift. The checklist left in `SKILL.md` is only
-the five items a machine cannot judge.
+**Enforcement.** `scripts/check-fa.py --level <level> --strict` fails the
+build on the mechanical rules — orthography, forbidden calques at that
+level, half-translated noun phrases, Persian affixes on Latin tokens,
+split isolates, un-isolated Latin runs and number clusters, RTL listings,
+mirrored artwork, missing images, figure direction, terminology drift.
+`--pairs` merges onto the house list. The checklist left in `SKILL.md` is
+only the five items a machine cannot judge.
 `tests/run.sh` keeps the checker honest with clean and deliberately
 broken fixtures.
 
 ```bash
 scripts/preflight.sh
-scripts/check-fa.py doc.tex --domains openstack
+scripts/check-fa.py doc.tex --level system-docs --domains openstack --strict
 scripts/build-pdf.sh doc.tex my-slug --verify
 bash tests/run.sh
 ```
