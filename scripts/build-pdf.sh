@@ -88,11 +88,10 @@ compile_tex() {
       show_tex_error "${stem_src}.log"; return 2; }
   else
     log "engine: xelatex (two passes)"
-    local pass
-    for pass in 1 2; do
-      xelatex -interaction=nonstopmode -halt-on-error "$src_base" \
-        >/dev/null 2>&1 || { show_tex_error "${stem_src}.log"; return 2; }
-    done
+    xelatex -interaction=nonstopmode -halt-on-error "$src_base" \
+      >/dev/null 2>&1 || { show_tex_error "${stem_src}.log"; return 2; }
+    xelatex -interaction=nonstopmode -halt-on-error "$src_base" \
+      >/dev/null 2>&1 || { show_tex_error "${stem_src}.log"; return 2; }
   fi
   [[ -f $pdf ]] || { log "expected PDF missing: ${src_dir}/${pdf}"; return 2; }
   cp -f "$pdf" "$dest" || return 2
