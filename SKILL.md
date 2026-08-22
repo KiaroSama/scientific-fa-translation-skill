@@ -91,13 +91,15 @@ label is English as **one whole isolate**; a field term of art is English at
 `system-docs` level, including its operation verb (`node`, `deployment`,
 `configure` — never گره / استقرار / پیکربندی); at `journal` those one-word
 field nouns are Persian (`پیاده‌سازی`, `رمزنگاری`, `گره`). Everything else
-is Persian. Never half-translate (`خوشه Kubernetes`, `سرویس‌های OpenStack`),
-never attach Persian morphology to a Latin token (`APIها`), and never mix
-two forms of one concept in a document. Forbidden calques are enforced from
+is Persian. Never half-translate (`خوشه Kubernetes`, `سرویس‌های OpenStack`).
+A kept-term plural is the singular stem plus `ها` (`\en{service}ها`,
+`\en{platform}ها`, `\en{API}ها`), never `services` / `platforms` / `APIs`;
+ezafe on Latin is still forbidden (`Goی`). Never mix two forms of one
+concept in a document. Forbidden calques are enforced from
 `references/term-pairs.tsv` at the matching `--level`.
 
 Example (`system-docs`): «برای \en{configure} هر \en{node} باید از یک
-\en{account with administrative privileges} استفاده کنید.» — not «برای
+\en{account with administrative privilege}ها استفاده کنید.» — not «برای
 پیکربندی هر گره».
 
 Example (`journal`): «این پیاده‌سازی از \en{gradient descent} برای کمینه
@@ -119,7 +121,7 @@ Full rules: `references/rtl-bidi.md`; engines and measured limits:
 On the PDF, non-negotiable: isolate every English term, whole collocation,
 number cluster, formula, URL, and inline code with `\lr{…}` (or
 `<span dir="ltr">`). Slash-, space-, arrow-, or parenthesis-joined English
-(`OP_IF/OP_NOTIF`, `3.1 The OpenStack services`, `STARTED -> LOCKED_IN`,
+(`OP_IF/OP_NOTIF`, `3.1 The OpenStack service`, `STARTED -> LOCKED_IN`,
 `1.0.1 (2026-08-09)`) is **one** isolate — split across two spans it
 renders reversed on the page. Listings are LTR and left-aligned. Math
 stays LTR. Do not mirror images. After a trailing English insertion the
@@ -148,7 +150,8 @@ page count, and the engine used.
 **Machine-checked** — `scripts/check-fa.py --level <level> --strict` must
 exit 0. It covers orthography (`ک`/`ی`, نیم‌فاصله on listed verbs/plurals,
 Western digits, Persian punctuation), forbidden calques at that level,
-half-translated noun phrases, Persian affixes on Latin tokens, split
+half-translated noun phrases, English `-s` plurals of kept terms, leftover
+Latin ezafe (`Goی`), split
 isolates, un-isolated Latin runs, un-isolated number clusters (ranges and
 dates reverse on an RTL page), listing direction, mirrored artwork,
 missing images, figure direction, and terminology drift inside isolates.

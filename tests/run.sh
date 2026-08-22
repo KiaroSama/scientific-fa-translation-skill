@@ -72,13 +72,13 @@ expect_no_errors "$here/../assets/rtl-document.html"
 
 expect_checks "$fixtures/bad.tex" \
   arabic-letters eastern-digits zwnj-verb zwnj-plural latin-punct \
-  forbidden-fa half-translation fa-morphology split-isolate \
+  forbidden-fa half-translation fa-morphology en-plural split-isolate \
   unisolated-latin unisolated-number code-direction missing-image \
   bookmark-guard figure-direction
 
 expect_checks "$fixtures/bad.html" \
   arabic-letters eastern-digits zwnj-verb forbidden-fa half-translation \
-  fa-morphology split-isolate unisolated-latin unisolated-number \
+  fa-morphology en-plural split-isolate unisolated-latin unisolated-number \
   code-direction html-root mirrored-image missing-image print-css \
   figure-direction
 

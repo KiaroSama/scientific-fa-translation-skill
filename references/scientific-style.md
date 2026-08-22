@@ -90,7 +90,7 @@ anything; a hand-typed number silently rots.
 
 Generic labels take the Persian in `glossary.md`. A heading that *is* a
 named artifact or a technical label stays English in one isolate — `The
-OpenStack services`, `Conceptual architecture`, `Host networking`, `Get
+OpenStack serviceها`, `Conceptual architecture`, `Host networking`, `Get
 started with OpenStack`. Do not Persianise the generic word and leave the
 name behind.
 

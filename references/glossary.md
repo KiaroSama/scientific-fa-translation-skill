@@ -70,7 +70,7 @@ are correct.
 | alternatives | جایگزین‌ها | — |
 | activation | فعال‌سازی | protocol activation (BIP 8/9) |
 | invalid | نامعتبر | a defined validity state |
-| policy | سیاست | `service policies` and similar labels |
+| policy | سیاست | `service policyها` and similar labels |
 | spam | هرزنامه | — |
 | steganography | پنهان‌نگاری | — |
 | grandfathering | معافیت عطف‌به‌ماسبق | — |
@@ -101,14 +101,14 @@ the checker fails the build on the Persian calque unless `--level journal`.
 
 | Term | Also covers |
 | --- | --- |
-| node / nodes | `controller node`, `compute node`, `Other nodes` |
+| node / nodeها | `controller node`, `compute node`, `Other nodeها` |
 | deployment / deploy | `deployment and configuration` |
 | configuration / configure | `Install and configure components` |
 | implementation / implement | `reference implementation` |
 | integration | — |
-| firewall / firewalls | `firewalling services`, `restrictive firewalls` |
+| firewall / firewallها | `firewalling serviceها`, `restrictive firewallها` |
 | encryption | — |
-| command / commands | `command-line clients` |
+| command / commandها | `command-line clientها` |
 | server | `physical server`, `database server` |
 | partition | `single disk partition` |
 | filter | — |

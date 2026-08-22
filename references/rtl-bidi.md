@@ -17,8 +17,9 @@ WeasyPrint print fallback (`assets/rtl-document.html`).
 Most of this file is machine-checked. Run
 `scripts/check-fa.py doc.tex --level <level> --strict` before reading
 further — it reports un-isolated Latin runs, un-isolated number clusters,
-split clusters, RTL listings, mirrored artwork, and Persian affixes on
-English tokens, so the reading below is for the cases that need judgement.
+split clusters, RTL listings, mirrored artwork, English `-s` plurals of
+kept terms, and leftover Persian ezafe on English tokens, so the reading
+below is for the cases that need judgement.
 
 **Engine caveat.** WeasyPrint does not implement `unicode-bidi: isolate`
 and warns about it on every run. The `dir="ltr"` **attribute** is what
@@ -92,7 +93,7 @@ cluster, citation key, formula, URL, file path, and inline code. A
 collocation is one isolate, not one span per word:
 
 ```html
-<span dir="ltr">composable APIs</span>
+<span dir="ltr">composable API</span>ها
 <span dir="ltr">Kubernetes cluster</span>
 ```
 
@@ -145,7 +146,7 @@ attention here.
 
 <!-- Right -->
 <span dir="ltr">OP_IF/OP_NOTIF</span>
-<h2><span dir="ltr">3.1 The OpenStack services</span></h2>
+<h2><span dir="ltr">3.1 The OpenStack service</span>ها</h2>
 <span dir="ltr">1.0.1 (2026-08-09)</span>
 <span dir="ltr">STARTED -&gt; LOCKED_IN</span>
 <span dir="ltr">1109/2016 (55%)</span>
@@ -154,7 +155,7 @@ attention here.
 
 ```tex
 \en{OP_IF/OP_NOTIF}
-\en{3.1 The OpenStack services}
+\en{3.1 The OpenStack service}ها
 \en{1.0.1 (2026-08-09)}
 \en{STARTED -> LOCKED_IN}
 ```
@@ -221,7 +222,7 @@ RLM only for a leftover end-of-sentence period.
 
 - Headings are RTL prose and stay physically right-aligned, even when the
   title is an English isolate. A numbered English title is **one** isolate:
-  `<h2><span dir="ltr">3.1 The OpenStack services</span></h2>`,
+  `<h2><span dir="ltr">3.1 The OpenStack service</span>ها</h2>`,
   never `3.1` in one span and the title in another. Two spans reverse on
   the page; WeasyPrint also packs a lone LTR heading to the left unless
   the heading has `text-align: right` (the HTML template sets that).
@@ -282,7 +283,7 @@ Never reverse English letter order by hand. Never rewrite `(Adam)` as
    Persian.
 3. Sentence-final periods sit at the right edge of the Persian sentence.
 4. Slash-, space-, or date-joined English still reads left-to-right
-   (`OP_IF/OP_NOTIF`, `3.1 The OpenStack services`, `1.0.1 (2026-08-09)`).
+   (`OP_IF/OP_NOTIF`, `3.1 The OpenStack service`, `1.0.1 (2026-08-09)`).
 5. Code blocks are LTR, left-aligned, and optically identical to the
    source listing. Images are the source pixels, unmirrored, uninverted,
    in source order — not a black rectangle.

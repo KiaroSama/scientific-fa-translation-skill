@@ -12,7 +12,8 @@ stays in SKILL.md is only the part a machine cannot judge.
 `--level journal` drops one-word field-noun bans (`گره`, `پیاده‌سازی`,
 `مجموعه داده`, …) so a paper that follows terminology.md does not fail.
 `--pairs FILE` is added on top of `references/term-pairs.tsv`, never a
-replacement.
+replacement. English `-s` plurals of kept terms (`services`, `APIs`) fail;
+the stem plus ها after the isolate is the surviving form.
 
 Exit codes: 0 clean, 1 findings at error level, 2 usage error.
 
@@ -80,6 +81,40 @@ TEX_STOPWORDS = {
     "scale", "angle", "keepaspectratio", "page", "trim", "clip",
 }
 
+# Names and non-plurals that end in s. A regular kept-term plural is the
+# singular stem plus ها, but Kubernetes / HTTPS / analysis are not plurals.
+EN_PLURAL_EXCEPTIONS = frozenset({
+    "windows", "kubernetes", "redis", "postgres", "ios", "macos",
+    "https", "http", "tls", "ssl", "aws", "gcs", "nfs", "dns", "bios",
+    "cosmos", "analysis", "thesis", "basis", "crisis", "physics",
+    "mathematics", "economics", "news", "series", "species", "means",
+    "always", "towards", "perhaps", "plus", "minus", "canvas", "atlas",
+    "this", "is", "was", "has", "does", "his", "its", "as", "us",
+    "across", "process", "access", "address", "status", "bus",
+})
+
+
+def english_plural_stem(word: str) -> str | None:
+    """Singular stem if *word* is a regular English plural, else None."""
+    if re.fullmatch(r"[A-Z]{2,}s", word):
+        return word[:-1]
+    if len(word) < 4 or word.isupper():
+        return None
+    lower = word.lower()
+    if lower in EN_PLURAL_EXCEPTIONS:
+        return None
+    if lower.endswith("ies") and len(word) > 4:
+        return word[:-3] + ("Y" if word[-4].isupper() else "y")
+    if lower.endswith("es") and len(word) > 4:
+        if lower.endswith(("ches", "shes")) or lower[-3] in "sxz":
+            return word[:-2]
+    if lower.endswith("s") and not lower.endswith("ss"):
+        if lower.endswith(("us", "is", "os", "as")):
+            return None
+        return word[:-1]
+    return None
+
+
 DEFAULT_PAIRS = [
     ("node", "گره"),
     ("deployment", "استقرار"),
@@ -88,7 +123,7 @@ DEFAULT_PAIRS = [
     ("integration", "یکپارچه‌سازی"),
     ("firewall", "دیوار آتش"),
     ("encryption", "رمزنگاری"),
-    ("commands", "فرمان‌ها"),
+    ("command", "فرمان"),
 ]
 
 
@@ -400,11 +435,24 @@ def check(src: Source, pairs: list[tuple[str, str, str]],
             "source noun phrase English in one isolate")
 
     for m in live_finditer(
-            rf"(?:\}}|</span>|</bdi>|[A-Za-z])(ها|های|هایی|ی)"
+            rf"(?:\}}|</span>|</bdi>|[A-Za-z])(?!ها)(ی)"
             rf"(?![{FA_RANGE}])"):
         add(ERROR, "fa-morphology", m.start(),
             f"Persian suffix {m.group(1)!r} attached to an English token; "
-            "pluralise inside the isolate instead (APIs, nodes)")
+            "do not add ezafe (Goی). Plurals are ها after the isolate "
+            "(serviceها, platformها, APIها)")
+
+    for pos, _end, body in src.isolates:
+        if "/" in body or "://" in body or "@" in body or "->" in body:
+            continue
+        for token in re.finditer(r"[A-Za-z]+", body):
+            word = token.group(0)
+            stem = english_plural_stem(word)
+            if stem is None:
+                continue
+            add(ERROR, "en-plural", pos,
+                f"English plural {word!r}; write the singular stem in the "
+                f"isolate and Persian ها after it ({stem}ها, not {word})")
 
     # Adjacent LTR isolates reverse on an RTL page. Compare isolate *ranges*
     # so `\textbf{درست} \en{node}` is not a false split, while

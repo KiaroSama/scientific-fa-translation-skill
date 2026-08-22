@@ -71,11 +71,15 @@ Mechanics live in `rtl-bidi.md`. Three rules belong here because they are
 terminology decisions, not layout:
 
 - One isolate per whole noun phrase, never one isolate per word.
-- No Persian affix on a Latin token. Pluralise inside the isolate:
-  `APIs`, `nodes` — never `APIها`, `Goی`.
-- No Persian head noun in front of an English name. `OpenStack services`
-  stays whole; «سرویس‌های OpenStack» is a half-translation, not a
-  compromise.
+- Regular English plurals of a kept term drop `-s` / `-es` / `-ies`. The
+  singular stem stays in the isolate; Persian `ها` (or `های` / `هایی`)
+  follows it: `\en{service}ها`, `\en{platform}ها`, `\en{API}ها`,
+  `\en{OpenStack service}ها`. Never `services`, `platforms`, `APIs`,
+  `nodes`. Names that merely end in *s* (`Kubernetes`, `Windows`) stay
+  as written. Do not attach any other Persian affix (`\en{Go}ی`).
+- No Persian head noun in front of an English name. `\en{OpenStack
+  service}ها` stays whole; «سرویس‌های OpenStack» is a half-translation,
+  not a compromise.
 
 ## First mention and consistency
 
@@ -102,10 +106,11 @@ scripts/check-fa.py path/to/doc.tex --level system-docs --domains openstack --st
 ```
 
 Common `system-docs` rows today: `node`, `deployment`, `configuration`,
-`implementation`, `integration`, `firewall`, `encryption`, `commands`,
+`implementation`, `integration`, `firewall`, `encryption`, `command`,
 `server`, `partition`, `filter`. At `journal` those one-word forms are
 Persian. Domain rows cover `password` (OpenStack install guides),
 `cluster` (Kubernetes), `transaction` / `block` / `fee` (Bitcoin),
 `dataset` (ML). Scoping matters: `block` is the Bitcoin lexicon but
 ordinary prose in a materials-science paper, so it must not be a
-universal rule.
+universal rule. A kept-term plural is `\en{node}ها`, not `nodes` and
+not گره‌ها.

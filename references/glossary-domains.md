@@ -10,7 +10,9 @@ scripts/check-fa.py doc.tex --level system-docs --domains openstack --strict
 ```
 
 Everything below is Keep English unless a row says otherwise. Rows are the
-whole source phrase — one isolate, no calque, no half-translation.
+whole **source** phrase. In the translation, a regular English plural of a
+kept term is the singular stem plus `ها` (`\en{OpenStack service}ها`, not
+`OpenStack services`); see `terminology.md`.
 
 ## openstack
 
@@ -20,7 +22,7 @@ Cloud install guides and service documentation.
 | --- | --- |
 | OpenStack services | `OpenStack packages`, `OpenStack architecture`, `OpenStack components` |
 | Identity service | `Image service`, `Compute service`, `Networking service`, `Block Storage node` |
-| controller node | `compute node`, `additional nodes`, `Other nodes` |
+| controller node | `compute node`, `additional nodeها`, `Other nodeها` |
 | provider networks | `provider network`, `self-service networks` |
 | AMQP message broker | `message broker`, `message queue` |
 | web-based user interface | `browser plug-ins`, `command-line clients` |
@@ -85,8 +87,8 @@ Flux, Argo, and continuous-delivery documentation.
 | Term | Also covers |
 | --- | --- |
 | GitOps Toolkit | — |
-| composable APIs | never «APIهای ترکیب‌پذیر» |
-| reusable Go packages | never «بسته‌های Go» |
+| composable APIs | never «APIهای ترکیب‌پذیر»; output is `\en{composable API}ها` |
+| reusable Go packages | never «بسته‌های Go»; output is `\en{reusable Go package}ها` |
 | Continuous Delivery workflows | — |
 | version-controlled approach to operations | keep whole; do not calque |
 | reconciliation, drift, source controller | field nouns |

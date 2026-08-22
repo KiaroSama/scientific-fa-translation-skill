@@ -22,7 +22,8 @@ that the check was visual and therefore partial.
    ```
 
    This settles orthography, forbidden calques, half-translated noun
-   phrases, split isolates, morphology on Latin tokens, listing direction,
+   phrases, split isolates, English `-s` plurals of kept terms, leftover
+   Latin ezafe, listing direction,
    and missing images. Do not spend review effort on anything in that list —
    report the counts.
 

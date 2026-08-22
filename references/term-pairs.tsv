@@ -5,7 +5,8 @@
 # fails the build when the forbidden form shows up in a translation.
 #
 # Columns (tab-separated):
-#   english          source form that must survive in the output
+#   english          form that must survive in the output (singular stem
+#                    of a kept term; regular plurals are stem + ها, not -s)
 #   forbidden_fa     Persian form that is wrong for this source term
 #   scope            `universal`, or a domain pack from glossary-domains.md
 #   levels           `system-docs` = one-word field noun, skipped at journal
@@ -19,7 +20,7 @@
 
 english	forbidden_fa	scope	levels
 node	گره	universal	system-docs
-nodes	گره‌ها	universal	system-docs
+node	گره‌ها	universal	system-docs
 deployment	استقرار	universal	system-docs
 deploy	استقرار	universal	system-docs
 configuration	پیکربندی	universal	system-docs
@@ -28,36 +29,36 @@ implementation	پیاده‌سازی	universal	system-docs
 implement	پیاده‌سازی	universal	system-docs
 integration	یکپارچه‌سازی	universal	system-docs
 firewall	دیوار آتش	universal	system-docs
-firewalls	دیوارهای آتش	universal	system-docs
-firewalling services	خدمات دیوار آتش	universal	all
+firewall	دیوارهای آتش	universal	system-docs
+firewalling service	خدمات دیوار آتش	universal	all
 encryption	رمزنگاری	universal	system-docs
-commands	فرمان‌ها	universal	system-docs
+command	فرمان‌ها	universal	system-docs
 command	فرمان	universal	system-docs
 server	کارساز	universal	system-docs
 partition	افراز	universal	system-docs
 filter	پالایه	universal	system-docs
-test vectors	بردارهای آزمون	universal	all
+test vector	بردارهای آزمون	universal	all
 reference implementation	پیاده‌سازی مرجع	universal	all
 underlying infrastructure	زیرساخت زیربنایی	universal	all
-account with administrative privileges	حسابی با امتیازهای مدیریتی	universal	all
-performance and redundancy requirements	نیازمندی‌های کارایی و افزونگی	universal	all
-interrelated services	سرویس‌های مرتبط	openstack	all
-supporting services	سرویس‌های پشتیبان	openstack	all
-complementary services	سرویس‌های مکمل	openstack	all
-advanced services	سرویس‌های پیشرفته	openstack	all
+account with administrative privilege	حسابی با امتیازهای مدیریتی	universal	all
+performance and redundancy requirement	نیازمندی‌های کارایی و افزونگی	universal	all
+interrelated service	سرویس‌های مرتبط	openstack	all
+supporting service	سرویس‌های پشتیبان	openstack	all
+complementary service	سرویس‌های مکمل	openstack	all
+advanced service	سرویس‌های پیشرفته	openstack	all
 password	گذرواژه	openstack	system-docs
-passwords	گذرواژه‌ها	openstack	system-docs
+password	گذرواژه‌ها	openstack	system-docs
 Network layout	طرح شبکه	openstack	all
 single disk partition	افراز دیسک واحد	openstack	all
 physical server	کارساز فیزیکی	openstack	all
 cluster	خوشه	kubernetes	system-docs
-clusters	خوشه‌ها	kubernetes	system-docs
-Continuous Delivery workflows	جریان‌های کاری پیوسته	gitops	all
+cluster	خوشه‌ها	kubernetes	system-docs
+Continuous Delivery workflow	جریان‌های کاری پیوسته	gitops	all
 fee	کارمزد	bitcoin	system-docs
 transaction	تراکنش	bitcoin	system-docs
-transactions	تراکنش‌ها	bitcoin	system-docs
+transaction	تراکنش‌ها	bitcoin	system-docs
 block	بلوک	bitcoin	system-docs
-blocks	بلوک‌ها	bitcoin	system-docs
+block	بلوک‌ها	bitcoin	system-docs
 miner	استخراج‌کننده	bitcoin	system-docs
 consensus	اجماع	bitcoin	system-docs
 activation	فعال‌سازی	bitcoin	system-docs

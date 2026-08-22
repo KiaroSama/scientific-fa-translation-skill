@@ -55,7 +55,7 @@ policy, so there is one place to change it.
 
 **Enforcement.** `scripts/check-fa.py --level <level> --strict` fails the
 build on the mechanical rules — orthography, forbidden calques at that
-level, half-translated noun phrases, Persian affixes on Latin tokens,
+level, half-translated noun phrases, English `-s` plurals of kept terms,
 split isolates, un-isolated Latin runs and number clusters, RTL listings,
 mirrored artwork, missing images, figure direction, terminology drift.
 `--pairs` merges onto the house list. The checklist left in `SKILL.md` is
