@@ -149,6 +149,30 @@
       font-size: 0.9em;
       break-before: page;
     }
+    /* Printed table of contents for books. Live page numbers from the
+       engine — never copy folios from the English source PDF. */
+    nav.toc {
+      break-after: page;
+      page-break-after: always;
+    }
+    nav.toc ol {
+      list-style: none;
+      padding: 0;
+      margin: 0.3rem 0 0.6rem;
+    }
+    nav.toc li {
+      margin: 0.25rem 0;
+    }
+    nav.toc > ol > li > ol {
+      padding-inline-start: 1.1rem;
+    }
+    nav.toc a {
+      text-decoration: none;
+      color: inherit;
+    }
+    nav.toc a.toc-leaf::after {
+      content: " " leader(".") " " target-counter(attr(href url), page);
+    }
   </style>
 </head>
 <body>
@@ -174,6 +198,15 @@
       </figure>
     A numbered English heading is one isolate, not two:
       <h2><span dir="ltr">3.1 The OpenStack service</span>ها</h2>
+
+    Books print a translated table of contents, not only a PDF outline:
+      <nav class="toc">
+        <h2>فهرست مطالب</h2>
+        <ol>
+          <li><a class="toc-leaf" href="#ch-1">فصل
+            <span dir="ltr">1</span>. …</a></li>
+        </ol>
+      </nav>
 
     Tables that break across pages need a real <thead>.
   -->

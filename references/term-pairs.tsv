@@ -53,6 +53,8 @@ single disk partition	افراز دیسک واحد	openstack	all
 physical server	کارساز فیزیکی	openstack	all
 cluster	خوشه	kubernetes	system-docs
 cluster	خوشه‌ها	kubernetes	system-docs
+cloud provider	ارائه‌دهندهٔ ابر	kubernetes	all
+cloud provider	ارائه‌دهندگان ابر	kubernetes	all
 Continuous Delivery workflow	جریان‌های کاری پیوسته	gitops	all
 fee	کارمزد	bitcoin	system-docs
 transaction	تراکنش	bitcoin	system-docs

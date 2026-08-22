@@ -35,7 +35,7 @@ Override only when the user says so.
 | Decision | Default |
 | --- | --- |
 | Direction | English → فارسی علمی |
-| Register | Formal فارسی معیار. No colloquial forms. |
+| Register | Formal فارسی معیار. Clear and readable, not ornate. No colloquial forms. |
 | Terminology | `journal` for papers, theses, review articles; `system-docs` for install guides, specs, RFCs, runbooks. Announce. Checker `--level` must match. |
 | First mention | No gloss for English terms unless the level or glossary says otherwise |
 | Output | Printable PDF at `/home/$USER/Documents/books/<slug>.pdf`. Chat is a short pointer, not RTL. |
@@ -49,6 +49,7 @@ Override only when the user says so.
 | Abstract/footnotes | Translate |
 | Bibliography | Do not translate (authors, titles, journals, DOIs, URLs) |
 | Ambiguity | Claim-changing ambiguity blocks and is asked; the rest is queued (`references/long-documents.md`) |
+| Books | Translate and print the source table of contents (`فهرست مطالب`). Do not drop it. |
 
 ## Workflow
 
@@ -60,6 +61,8 @@ Override only when the user says so.
    `inventory.md` and `manifest.txt` in the working tree.
    Never translate from memory when a fetch fails. Never ship a black
    pdfimages dump. Never ship a full source-page raster as a figure.
+   A book `contents` / `brief contents` page is inventory chrome, not
+   optional: translate it and print it.
 3. **Terminology first.** Scan domain terms, apply
    `references/terminology.md`, and write `terms.tsv` plus
    `glossary.local.md` **before** drafting. For a long document show the
@@ -146,6 +149,8 @@ page count, and the engine used.
 6. `scripts/build-pdf.sh path/to/doc.tex <slug> --verify`. Without TeX the
    same script takes the filled-in `assets/rtl-document.html`; embed
    Vazirmatn with `scripts/fetch-vazirmatn.sh` and never the UI-FD cut.
+   A page-range PDF is `scripts/extract-pdf-pages.py in.pdf out.pdf 1-20`
+   — one range, never a per-page loop (`references/pdf-output.md`).
 
 ## Quality gate
 

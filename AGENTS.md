@@ -66,3 +66,6 @@ loop is lint → test → build a PDF; there is nothing to keep running.
   system face offline (no network needed) to drop the TTFs beside an
   HTML build. `--verify` rasterises sample pages to PNG; judge RTL from
   those images, never from `pdftotext`.
+- A page-range PDF is `scripts/extract-pdf-pages.py in.pdf out.pdf 1-20`
+  after the full build. Never loop `insert_pdf` per page — that
+  duplicates XObjects and explodes file size.

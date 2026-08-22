@@ -27,10 +27,13 @@ Ordered. First match wins. Apply to each source token or noun phrase.
 
 0. **Document chrome.** A generic IMRAD or book label — `Abstract`,
    `Introduction`, `Methods`, `Results`, `Discussion`, `Conclusion`,
-   `References`, `Figure`, `Table`, `Equation`, `Section`, `Appendix` —
-   is Persian, always, at every level. This step exists so a source
-   glossary cannot drag `Introduction` into English. It applies only to
-   the bare label, never to a heading that names an artifact.
+   `References`, `Figure`, `Table`, `Equation`, `Section`, `Appendix`,
+   `Contents` / `Table of contents` / `Brief contents`, `Foreword`,
+   `Preface` — is Persian, always, at every level. This step exists so a
+   source glossary cannot drag `Introduction` into English. It applies
+   only to the bare label, never to a heading that names an artifact. A
+   book contents page is translated and printed; omitting it is a missing
+   section, not a layout choice.
 1. **Named artifact.** Product, project, algorithm, library, protocol,
    standard, opcode, identifier, acronym, unit, statistical symbol,
    person, journal, conference, DOI, URL, licence → English.

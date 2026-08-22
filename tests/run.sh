@@ -195,6 +195,15 @@ else
   fail=1
 fi
 
+help_out=$(python3 "$here/../scripts/extract-pdf-pages.py" --help 2>&1) || help_rc=$?
+if [[ ${help_rc:-0} -eq 0 ]] && grep -q extract-pdf-pages <<<"$help_out"; then
+  echo "ok   extract-pdf-pages.py --help"
+else
+  echo "FAIL extract-pdf-pages.py --help"
+  echo "$help_out" | sed 's/^/    /'
+  fail=1
+fi
+
 if [[ $fail -eq 0 ]]; then
   echo "all tests passed"
 else

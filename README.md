@@ -89,6 +89,7 @@ scripts/preflight.sh           what this machine can build
 scripts/check-fa.py            mechanical checker
 scripts/prepare-figures.py     flatten alpha; catch pdfimages negatives
 scripts/crop-source-figures.py crop artwork; never embed a full PDF page
+scripts/extract-pdf-pages.py   page-range PDF without duplicating XObjects
 scripts/build-pdf.sh           compile and verify
 scripts/fetch-vazirmatn.sh     font for the HTML path
 tests/                         checker regression tests

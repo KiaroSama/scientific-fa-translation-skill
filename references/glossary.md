@@ -34,6 +34,11 @@ label only — a heading that names an artifact stays English.
 | conclusion | نتیجه‌گیری |
 | related work | کارهای مرتبط |
 | acknowledgments | سپاسگزاری |
+| contents / table of contents / brief contents | فهرست مطالب |
+| foreword | سخن مقدمه |
+| preface | پیشگفتار |
+| about this book | دربارهٔ این کتاب |
+| about the author | دربارهٔ نویسنده |
 | references / bibliography | منابع |
 | figure | شکل |
 | table | جدول |

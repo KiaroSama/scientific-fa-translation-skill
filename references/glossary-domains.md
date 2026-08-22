@@ -76,6 +76,7 @@ State transitions and opcode pairs arrive joined by punctuation
 | Term | Also covers |
 | --- | --- |
 | Kubernetes cluster | `Kubernetes clusters`; never «خوشه Kubernetes» |
+| cloud provider | never ارائه‌دهندهٔ ابر / ارائه‌دهندگان ابر; plural is `cloud provider`ها |
 | namespace, controller, operator, sidecar | field nouns |
 | Custom Resource Definition, CRD | — |
 | control plane | `worker node` |

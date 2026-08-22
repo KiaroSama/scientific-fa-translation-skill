@@ -45,6 +45,14 @@ Aim for 1500–3000 words per part. Assemble with `\input` from a thin
 `doc.tex` that holds only the preamble, title, TOC, and the input list —
 for HTML, concatenate parts in order into `doc.html`.
 
+A book or long report **prints** the source table of contents, translated
+(`فهرست مطالب`). TeX: `\renewcommand{\contentsname}{فهرست مطالب}` then
+`\tableofcontents`. HTML: a `<nav class="toc">` after the cover, matching
+the source entries; live page numbers via CSS `target-counter` (the
+template already has the rule). Do not copy folio numbers from the English
+PDF — those are the source's pages, not yours. Do not skip the contents
+because “the PDF outline is enough”; the printed page is the deliverable.
+
 Lint each part as it is finished, not at the end:
 
 ```bash
@@ -102,3 +110,9 @@ that is what the file is for.
    does all three).
 4. Check the figure count against `manifest.txt`.
 5. Report the path, the page count, and the queued questions.
+
+If the user asked for a page range, not the whole PDF, extract it with
+`scripts/extract-pdf-pages.py in.pdf out.pdf 1-20` after the build. That
+script copies a contiguous range in **one** operation so fonts and images
+stay shared. Never loop `insert_pdf` (or equivalent) one page at a time —
+each iteration duplicates every XObject and a 2 MB file becomes 40 MB.

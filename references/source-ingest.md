@@ -110,8 +110,11 @@ The checker fails (`full-page-figure`) if the translation still references
 
 Write `inventory.md` while the source is open, before drafting: counts of
 headings, figures, tables, equations, code listings, footnotes, and
-references, plus the page or section they live in. It costs a minute and it
-is the only way to answer «is anything missing?» at the end. Then:
+references, plus the page or section they live in. **List the table of
+contents** (`contents`, `brief contents`) as its own front-matter section
+when the source has one. Translate it and print it; dropping those pages
+is a missing section. It costs a minute and it is the only way to answer
+«is anything missing?» at the end. Then:
 
 ```bash
 ls figures/ | sed 's/.*\///' > manifest.txt

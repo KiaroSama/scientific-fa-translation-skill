@@ -202,6 +202,25 @@ a failed crop, not “the figure”.
 Digit smoke test, once per document: put `3.14` in a Persian sentence, build,
 rasterise, and confirm the glyphs are `3.14` and not `۳٫۱۴`.
 
+## Page ranges and file size
+
+The full build is the source of truth. A “pages 1–20” or “this chapter”
+PDF is an extract of that file, not a second translation.
+
+```bash
+scripts/extract-pdf-pages.py doc.pdf /home/$USER/Documents/books/<slug>-1-20.pdf 1-20
+```
+
+Extract a **contiguous range in one call**. Looping `insert_pdf` (or
+`pdfseparate` then a naive merge) one page at a time copies every shared
+image and font onto every page. A WeasyPrint book that is 2 MB for 44
+pages becomes 40 MB for 20 pages that way. The extract script uses one
+range and then `garbage=4` / deflate. Ghostscript
+`-dFirstPage` / `-dLastPage` is the same idea if PyMuPDF is missing.
+
+Do not overwrite the full-book slug when the user asked for a slice;
+use `<slug>-1-20.pdf` or `<slug>-chapter-01.pdf`.
+
 ## Chat after success
 
 One short message: what was translated, the absolute PDF path, the page

@@ -8,6 +8,9 @@ here — `terminology.md` owns the keep-English split, and bidi is
 
 - Formal written Persian. No spoken reductions: not `میشه`, `می‌خواد`,
   `چونکه` as a default, `اصلاً` as filler.
+- Prefer clear scientific prose over ornate or heavy diction. Short
+  verbs (`می‌دهد`, `نگاه کنید`, `لازم است`) beat elevated calques
+  (`فراهم می‌کنند`, `بنگرید`, `ایجاب می‌کند`) when both are accurate.
 - Prefer clear scientific prose over sentence-level calques. Do not copy
   English *clause* order when it produces unreadable Persian.
 - Keep the author's epistemic stance. `may` / `might` / `suggest` /
@@ -32,10 +35,11 @@ is technically accurate and still unreadable.
    reads better with the verb restored. `perform an evaluation of` →
    «ارزیابی می‌کنیم», not «انجام یک ارزیابی از».
 4. **Bidi-heavy sentences.** With this skill's terminology policy a
-   sentence can end up more English than Persian. Never *start* a Persian
-   sentence with an LTR isolate — put a Persian subject or preposition
-   first, because a line that begins left-to-right reads as a layout bug
-   in print. If more than about half a sentence is isolates, split it.
+   sentence can end up more English than Persian. Prefer a Persian
+   subject or preposition first. A sentence **may** start with an LTR
+   isolate when that isolate is the grammatical subject — a kept field
+   term (`Cloud provider`ها …, `CLI`ها …). If more than about half a
+   sentence is isolates, split it.
 5. **First person.** Keep the source's stance: `we trained` → «آموزش
    دادیم», `it is assumed` → «فرض می‌شود». Do not promote an impersonal
    source to first person or the reverse.
@@ -80,6 +84,7 @@ register are judgement — `review.md`.
 | Equation (4) | معادله (4) |
 | Section 3.2 | بخش 3.2 |
 | Appendix A | پیوست A |
+| Contents | فهرست مطالب |
 | Theorem / Lemma / Proof | قضیه / لم / اثبات |
 
 Do not localise the numeral, and keep it in an LTR isolate. Prefer real
