@@ -231,19 +231,23 @@ RLM only for a leftover end-of-sentence period.
 - Numeric table cells are LTR. Persian prose cells stay RTL.
 - Do not reverse column order unless the user asks.
 - Figure captions: `شکل <span dir="ltr">3</span>. …` Isolate any English
-  term inside the caption.
+  term inside the caption. Do not end the caption with an English isolate
+  followed by a Persian period (the period jumps left). End on Persian, or
+  drop that period.
 - The `<img>` / `<svg>` itself is not RTL content. Give it `dir="ltr"`
   (HTML) or wrap `\includegraphics` in `LTR` (XeLaTeX). Do not mirror it
-  (`transform: scaleX(-1)` is forbidden). Place it in the same
-  relative position as the source. Width/height follow the source
-  aspect ratio. Flatten PNG alpha onto white before the print build
-  (`scripts/prepare-figures.py`); engines composite leftover alpha onto
-  black.
+  (`transform: scaleX(-1)` is forbidden). Center it on the page
+  (`margin-inline: auto`); a block-level LTR image otherwise sits on the
+  physical left. Width/height follow the artwork aspect. Flatten PNG alpha
+  onto white before the print build (`scripts/prepare-figures.py`);
+  engines composite leftover alpha onto black. Never embed a full source
+  page as the figure.
 
 ```html
 <figure>
-  <img dir="ltr" src="figures/fig-3.png" alt="…" width="720" height="420">
-  <figcaption>شکل <span dir="ltr">3</span>. معماری <span dir="ltr">transformer</span>.</figcaption>
+  <img dir="ltr" src="figures/artwork/fig-3.png" alt="…" width="720" height="420">
+  <figcaption>شکل <span dir="ltr">3</span>. معماری
+  <span dir="ltr">transformer</span></figcaption>
 </figure>
 ```
 
@@ -259,7 +263,7 @@ Only when the user demands Markdown:
 <pre dir="ltr"><code>print(x)</code></pre>
 
 <figure>
-  <img dir="ltr" src="figures/fig-3.png" alt="…" width="720" height="420">
+  <img dir="ltr" src="figures/artwork/fig-3.png" alt="…" width="720" height="420">
   <figcaption>شکل <span dir="ltr">3</span>. …</figcaption>
 </figure>
 

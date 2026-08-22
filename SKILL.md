@@ -44,7 +44,7 @@ Override only when the user says so.
 | Digits | Western (`3.14`, not `۳٫۱۴`) |
 | Dates | Source calendar and format, one isolate. No Jalali conversion unless asked. |
 | Figures/tables | `شکل 3`, `جدول 2` — label translated, number unchanged |
-| Images | Same pixels as the source page, order, size, placement. Flatten alpha. `dir="ltr"` / `LTR`. Never mirror, crop, redraw, drop, or ship a pdfimages negative. |
+| Images | Same pixels as the **artwork** on the source page (diagram, screenshot, photo), not the whole page. Flatten alpha. `dir="ltr"` / `LTR`, centered (`margin-inline: auto`). Never mirror, redraw, drop, or ship a pdfimages negative. Never embed a full source page (headers, body text, page numbers, English caption) as a figure — crop to the artwork with `scripts/crop-source-figures.py`. |
 | Code blocks | Always LTR and left-aligned |
 | Abstract/footnotes | Translate |
 | Bibliography | Do not translate (authors, titles, journals, DOIs, URLs) |
@@ -55,10 +55,11 @@ Override only when the user says so.
 1. **Preflight.** `scripts/preflight.sh` — know which engine and fonts
    exist before promising a build. Confirm source, target, and level.
 2. **Ingest.** `references/source-ingest.md`: fetch the source, extract
-   figures, run `scripts/prepare-figures.py figures/ --check`, write
+   figures, run `scripts/crop-source-figures.py` then
+   `scripts/prepare-figures.py figures/ --check`, write
    `inventory.md` and `manifest.txt` in the working tree.
    Never translate from memory when a fetch fails. Never ship a black
-   pdfimages dump.
+   pdfimages dump. Never ship a full source-page raster as a figure.
 3. **Terminology first.** Scan domain terms, apply
    `references/terminology.md`, and write `terms.tsv` plus
    `glossary.local.md` **before** drafting. For a long document show the
@@ -137,8 +138,9 @@ page count, and the engine used.
 2. Persian prose in the `.tex`; English runs in `\lr{…}` / `\en{…}`.
 3. Listings in `\begin{latin}…\end{latin}`. Captions translated,
    identifiers kept (`Figure 3` → `شکل 3`).
-4. `\includegraphics` each copied source image inside `LTR`; HTML `<img dir="ltr">`.
-   Flatten alpha. Order, aspect, and subfigure layout preserved.
+4. `\includegraphics` each cropped artwork file inside `LTR`; HTML `<img dir="ltr">`
+   with `margin-inline: auto`. Flatten alpha. Order, aspect, and subfigure
+   layout preserved. Never point at a full `pdftoppm` of the source page.
 5. Bibliography in a `latin` section, source language. Fill the colophon
    with source, licence, and retrieval date.
 6. `scripts/build-pdf.sh path/to/doc.tex <slug> --verify`. Without TeX the
@@ -154,7 +156,7 @@ half-translated noun phrases, English `-s` plurals of kept terms, leftover
 Latin ezafe (`Goی`), split
 isolates, un-isolated Latin runs, un-isolated number clusters (ranges and
 dates reverse on an RTL page), listing direction, mirrored artwork,
-missing images, figure direction, and terminology drift inside isolates.
+missing images, figure direction, full-page figure rasters, and terminology drift inside isolates.
 Do not re-check these by hand. `--pairs` merges onto the house list.
 
 **Judgement** — only these five, and they are the whole point:
@@ -162,7 +164,8 @@ Do not re-check these by hand. `--pairs` merges onto the house list.
 - [ ] No added, omitted, or softened scientific claim; hedges intact
 - [ ] Terminology consistent with `terms.tsv`, one form per concept
 - [ ] Every source figure present, unmirrored, in source order, with a
-      translated caption, and matching the source page (not a black box)
+      translated caption, showing the artwork (not a black box, not a dump
+      of the English source page around it)
 - [ ] Rasterised pages actually read correctly (periods, parentheses,
       listings, no missing-glyph boxes) — not judged from `pdftotext`
 - [ ] Claim-changing ambiguities were asked, not guessed; the rest are

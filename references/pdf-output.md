@@ -195,8 +195,9 @@ pdftoppm -png -r 110 -f 1 -l 2 out.pdf /tmp/check-p
 
 Then **look at the PNG**. Do not treat `pdftotext` as visual truth on an RTL
 PDF; it reorders. What to look for is in `review.md`. Figures must match
-the source page — a black rectangle is a failed extract or unflattened
-alpha, not “the figure”.
+the **artwork** on the source page — a black rectangle is a failed extract
+or unflattened alpha; a whole English book page (header, body, folio) is
+a failed crop, not “the figure”.
 
 Digit smoke test, once per document: put `3.14` in a Persian sentence, build,
 rasterise, and confirm the glyphs are `3.14` and not `۳٫۱۴`.

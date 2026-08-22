@@ -76,6 +76,11 @@ elif have magick || have convert; then
 else
   no "Pillow/ImageMagick" "figures cannot be flattened; pip install pillow"
 fi
+if python3 -c "import pymupdf" >/dev/null 2>&1; then
+  ok "PyMuPDF" "scripts/crop-source-figures.py"
+else
+  no "PyMuPDF" "cannot crop PDF artwork; pip install pymupdf"
+fi
 
 echo
 echo "Verdict"

@@ -57,7 +57,7 @@ policy, so there is one place to change it.
 build on the mechanical rules — orthography, forbidden calques at that
 level, half-translated noun phrases, English `-s` plurals of kept terms,
 split isolates, un-isolated Latin runs and number clusters, RTL listings,
-mirrored artwork, missing images, figure direction, terminology drift.
+mirrored artwork, missing images, figure direction, full-page rasters, terminology drift.
 `--pairs` merges onto the house list. The checklist left in `SKILL.md` is
 only the five items a machine cannot judge.
 `tests/run.sh` keeps the checker honest with clean and deliberately
@@ -88,6 +88,7 @@ references/review.md           reviewing a finished translation
 scripts/preflight.sh           what this machine can build
 scripts/check-fa.py            mechanical checker
 scripts/prepare-figures.py     flatten alpha; catch pdfimages negatives
+scripts/crop-source-figures.py crop artwork; never embed a full PDF page
 scripts/build-pdf.sh           compile and verify
 scripts/fetch-vazirmatn.sh     font for the HTML path
 tests/                         checker regression tests

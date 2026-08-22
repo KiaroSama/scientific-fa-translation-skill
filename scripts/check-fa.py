@@ -525,6 +525,13 @@ def check(src: Source, pairs: list[tuple[str, str, str]],
             srcm = re.search(r"\bsrc\s*=\s*[\"']([^\"']+)[\"']", tag)
             if srcm:
                 images.append((m.start(), srcm.group(1)))
+                ref = srcm.group(1)
+                base = os.path.basename(ref)
+                if re.match(r"(?:srcpage|page)-\d+\.(?:png|jpe?g|webp)$",
+                            base, re.I):
+                    add(ERROR, "full-page-figure", m.start(),
+                        f"image {base!r} is a full source-page raster; "
+                        "crop to the artwork (scripts/crop-source-figures.py)")
             if not re.search(r"\bdir\s*=\s*[\"']ltr[\"']", tag):
                 add(ERROR, "figure-direction", m.start(),
                     "<img> without dir=\"ltr\"; RTL layout can recell or "
@@ -547,7 +554,13 @@ def check(src: Source, pairs: list[tuple[str, str, str]],
         images = [(m.start(), m.group(1)) for m in
                   live_finditer(
                       r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}")]
-        for pos, _ref in images:
+        for pos, ref in images:
+            base = os.path.basename(ref)
+            if re.match(r"(?:srcpage|page)-\d+\.(?:png|jpe?g|webp)$",
+                        base, re.I):
+                add(ERROR, "full-page-figure", pos,
+                    f"image {base!r} is a full source-page raster; "
+                    "crop to the artwork (scripts/crop-source-figures.py)")
             before = text[:pos]
             last_begin = max(
                 before.rfind("\\begin{LTR}"),

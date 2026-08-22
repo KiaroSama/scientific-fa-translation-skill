@@ -74,13 +74,13 @@ expect_checks "$fixtures/bad.tex" \
   arabic-letters eastern-digits zwnj-verb zwnj-plural latin-punct \
   forbidden-fa half-translation fa-morphology en-plural split-isolate \
   unisolated-latin unisolated-number code-direction missing-image \
-  bookmark-guard figure-direction
+  bookmark-guard figure-direction full-page-figure
 
 expect_checks "$fixtures/bad.html" \
   arabic-letters eastern-digits zwnj-verb forbidden-fa half-translation \
   fa-morphology en-plural split-isolate unisolated-latin unisolated-number \
   code-direction html-root mirrored-image missing-image print-css \
-  figure-direction
+  figure-direction full-page-figure
 
 # Journal-correct field nouns must fail at the default system-docs level.
 journal_out=$(python3 "$lint" "$fixtures/journal.tex" --domains all 2>&1) || true
@@ -184,6 +184,15 @@ PY
   rm -f "$alpha" "$alpha.orig"
 else
   echo "skip prepare-figures (no Pillow)"
+fi
+
+help_out=$(python3 "$here/../scripts/crop-source-figures.py" --help 2>&1) || help_rc=$?
+if [[ ${help_rc:-0} -eq 0 ]] && grep -q crop-source-figures <<<"$help_out"; then
+  echo "ok   crop-source-figures.py --help"
+else
+  echo "FAIL crop-source-figures.py --help"
+  echo "$help_out" | sed 's/^/    /'
+  fail=1
 fi
 
 if [[ $fail -eq 0 ]]; then

@@ -91,12 +91,14 @@
       margin: 1.5rem 0;
       break-inside: avoid;
       page-break-inside: avoid;
+      text-align: center;
     }
     figure img,
     figure svg {
       display: block;
       max-width: 100%;
       height: auto;
+      margin-inline: auto;
       direction: ltr;
       unicode-bidi: isolate;
       transform: none;
@@ -164,10 +166,11 @@
     Listings keep dir="ltr" on <pre>, never RTL:
       <pre dir="ltr"><code>…</code></pre>
 
-    Figures use the original files, flattened RGB, never mirrored:
+    Figures are the artwork only, flattened RGB, never a full source page:
       <figure>
-        <img dir="ltr" src="figures/fig-3.png" alt="…" width="720" height="420">
-        <figcaption>شکل <span dir="ltr">3</span>. …</figcaption>
+        <img dir="ltr" src="figures/artwork/fig-3.png" alt="…" width="720" height="420">
+        <figcaption>شکل <span dir="ltr">3</span>. معماری
+        <span dir="ltr">transformer</span></figcaption>
       </figure>
     A numbered English heading is one isolate, not two:
       <h2><span dir="ltr">3.1 The OpenStack service</span>ها</h2>

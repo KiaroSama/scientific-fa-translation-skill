@@ -98,21 +98,32 @@ name behind.
 
 The translation must *show* the same figures the source shows.
 
-- Copy the original files (PNG, JPEG, SVG, extracted PDF page). Point
-  `\includegraphics` or `img src` at those copies. Do not redraw,
-  screenshot-replace, or generate a substitute.
-- Run `scripts/prepare-figures.py figures/ --check` after ingest. Flatten
-  PNG alpha onto white. If a file is a near-black dump, compare it with a
-  `pdftoppm` of the source page; invert only when that page is light
-  (`--invert-dark`).
-- HTML: `dir="ltr"` on every `<img>`. XeLaTeX: `\includegraphics` inside
-  `LTR`. The checker fails without those.
-- Keep document order, subfigure layout (`a`/`b`/`c`), aspect ratio, and
-  resolution. Do not crop or pad in a way that changes what is visible.
+- Copy or crop the original artwork (PNG, JPEG, SVG, a **clip** of the
+  PDF page). Point `\includegraphics` or `img src` at those files. Do not
+  redraw, screenshot-replace, or generate a substitute.
+- A full `pdftoppm` of the source page is not a figure. It contains
+  English headers, body, captions, and page numbers. Crop with
+  `scripts/crop-source-figures.py` to the diagram, screenshot, or photo.
+  Cover: illustration only. Author: headshot only.
+- Run `scripts/prepare-figures.py figures/artwork --check` after ingest.
+  Flatten PNG alpha onto white. If a file is a near-black dump, compare it
+  with a `pdftoppm` of the source page; invert only when that page is
+  light (`--invert-dark`).
+- HTML: `dir="ltr"` on every `<img>`, and center it (`margin-inline:
+  auto` — the HTML template does this). `dir="ltr"` plus `display:block`
+  without auto margins hugs the physical left of an RTL page. XeLaTeX:
+  `\includegraphics` inside `LTR`. The checker fails without `dir="ltr"` /
+  `LTR`, and on `srcpage-N` / `page-N` filenames.
+- Keep document order, subfigure layout (`a`/`b`/`c`), and the artwork's
+  aspect ratio. Crop away page chrome; do not crop away labels that belong
+  to the figure.
 - Never mirror or rotate for RTL.
 - Text baked into the image stays as in the source. Do not edit pixels to
   Persianise axis labels or legends.
-- Translate the caption and the prose that refers to the figure.
+- Translate the caption and the prose that refers to the figure. Do not
+  put a Persian period immediately after an English isolate at the end of
+  a caption — it jumps to the left. End the caption on a Persian word, or
+  omit that period.
 - `alt` may be a short Persian description; it must not replace the image.
 - If a file is missing or unreadable, leave a visible comment at that spot
   and tell the user. Do not invent a figure. The checker fails on an

@@ -53,7 +53,7 @@ checking your own output, not to reading an English source.
 ## Extracting figures
 
 The destination PDF must show the **same pixels the reader sees on the
-source page**. That is not the same as dumping every embedded stream.
+figure**, not the whole source page around it.
 
 1. **Prefer the original asset.** If the source is HTML, or the PDF has an
    HTML companion, copy the `<img src>` / SVG files. Those are the figures.
@@ -63,11 +63,29 @@ source page**. That is not the same as dumping every embedded stream.
    companions. Never ship those.
 3. **Rasterise the source page** (`pdftoppm -png -r 150 -f N -l N`) and
    compare each extracted file with that page. If the extract is a
-   photographic negative of the figure, it is wrong.
-4. **Flatten before the print build:**
+   photographic negative of the figure, it is wrong. That raster is
+   **ground truth for checking**, not a file to embed.
+4. **Crop to the artwork.** A figure is the diagram, screenshot, or photo.
+   It is not the running header, English body, source caption, or page
+   number. Never point `<img>` / `\includegraphics` at a full-page
+   `pdftoppm` (`srcpage-027.png`, `page-12.png`). Map each figure to its
+   PDF page by reading `pdftotext -f N -l N` until the caption (`Figure
+   1.1`) appears — do not guess an offset from printed page numbers.
 
    ```bash
-   scripts/prepare-figures.py figures/ --check
+   scripts/crop-source-figures.py source/doc.pdf --out figures/artwork \
+       --map figures-map.tsv --cover --author-page 18
+   ```
+
+   `figures-map.tsv` is `figure_id`, optional printed page, then **PDF page**.
+   Two figures on one page become two rows with the same PDF page; crops
+   are top-to-bottom. Cover art is the plate only (no English title
+   spine). An author portrait is the headshot, not the “about the author”
+   page.
+5. **Flatten before the print build:**
+
+   ```bash
+   scripts/prepare-figures.py figures/artwork --check
    ```
 
    `--check` fails on leftover alpha (WeasyPrint/Cairo and xepersian paint
@@ -75,17 +93,18 @@ source page**. That is not the same as dumping every embedded stream.
    source page that a dark dump is inverted, not a real dark photograph:
 
    ```bash
-   scripts/prepare-figures.py figures/ --invert-dark
+   scripts/prepare-figures.py figures/artwork --invert-dark
    ```
 
 ```bash
 pdfimages -png -p source/doc.pdf figures/img      # last-resort rasters
-pdftoppm -png -r 150 -f 12 -l 12 source/doc.pdf figures/page-12  # ground truth
-scripts/prepare-figures.py figures/ --check
+pdftoppm -png -r 150 -f 12 -l 12 source/doc.pdf /tmp/page-12  # check only
+scripts/crop-source-figures.py source/doc.pdf --out figures/artwork --map figures-map.tsv
+scripts/prepare-figures.py figures/artwork --check
 ```
 
-Use `pdftoppm` on a page when a figure is vector-drawn and cannot be
-extracted, and crop nothing.
+The checker fails (`full-page-figure`) if the translation still references
+`srcpage-N.png` or `page-N.png`.
 
 ## Structure inventory
 
