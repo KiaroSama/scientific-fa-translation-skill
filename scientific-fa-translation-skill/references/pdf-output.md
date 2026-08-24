@@ -14,8 +14,8 @@ $HOME/Documents/books/<slug>.pdf
 ```
 
 Create it if needed. On native Windows that same directory is
-`%USERPROFILE%\Documents\books`; the shell scripts expect WSL or Git Bash,
-where `$HOME` already resolves there. `<slug>` is a
+`%USERPROFILE%\Documents\books`, which is what `$HOME` resolves to in
+PowerShell, WSL, and Git Bash alike. `<slug>` is a
 filesystem-safe stem from the source title (`attention-is-all-you-need`).
 Re-running the same document overwrites the same slug; a different work gets
 a different slug. Never leave the only copy in the workspace or `/tmp`.
@@ -29,10 +29,52 @@ Run this **first**, before choosing an approach:
 scripts/preflight.sh
 ```
 
+```powershell
+.\scripts\preflight.ps1
+```
+
 It reports which engines and fonts actually exist and prints the install
 command for what is missing. Do not plan a XeLaTeX build on a machine
 without XeLaTeX and then discover it at compile time — decide up front, and
 tell the user which engine will be used and what that costs.
+
+## Windows
+
+Every shell script has a PowerShell twin with the same name and the same
+behaviour, so the workflow is identical — only the extension and the flag
+style change:
+
+| POSIX | Windows |
+| --- | --- |
+| `scripts/preflight.sh` | `.\scripts\preflight.ps1` |
+| `scripts/build-pdf.sh doc.tex slug --verify` | `.\scripts\build-pdf.ps1 doc.tex slug -Verify` |
+| `scripts/build-pdf.sh doc.html slug --engine chromium` | `.\scripts\build-pdf.ps1 doc.html slug -Engine chromium` |
+| `scripts/fetch-vazirmatn.sh fonts` | `.\scripts\fetch-vazirmatn.ps1 fonts` |
+
+The `.py` helpers need no port — run them as `python scripts\check-fa.py …`.
+The `.ps1` scripts target PowerShell 5.1, so they work in the shell that
+ships with Windows; PowerShell 7 (`pwsh`) is fine too. If execution policy
+blocks them, start them with
+`powershell -ExecutionPolicy Bypass -File .\scripts\preflight.ps1` rather
+than relaxing the machine-wide policy.
+
+Windows specifics worth knowing:
+
+- **Browser engine.** Edge is checked before Chrome — it ships with
+  Windows, so a browser fallback is almost always available. The headless
+  run gets its own `--user-data-dir`, because otherwise an already-open
+  Edge or Chrome window makes `--print-to-pdf` exit 0 without writing
+  anything.
+- **Poppler** (`pdfinfo`, `pdffonts`, `pdftoppm`, `pdfimages`) is not
+  present by default. Without it `-Verify` still checks that the PDF is
+  non-empty but cannot rasterise sample pages, and figure extraction is
+  unavailable. `winget install oschwartz10612.Poppler`.
+- **TeX.** MiKTeX (`winget install MiKTeX.MiKTeX`) can install `xepersian`
+  and `bidi` on demand; TeX Live for Windows works as well.
+- **Fonts.** There is no `fc-list`, so `preflight.ps1` reads the font
+  registry instead, and `fetch-vazirmatn.ps1` copies an installed
+  Vazirmatn from `C:\Windows\Fonts` or the per-user font directory before
+  it downloads anything.
 
 ## Engine order
 

@@ -57,9 +57,12 @@ the directory name.
   (engines, fonts, verification), `source-ingest.md` (fetching the
   source), `long-documents.md` (sectioning, resume, ambiguity queue),
   `review.md` (reviewing a finished translation).
-- `scientific-fa-translation-skill/scripts/` — `preflight.sh`,
-  `check-fa.py`, `build-pdf.sh`, `prepare-figures.py`,
-  `crop-source-figures.py`, `extract-pdf-pages.py`, `fetch-vazirmatn.sh`
+- `scientific-fa-translation-skill/scripts/` — `preflight`, `build-pdf`,
+  and `fetch-vazirmatn` exist twice, as `.sh` and `.ps1` with the same
+  name and the same behaviour; `check-fa.py`, `prepare-figures.py`,
+  `crop-source-figures.py`, and `extract-pdf-pages.py` are cross-platform
+  Python and are not duplicated. A behaviour change to one shell script
+  must land in its twin in the same commit, or the two platforms drift.
 - `scientific-fa-translation-skill/assets/` — `rtl-document.tex` and
   `rtl-document.html` print templates
 - `tests/` — repo tooling, not shipped in the `.skill`
@@ -100,8 +103,11 @@ lint → test → build a PDF; there is nothing to keep running.
   `python3-pil`/Pillow, `poppler-utils`, `fonts-vazirmatn`,
   `texlive-xetex` + `texlive-lang-arabic` for xepersian, `latexmk`,
   `google-chrome`). Any boot-time update script is intentionally a no-op.
-- The shell scripts assume a POSIX shell. On native Windows run them
-  under WSL or Git Bash; PowerShell is not supported.
+- The `.sh` scripts assume a POSIX shell; the `.ps1` twins target
+  PowerShell 5.1, so they run in the shell that ships with Windows. Do not
+  use PowerShell-7-only syntax (`??`, ternaries, `ForEach-Object
+  -Parallel`). `tests/run.sh` is POSIX-only — on Windows run it under WSL
+  or Git Bash.
 
 ## Known toolchain issue (also seen on Cursor Cloud)
 

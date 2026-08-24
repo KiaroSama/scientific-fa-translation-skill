@@ -20,6 +20,8 @@ Codex.
   English, with two levels (`journal`, `system-docs`) and per-field packs
 - **Print-ready RTL** — XeLaTeX + `xepersian`, with a Chromium/WeasyPrint
   HTML fallback; every LTR run isolated so bidi cannot reverse it
+- **Linux, macOS, and Windows** — each shell script has a PowerShell twin
+  of the same name; the Python helpers run anywhere
 - **Mechanical enforcement** — `check-fa.py` fails the build on
   orthography, calques, split isolates, mirrored artwork, and more
 
@@ -128,8 +130,20 @@ scripts/build-pdf.sh doc.tex my-slug --verify
 cd .. && bash tests/run.sh
 ```
 
-The scripts are POSIX shell — on native Windows run them under WSL or Git
-Bash.
+On native Windows, use the PowerShell twins — same names, same behaviour:
+
+```powershell
+cd scientific-fa-translation-skill
+.\scripts\preflight.ps1
+python scripts\check-fa.py doc.tex --level system-docs --domains openstack --strict
+.\scripts\build-pdf.ps1 doc.tex my-slug -Verify
+```
+
+The `.ps1` scripts target PowerShell 5.1, so the shell that ships with
+Windows is enough. The `.py` helpers are cross-platform and need no port.
+`tests/run.sh` is POSIX-only — run it under WSL or Git Bash. See
+`references/pdf-output.md` for the Windows engine notes (Edge as the
+browser fallback, MiKTeX for TeX, poppler for `-Verify` rasterisation).
 
 ## Repository contents
 
@@ -150,14 +164,14 @@ scientific-fa-translation-skill/       the skill; copy this into your skills dir
 │   ├── source-ingest.md               fetching and extracting the source
 │   ├── long-documents.md              sectioning, resume, ambiguity queue
 │   └── review.md                      reviewing a finished translation
-└── scripts/
-    ├── preflight.sh                   what this machine can build
+└── scripts/                           .sh and .ps1 are twins; .py is portable
+    ├── preflight.sh    preflight.ps1        what this machine can build
+    ├── build-pdf.sh    build-pdf.ps1        compile and verify
+    ├── fetch-vazirmatn.sh  ….ps1            font for the HTML path
     ├── check-fa.py                    mechanical checker
     ├── prepare-figures.py             flatten alpha; catch pdfimages negatives
     ├── crop-source-figures.py         crop artwork; never embed a full PDF page
-    ├── extract-pdf-pages.py           page-range PDF without duplicating XObjects
-    ├── build-pdf.sh                   compile and verify
-    └── fetch-vazirmatn.sh             font for the HTML path
+    └── extract-pdf-pages.py           page-range PDF without duplicating XObjects
 
 scientific-fa-translation-skill.skill  packaged zip of the above
 tests/                                 checker regression tests (not shipped)

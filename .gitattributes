@@ -2,6 +2,10 @@
 # templates must not gain CR bytes when the repo is cloned on Windows.
 * text=auto eol=lf
 
+# PowerShell is the one exception: check the .ps1 twins out with CRLF, the
+# native Windows convention.
+*.ps1 text eol=crlf
+
 # The packaged skill is a zip; never run line-ending conversion on it.
 *.skill binary
 *.png   binary

@@ -20,6 +20,30 @@ jobs:
       - name: Byte-compile python
         run: python3 -m py_compile $(git ls-files '*.py')
 
+      - name: PowerShell twins exist and stay ASCII
+        run: |
+          set -e
+          # Windows PowerShell 5.1 decodes a BOM-less .ps1 with the system
+          # ANSI code page. A UTF-8 em dash then becomes U+201D, which the
+          # tokenizer treats as a double quote and the whole file fails to
+          # parse. Keeping the .ps1 files ASCII removes the dependency.
+          fail=0
+          for f in $(git ls-files '*.ps1'); do
+            if LC_ALL=C grep -nP '[^\x00-\x7F]' "$f"; then
+              echo "$f: non-ASCII byte; PowerShell 5.1 will mis-decode it"
+              fail=1
+            fi
+          done
+          # Every shell script in the skill needs a same-named .ps1 twin.
+          for sh in scientific-fa-translation-skill/scripts/*.sh; do
+            ps1="${sh%.sh}.ps1"
+            if [ ! -f "$ps1" ]; then
+              echo "missing PowerShell twin for $sh"
+              fail=1
+            fi
+          done
+          exit $fail
+
       - name: Checker regression tests
         run: bash tests/run.sh
 

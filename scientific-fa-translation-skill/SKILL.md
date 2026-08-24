@@ -56,6 +56,11 @@ Override only when the user says so.
 
 1. **Preflight.** `scripts/preflight.sh` — know which engine and fonts
    exist before promising a build. Confirm source, target, and level.
+   On native Windows every `.sh` here has a `.ps1` twin with the same name
+   and the same behaviour: `scripts/preflight.ps1`, `scripts/build-pdf.ps1`,
+   `scripts/fetch-vazirmatn.ps1`. The `.py` helpers are cross-platform —
+   run them as `python scripts\check-fa.py …`. Pick one family and stay in
+   it for the whole document.
 2. **Ingest.** `references/source-ingest.md`: fetch the source, extract
    figures, run `scripts/crop-source-figures.py` then
    `scripts/prepare-figures.py figures/ --check`, write
@@ -135,10 +140,10 @@ Persian period must belong to the Persian sentence.
 ## Output
 
 Default: printable PDF at `$HOME/Documents/books/<slug>.pdf` (created if
-needed). `scripts/build-pdf.sh` resolves `$HOME` itself, so the same command
-works on Linux, macOS, WSL, and Git Bash; on native Windows the same
-directory is `%USERPROFILE%\Documents\books`. Report the resolved absolute
-path, the page count, and the engine used.
+needed). Both `scripts/build-pdf.sh` and `scripts/build-pdf.ps1` resolve
+`$HOME` themselves, so the destination is the same on Linux, macOS, WSL,
+Git Bash, and native Windows (`%USERPROFILE%\Documents\books`). Report the
+resolved absolute path, the page count, and the engine used.
 
 1. Read `references/pdf-output.md`. Prefer `assets/rtl-document.tex`.
 2. Persian prose in the `.tex`; English runs in `\lr{…}` / `\en{…}`.
@@ -149,9 +154,11 @@ path, the page count, and the engine used.
    layout preserved. Never point at a full `pdftoppm` of the source page.
 5. Bibliography in a `latin` section, source language. Fill the colophon
    with source, licence, and retrieval date.
-6. `scripts/build-pdf.sh path/to/doc.tex <slug> --verify`. Without TeX the
-   same script takes the filled-in `assets/rtl-document.html`; embed
-   Vazirmatn with `scripts/fetch-vazirmatn.sh` and never the UI-FD cut.
+6. `scripts/build-pdf.sh path/to/doc.tex <slug> --verify`, or on Windows
+   `scripts\build-pdf.ps1 path\to\doc.tex <slug> -Verify`. Without TeX the
+   same script takes the filled-in `assets/rtl-document.html` — Chromium
+   on Linux/macOS, Edge then Chrome on Windows; embed Vazirmatn with
+   `scripts/fetch-vazirmatn.sh` (`.ps1`) and never the UI-FD cut.
    A page-range PDF is `scripts/extract-pdf-pages.py in.pdf out.pdf 1-20`
    — one range, never a per-page loop (`references/pdf-output.md`).
 
