@@ -47,8 +47,14 @@ function Write-No {
 }
 
 function Get-Tool {
+    # -First 1 is load-bearing: several pythons on PATH (3.13, 3.11, the
+    # WindowsApps stub) make Get-Command return an array, and $cmd.Source
+    # would then be an array of paths that the call operator cannot run.
+    # Get-Command yields them in PATH order, so the first is the one a bare
+    # name would have resolved to anyway.
     param([string]$Name)
-    $cmd = Get-Command -Name $Name -CommandType Application -ErrorAction SilentlyContinue
+    $cmd = Get-Command -Name $Name -CommandType Application -ErrorAction SilentlyContinue |
+        Select-Object -First 1
     if ($cmd) { return $cmd.Source }
     return $null
 }
@@ -73,8 +79,14 @@ function Invoke-Tool {
     param([string]$Exe, [string[]]$Arguments)
     $ErrorActionPreference = 'Continue'
     $PSNativeCommandUseErrorActionPreference = $false
-    $out = & $Exe @Arguments 2>&1
-    $code = if (Test-Path 'variable:LASTEXITCODE') { $LASTEXITCODE } else { 0 }
+    # Clear the sentinel first. If the executable never launches, nothing
+    # updates $LASTEXITCODE and a stale or unset value would read as a clean
+    # exit - which would report a missing Python module as installed.
+    $global:LASTEXITCODE = $null
+    $out = $null
+    try { $out = & $Exe @Arguments 2>&1 }
+    catch { $out = $_.Exception.Message }
+    if ($null -eq $LASTEXITCODE) { $code = 127 } else { $code = $LASTEXITCODE }
     return [pscustomobject]@{ ExitCode = $code; Output = $out }
 }
 

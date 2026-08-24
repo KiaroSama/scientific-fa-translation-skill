@@ -80,7 +80,16 @@ exit code, which the scripts do constantly:
 - **Command discovery.** `& 'pdfinfo'` runs full discovery and prefers an
   alias, function, or cmdlet over the executable; those leave
   `$LASTEXITCODE` stale, or unset in a fresh session, where StrictMode
-  then throws on the read.
+  then throws on the read. Worse, `Get-Command python` routinely returns
+  *several* matches on Windows — 3.13, 3.11, and the WindowsApps Store
+  stub are all on a typical `PATH` — so `$cmd.Source` is an array of paths
+  that nothing can execute. `Get-Tool` takes the first match, which is the
+  one PATH order would have selected anyway.
+- **A command that never launches.** If the executable cannot start,
+  nothing writes `$LASTEXITCODE`, so a stale or unset value reads as a
+  clean exit. That is how a probe like `python -c "import PIL"` can report
+  a missing module as installed. `Invoke-Tool` clears `$LASTEXITCODE`
+  before every call and reports 127 when it comes back unset.
 
 All three are neutralised in one place — the `Invoke-Tool` helper sets
 `$ErrorActionPreference = 'Continue'` and
