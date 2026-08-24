@@ -276,8 +276,42 @@ function Invoke-TexBuild {
         Write-Log "expected PDF missing: $pdf"
         return 2
     }
+    # A zero exit code from xelatex only means TeX itself was happy. The
+    # PDF driver runs afterwards and reports its own failure in the log
+    # while xelatex still exits 0, so check for that before believing it.
+    if (Test-Path -LiteralPath $log -PathType Leaf) {
+        $driver = Get-Content -LiteralPath $log -Encoding UTF8 |
+            Where-Object { $_ -like '*driver return code*' }
+        if ($driver) {
+            Write-Log 'the PDF driver failed even though xelatex exited 0:'
+            $driver | ForEach-Object { [Console]::Error.WriteLine($_) }
+            Write-ToolOutput $r.Output
+            return 2
+        }
+    }
+    if (-not (Test-PdfStructure $pdf)) {
+        Write-Log "$pdf is truncated (no %%EOF); the driver did not finish"
+        Write-ToolOutput $r.Output
+        return 2
+    }
     Copy-Item -LiteralPath $pdf -Destination $Destination -Force
     return 0
+}
+
+function Test-PdfStructure {
+    # A PDF that exists is not a PDF that is complete. XeLaTeX can exit 0
+    # while the xdvipdfmx driver dies, leaving a truncated file with a valid
+    # header and no trailer - poppler then reports "Couldn't find trailer
+    # dictionary" and the page count is unknown.
+    param([string]$Pdf)
+    $item = Get-Item -LiteralPath $Pdf -ErrorAction SilentlyContinue
+    if (-not $item -or $item.Length -lt 100) { return $false }
+    $bytes = [IO.File]::ReadAllBytes($Pdf)
+    $head = [Text.Encoding]::ASCII.GetString($bytes, 0, [Math]::Min(8, $bytes.Length))
+    if ($head -notlike '%PDF-*') { return $false }
+    $tailLen = [Math]::Min(2048, $bytes.Length)
+    $tail = [Text.Encoding]::ASCII.GetString($bytes, $bytes.Length - $tailLen, $tailLen)
+    return $tail.Contains('%%EOF')
 }
 
 function ConvertTo-FileUri {
@@ -362,9 +396,8 @@ function Invoke-HtmlBuild {
 
 function Test-OutputPdf {
     param([string]$Pdf, [string]$WorkDir, [string]$Stem)
-    $item = Get-Item -LiteralPath $Pdf -ErrorAction SilentlyContinue
-    if (-not $item -or $item.Length -eq 0) {
-        Write-Log "VERIFY FAIL: $Pdf is empty"
+    if (-not (Test-PdfStructure $Pdf)) {
+        Write-Log "VERIFY FAIL: $Pdf is empty or truncated (no %%EOF trailer)"
         return $false
     }
     $pages = $null
@@ -470,7 +503,13 @@ try {
         exit 1
     }
 
-    if ($Verify) { Test-OutputPdf $dest $srcDir $Slug | Out-Null }
+    # Verification that cannot fail the build is decoration. If -Verify was
+    # asked for and it fails, do not print the destination path as though
+    # the document were usable.
+    if ($Verify -and -not (Test-OutputPdf $dest $srcDir $Slug)) {
+        Write-Log 'verification failed; this PDF is not usable'
+        exit 1
+    }
 }
 finally {
     Pop-Location

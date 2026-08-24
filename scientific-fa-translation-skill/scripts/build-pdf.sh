@@ -70,6 +70,17 @@ find_chrome() {
   return 1
 }
 
+# A PDF that exists is not a PDF that is complete. XeLaTeX can exit 0 while
+# the xdvipdfmx driver dies, leaving a truncated file with a valid header and
+# no trailer - poppler then reports "Couldn't find trailer dictionary".
+pdf_is_complete() {
+  local f=$1
+  [[ -s $f ]] || return 1
+  [[ $(head -c 5 "$f") == '%PDF-' ]] || return 1
+  tail -c 2048 "$f" | grep -q '%%EOF' || return 1
+  return 0
+}
+
 show_tex_error() {
   local logfile=$1
   [[ -f $logfile ]] || return 0
@@ -136,6 +147,20 @@ compile_tex() {
     return 2
   fi
   [[ -f $pdf ]] || { log "expected PDF missing: ${src_dir}/${pdf}"; return 2; }
+  # A zero exit code from xelatex only means TeX itself was happy. The PDF
+  # driver runs afterwards and reports its own failure in the log while
+  # xelatex still exits 0, so check for that before believing it.
+  if [[ -f $logfile ]] && grep -q 'driver return code' "$logfile"; then
+    log "the PDF driver failed even though xelatex exited 0:"
+    grep -n 'driver return code' "$logfile" >&2
+    printf '%s\n' "$out" >&2
+    return 2
+  fi
+  if ! pdf_is_complete "$pdf"; then
+    log "${pdf} is truncated (no %%EOF); the driver did not finish"
+    printf '%s\n' "$out" >&2
+    return 2
+  fi
   cp -f "$pdf" "$dest" || return 2
   return 0
 }
@@ -171,7 +196,8 @@ HTML(sys.argv[1]).write_pdf(sys.argv[2])' "$html" "$out" || return 2
 
 verify_pdf() {
   local pdf=$1
-  [[ -s $pdf ]] || { log "VERIFY FAIL: $pdf is empty"; return 1; }
+  pdf_is_complete "$pdf" || {
+    log "VERIFY FAIL: $pdf is empty or truncated (no %%EOF trailer)"; return 1; }
   local pages=""
   if command -v pdfinfo >/dev/null 2>&1; then
     pages=$(pdfinfo "$pdf" 2>/dev/null | awk '/^Pages:/{print $2}')
@@ -241,6 +267,12 @@ if [[ $rc -ne 0 ]]; then
   exit 1
 fi
 
-[[ $verify -eq 1 ]] && verify_pdf "$dest"
+# Verification that cannot fail the build is decoration. If --verify was
+# asked for and it fails, do not print the destination path as though the
+# document were usable.
+if [[ $verify -eq 1 ]] && ! verify_pdf "$dest"; then
+  log "verification failed; this PDF is not usable"
+  exit 1
+fi
 
 echo "$dest"

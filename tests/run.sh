@@ -225,13 +225,26 @@ cat >"$stub/latexmk" <<'STUB'
 echo "Can't locate strict.pm in @INC" >&2
 exit 2
 STUB
+complete_pdf() { printf '%%PDF-1.7\n1 0 obj\n<<>>\nendobj\ntrailer\n%%%%EOF\n' >"$1"; }
 cat >"$stub/xelatex" <<'STUB'
 #!/bin/sh
 for a; do case "$a" in *.tex) s=$(basename "$a" .tex);; esac; done
 case "$XELATEX_MODE" in
-  ok)      echo "log line" > "$s.log"; printf '%%PDF-1.4\n' > "$s.pdf"; exit 0 ;;
-  logfail) printf '! Undefined control sequence.\nl.42 \\bogus\n' > "$s.log"; exit 1 ;;
-  *)       echo "xelatex: cannot execute" >&2; exit 127 ;;
+  ok)       echo "log line" > "$s.log"
+            printf '%%PDF-1.7\n1 0 obj\n<<>>\nendobj\ntrailer\n%%%%EOF\n' > "$s.pdf"
+            exit 0 ;;
+  logfail)  printf '! Undefined control sequence.\nl.42 \\bogus\n' > "$s.log"; exit 1 ;;
+  # Exit 0, but the xdvipdfmx driver died: log says so and the PDF is
+  # truncated. This is the MiKTeX failure that reported a broken build as a
+  # success.
+  driver)   printf 'Error 1 (driver return code) generating output;\nfile %s.pdf may not be valid.\n' "$s" > "$s.log"
+            printf '%%PDF-1.7\n1 0 obj\n<</Filter/FlateD' > "$s.pdf"
+            exit 0 ;;
+  # Exit 0, no driver line, but still a truncated PDF.
+  truncated) echo "log line" > "$s.log"
+            printf '%%PDF-1.7\n1 0 obj\n<</Filter/FlateD' > "$s.pdf"
+            exit 0 ;;
+  *)        echo "xelatex: cannot execute" >&2; exit 127 ;;
 esac
 STUB
 chmod +x "$stub"/*
@@ -282,6 +295,12 @@ expect_build "prints engine output when no .log exists" dead 1 \
 # output, or the latexmk fallback silently stops working.
 expect_build "is not fooled by a stale .log" ok 0 stale \
   "latexmk wrote no .log" "retrying with xelatex"
+# xelatex exits 0, the PDF driver does not. A build that ships a truncated
+# PDF as a success is worse than one that fails.
+expect_build "fails when the PDF driver dies behind a zero exit code" driver 1 \
+  "the PDF driver failed even though xelatex exited 0" "driver return code"
+expect_build "fails on a truncated PDF with no %%EOF" truncated 1 \
+  "is truncated (no %%EOF)"
 
 # The .tex template resolves fonts with \IfFontExistsTF chains whose last
 # entry is unguarded: if that face is missing, fontspec aborts the build.
