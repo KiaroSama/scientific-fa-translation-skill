@@ -61,8 +61,8 @@ start them with
 `pwsh -ExecutionPolicy Bypass -File …`) rather than relaxing the
 machine-wide policy.
 
-Three traps are already handled inside the scripts, and any new `.ps1` code
-must handle them too. All three are about probing a native command for its
+These traps are already handled inside the scripts, and any new `.ps1` code
+must handle them too. They are all about probing a native command for its
 exit code, which the scripts do constantly:
 
 - **5.1** turns each stderr line of a native command into an `ErrorRecord`
@@ -90,8 +90,18 @@ exit code, which the scripts do constantly:
   clean exit. That is how a probe like `python -c "import PIL"` can report
   a missing module as installed. `Invoke-Tool` clears `$LASTEXITCODE`
   before every call and reports 127 when it comes back unset.
+- **A GUI-subsystem executable is never waited for.** PowerShell blocks on
+  console applications only. `msedge.exe` and `chrome.exe` are GUI
+  binaries, so `& $browser --print-to-pdf …` returns the moment the
+  process starts: nothing is captured, nothing writes `$LASTEXITCODE`, and
+  the check for the finished PDF runs while the browser is still booting.
+  `Invoke-Tool` reads that as its "never launched" sentinel and reports
+  127 — which is why the HTML path failed on every Windows machine with
+  Edge until `Invoke-Browser` was split out. Only `Start-Process -Wait`
+  blocks on a GUI process, and it joins the arguments into one string, so
+  anything containing a space has to be quoted on the way in.
 
-All three are neutralised in one place — the `Invoke-Tool` helper sets
+All of these are neutralised in one place — the `Invoke-Tool` helper sets
 `$ErrorActionPreference = 'Continue'` and
 `$PSNativeCommandUseErrorActionPreference = $false` as function-scoped
 locals (they revert on return), and reads `$LASTEXITCODE` defensively.
@@ -145,6 +155,16 @@ Windows specifics worth knowing:
   registry instead, and `fetch-vazirmatn.ps1` copies an installed
   Vazirmatn from `C:\Windows\Fonts` or the per-user font directory before
   it downloads anything.
+- **A variable font cannot be selected by family name.** Google Fonts
+  ships Vazirmatn as `Vazirmatn-VariableFont_wght.ttf`, and that is what
+  most Windows machines have installed. Asked for the *family*, XeTeX
+  hands the driver a named instance of it, which `xdvipdfmx` cannot
+  embed — `Invalid TTC index (not TTC font)`, then
+  `dvipdfmx:fatal: Invalid font: -1 (4)`, then no PDF. The identical file
+  loaded by **path** carries no instance index and embeds normally, so
+  `assets/rtl-document.tex` tries `fonts/Vazirmatn-Regular.ttf` before any
+  family name. Put the files there first (see below); `build-pdf` prints
+  that instruction when it recognises the driver error.
 
 ## Engine order
 
@@ -169,7 +189,19 @@ the `.tex` and figures so the user can compile later.
 ## XeLaTeX + xepersian
 
 Start from `assets/rtl-document.tex`. Load `graphicx`, `hyperref`, and
-`geometry` **before** `xepersian`. The template resolves fonts itself with
+`geometry` **before** `xepersian`. Put the font beside the document first —
+the same `fonts/` the HTML template embeds, and the only form a variable
+Vazirmatn can be used in at all:
+
+```bash
+scripts/fetch-vazirmatn.sh fonts       # run in the document's directory
+```
+
+```powershell
+.\scripts\fetch-vazirmatn.ps1 fonts
+```
+
+The template resolves the rest itself with
 `\IfFontExistsTF`, so there is nothing to hand-edit — but confirm the chosen
 face covers Persian:
 

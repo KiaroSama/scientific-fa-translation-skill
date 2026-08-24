@@ -13,9 +13,11 @@ installs into Claude Code, Cursor, and Codex unchanged.
 ## Build Commands
 
 ```bash
-# Package the skill (creates the .skill zip)
-zip -r scientific-fa-translation-skill.skill \
-  scientific-fa-translation-skill -x "*.DS_Store" -x "*__pycache__*"
+# Package the skill from the committed tree, so a fetched fonts/
+# directory, a stray build artefact, or a CRLF working copy cannot
+# end up inside the .skill.
+git archive --format=zip -o scientific-fa-translation-skill.skill \
+  HEAD scientific-fa-translation-skill
 
 # Install to the Claude Code skills directory
 cp -r scientific-fa-translation-skill ~/.claude/skills/
@@ -101,3 +103,11 @@ The font "TeX Gyre Termes" does not contain U+06F0`. Build via the HTML
 path instead (`scripts/build-pdf.sh doc.html <slug> --verify`, Chromium
 engine). Only touch the template's digit-font handling if the `.tex` path
 itself is the task.
+
+A variable font cannot be selected by family name. Windows normally has
+Vazirmatn installed as `Vazirmatn-VariableFont_wght.ttf`; XeTeX then hands
+the driver a named instance, which `xdvipdfmx` refuses with `Invalid TTC
+index` and `dvipdfmx:fatal: Invalid font: -1 (4)`. The same file loaded by
+*path* embeds fine, so run `fetch-vazirmatn` in the document's own
+directory before the `.tex` build and let the template pick up
+`fonts/Vazirmatn-Regular.ttf`.

@@ -188,8 +188,9 @@ shellcheck -S warning $(git ls-files '*.sh')
 python3 -m py_compile $(git ls-files '*.py')
 
 # repackage after changing anything under scientific-fa-translation-skill/
-zip -r scientific-fa-translation-skill.skill \
-  scientific-fa-translation-skill -x "*.DS_Store" -x "*__pycache__*"
+# (from the committed tree: never an ignored fonts/ or build artefact)
+git archive --format=zip -o scientific-fa-translation-skill.skill \
+  HEAD scientific-fa-translation-skill
 ```
 
 CI runs all of the above on every push and pull request, and additionally

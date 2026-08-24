@@ -99,6 +99,22 @@ show_tex_error() {
   tail -25 "$logfile" >&2
 }
 
+# xdvipdfmx cannot embed a *named instance* of a variable font, and a named
+# instance is exactly what XeTeX hands it for any family that is installed
+# only as a variable face - Vazirmatn from Google Fonts among them. What it
+# prints is "Invalid TTC index" and "Invalid font: -1 (4)", which says
+# nothing about fonts to anyone who has not met it before. Translate it.
+explain_driver_failure() {
+  case $1 in
+    *'Invalid TTC index'*|*'Invalid font: -1'*) ;;
+    *) return 0 ;;
+  esac
+  log 'that is a variable font: XeTeX selected a named instance of it and'
+  log '  the PDF driver cannot embed one. The same file loaded by path'
+  log '  works, so put the TTFs beside the document and rebuild:'
+  log "    scripts/fetch-vazirmatn.sh ${src_dir}/fonts"
+}
+
 # 0 = built, 1 = engine unavailable, 2 = engine present but failed.
 compile_tex() {
   have_xelatex || return 1
@@ -154,11 +170,13 @@ compile_tex() {
     log "the PDF driver failed even though xelatex exited 0:"
     grep -n 'driver return code' "$logfile" >&2
     printf '%s\n' "$out" >&2
+    explain_driver_failure "$out"
     return 2
   fi
   if ! pdf_is_complete "$pdf"; then
     log "${pdf} is truncated (no %%EOF); the driver did not finish"
     printf '%s\n' "$out" >&2
+    explain_driver_failure "$out"
     return 2
   fi
   cp -f "$pdf" "$dest" || return 2

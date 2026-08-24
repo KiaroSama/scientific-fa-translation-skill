@@ -31,6 +31,22 @@
 % Do not leave a Linux-only face as the last entry.
 %
 % Persian text face.
+%
+% A local fonts/ directory beside this file wins over every system name,
+% and that is not a preference - it is the only way a *variable* font can
+% be used at all. Asked for a family name, XeTeX hands the driver a named
+% instance of the variable font, and xdvipdfmx cannot embed one: it warns
+% "Invalid TTC index (not TTC font)" and dies with
+% "dvipdfmx:fatal: Invalid font: -1 (4)". The identical file loaded by
+% *path* carries no instance index and embeds fine. Vazirmatn now installs
+% as Vazirmatn-VariableFont_wght.ttf from Google Fonts, so this is the
+% common case on Windows, not an edge case.
+%
+% Put the files there with scripts/fetch-vazirmatn.sh (or .ps1) run in the
+% document's own directory - the same fonts/ the HTML template embeds.
+\IfFontExistsTF{fonts/Vazirmatn-Regular.ttf}{%
+  \settextfont[Path=fonts/,BoldFont=Vazirmatn-Bold.ttf,
+               Ligatures=TeX]{Vazirmatn-Regular.ttf}}{%
 \IfFontExistsTF{Vazirmatn}{\settextfont[Ligatures=TeX]{Vazirmatn}}{%
   \IfFontExistsTF{Shabnam}{\settextfont[Ligatures=TeX]{Shabnam}}{%
     \IfFontExistsTF{Sahel}{\settextfont[Ligatures=TeX]{Sahel}}{%
@@ -38,7 +54,7 @@
         \IfFontExistsTF{Noto Naskh Arabic}{%
           \settextfont[Ligatures=TeX]{Noto Naskh Arabic}}{%
           \IfFontExistsTF{Tahoma}{\settextfont[Ligatures=TeX]{Tahoma}}{%
-            \settextfont[Ligatures=TeX]{DejaVu Sans}}}}}}}
+            \settextfont[Ligatures=TeX]{DejaVu Sans}}}}}}}}
 % Latin text and digit face — Latin, so digits stay Western.
 %
 % OS-native faces come FIRST, and that ordering is not cosmetic. On MiKTeX

@@ -244,15 +244,26 @@ case "$XELATEX_MODE" in
   truncated) echo "log line" > "$s.log"
             printf '%%PDF-1.7\n1 0 obj\n<</Filter/FlateD' > "$s.pdf"
             exit 0 ;;
+  # The driver refusing a variable font. Its own words say nothing about
+  # fonts, so build-pdf has to translate them.
+  varfont)  printf 'Error 1 (driver return code) generating output;\n' > "$s.log"
+            echo "xdvipdfmx:warning: Invalid TTC index (not TTC font): Vazirmatn-VariableFont_wght.ttf"
+            echo "xdvipdfmx:fatal: Invalid font: -1 (4)"
+            printf '%%PDF-1.7\n1 0 obj\n<</Filter/FlateD' > "$s.pdf"
+            exit 0 ;;
   *)        echo "xelatex: cannot execute" >&2; exit 127 ;;
 esac
 STUB
 chmod +x "$stub"/*
 
 expect_build() {
-  local label=$1 mode=$2 want_rc=$3 stale=${4:-}
+  local label=$1 mode=$2 want_rc=$3
   shift 3
-  [[ -n $stale ]] && shift
+  # The optional 4th word is the literal "stale"; anything else is already
+  # the first expected phrase. Testing "is there a 4th argument" instead
+  # would shift the first phrase away and never check it.
+  local stale=
+  if [[ ${1:-} == stale ]]; then stale=stale; shift; fi
   local out rc
   rm -f "$work"/*.log "$work"/*.pdf
   cp "$skill/assets/rtl-document.tex" "$work/probe.tex"
@@ -301,6 +312,11 @@ expect_build "fails when the PDF driver dies behind a zero exit code" driver 1 \
   "the PDF driver failed even though xelatex exited 0" "driver return code"
 expect_build "fails on a truncated PDF with no %%EOF" truncated 1 \
   "is truncated (no %%EOF)"
+# "Invalid font: -1 (4)" is unactionable on its own. The driver is refusing
+# a named instance of a variable font, and the fix is to load the file by
+# path instead - say that, and name the command that puts it there.
+expect_build "explains a variable-font driver failure" varfont 1 \
+  "that is a variable font" "fetch-vazirmatn.sh"
 
 # The .tex template resolves fonts with \IfFontExistsTF chains whose last
 # entry is unguarded: if that face is missing, fontspec aborts the build.
@@ -357,6 +373,51 @@ check_font_order() {
 }
 check_font_order "latin"     'Times New Roman' 'TeX Gyre Termes'
 check_font_order "monospace" 'Consolas'        'TeX Gyre Cursor'
+
+# A family name resolves to a named instance when the only installed cut is
+# a variable font, and xdvipdfmx cannot embed one - it dies with "Invalid
+# font: -1 (4)". Loading the same file by path avoids the instance index
+# entirely, so the local fonts/ directory must be tried before the name.
+file_at=$(grep -nF -- 'fonts/Vazirmatn-Regular.ttf' <<<"$tex_code" | head -1 | cut -d: -f1)
+name_at=$(grep -nF -- '{Vazirmatn}' <<<"$tex_code" | head -1 | cut -d: -f1)
+if [[ -n $file_at && -n $name_at && $file_at -lt $name_at ]]; then
+  echo "ok   font chain persian tries fonts/ before the family name"
+else
+  echo "FAIL font chain persian must test fonts/Vazirmatn-Regular.ttf before"
+  echo "     {Vazirmatn}; a variable font picked by name cannot be embedded"
+  fail=1
+fi
+
+# build-pdf.ps1: the browser must not go through Invoke-Tool. Chromium is a
+# GUI-subsystem binary, and PowerShell does not wait for those - `& msedge`
+# returns before the PDF exists and never sets $LASTEXITCODE, which
+# Invoke-Tool reports as exit 127. Only Start-Process -Wait blocks.
+ps1="$skill/scripts/build-pdf.ps1"
+if grep -q 'Invoke-Browser \$browser' "$ps1" &&
+   grep -q 'Start-Process' "$ps1" && grep -q -- '-Wait' "$ps1"; then
+  echo "ok   build-pdf.ps1 waits for the browser"
+else
+  echo "FAIL build-pdf.ps1 must launch the browser with Start-Process -Wait;"
+  echo "     & msedge.exe returns before the PDF is written"
+  fail=1
+fi
+
+# check-fa.py prints Persian, so it must not depend on the console encoding.
+# On Windows an unredirected stdout is cp1252 and the first finding dies
+# with UnicodeEncodeError, taking every later check down with it.
+cp1252_out=$(PYTHONIOENCODING=cp1252 python3 "$lint" "$fixtures/bad.tex" \
+             --domains all 2>&1) || true
+if grep -q UnicodeEncodeError <<<"$cp1252_out"; then
+  echo "FAIL check-fa.py dies on a non-UTF-8 stdout (Windows console)"
+  echo "$cp1252_out" | sed 's/^/    /' | tail -5
+  fail=1
+elif grep -q full-page-figure <<<"$cp1252_out"; then
+  echo "ok   check-fa.py forces UTF-8 output"
+else
+  echo "FAIL check-fa.py under cp1252 did not report the last check"
+  echo "$cp1252_out" | sed 's/^/    /' | tail -5
+  fail=1
+fi
 
 if [[ $fail -eq 0 ]]; then
   echo "all tests passed"

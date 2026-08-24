@@ -109,7 +109,9 @@ function Get-Tool {
 }
 
 function Invoke-Tool {
-    # Run an executable, capture merged stdout+stderr, return the exit code.
+    # Run a *console* executable, capture merged stdout+stderr, return the
+    # exit code. A GUI-subsystem executable needs Invoke-Browser instead -
+    # see the note there.
     #
     # $Exe must be a resolved path from Get-Tool, never a bare name: the call
     # operator runs full command discovery, which prefers an alias, function
@@ -144,6 +146,49 @@ function Invoke-Tool {
     catch { $out = $_.Exception.Message }
     if ($null -eq $LASTEXITCODE) { $code = 127 } else { $code = $LASTEXITCODE }
     return [pscustomobject]@{ ExitCode = $code; Output = $out }
+}
+
+function Invoke-Browser {
+    # Same contract as Invoke-Tool, but for a GUI-subsystem executable.
+    #
+    # PowerShell only waits for *console* applications. msedge.exe and
+    # chrome.exe are GUI binaries, so `& $browser --print-to-pdf ...`
+    # returns the instant the process is launched: nothing is captured,
+    # nothing writes $LASTEXITCODE, and the check for the finished PDF runs
+    # while the browser is still starting. Invoke-Tool reads that unset
+    # exit code as its "never launched" sentinel and reports 127, which is
+    # why the HTML path failed on every Windows machine that has Edge.
+    #
+    # Start-Process -Wait is the form that actually blocks on a GUI
+    # process. It hands the arguments over as one joined string instead of
+    # an argv array, so anything holding a space - every path under
+    # "Program Files", every slug with a space in it - has to be quoted
+    # here; the call operator did that itself.
+    param([string]$Exe, [string[]]$Arguments)
+    $stem = Join-Path ([IO.Path]::GetTempPath()) ('fa-run-' + [Guid]::NewGuid().ToString('N'))
+    $outFile = "$stem.out"
+    $errFile = "$stem.err"
+    $quoted = @($Arguments | ForEach-Object {
+        if ($_ -match '[\s"]') { '"' + ($_ -replace '"', '\"') + '"' } else { $_ }
+    })
+    try {
+        $p = Start-Process -FilePath $Exe -ArgumentList $quoted -Wait -PassThru `
+            -NoNewWindow -RedirectStandardOutput $outFile -RedirectStandardError $errFile
+        $lines = @()
+        foreach ($f in @($outFile, $errFile)) {
+            if (Test-Path -LiteralPath $f) {
+                $lines += @(Get-Content -LiteralPath $f -ErrorAction SilentlyContinue)
+            }
+        }
+        return [pscustomobject]@{ ExitCode = $p.ExitCode; Output = $lines }
+    }
+    catch {
+        # Could not start at all: report it the way Invoke-Tool would.
+        return [pscustomobject]@{ ExitCode = 127; Output = @($_.Exception.Message) }
+    }
+    finally {
+        Remove-Item -LiteralPath $outFile, $errFile -Force -ErrorAction SilentlyContinue
+    }
 }
 
 function Write-ToolOutput {
@@ -229,6 +274,24 @@ function Show-TexError {
         ForEach-Object { [Console]::Error.WriteLine($_) }
 }
 
+function Show-DriverFailure {
+    # xdvipdfmx cannot embed a *named instance* of a variable font, and a
+    # named instance is exactly what XeTeX hands it for any family that is
+    # installed only as a variable face - Vazirmatn from Google Fonts among
+    # them. What it prints is "Invalid TTC index" and "Invalid font: -1 (4)",
+    # which says nothing about fonts to anyone who has not met it before.
+    # Translate it.
+    param($Output, [string]$SourceDir)
+    $hit = $Output | Where-Object {
+        "$_" -like '*Invalid TTC index*' -or "$_" -like '*Invalid font: -1*'
+    }
+    if (-not $hit) { return }
+    Write-Log 'that is a variable font: XeTeX selected a named instance of it and'
+    Write-Log '  the PDF driver cannot embed one. The same file loaded by path'
+    Write-Log '  works, so put the TTFs beside the document and rebuild:'
+    Write-Log "    scripts\fetch-vazirmatn.ps1 $(Join-Path $SourceDir 'fonts')"
+}
+
 # 0 = built, 1 = engine unavailable, 2 = engine present but failed.
 function Invoke-TexBuild {
     param([string]$SourceName, [string]$Stem, [string]$Destination)
@@ -300,12 +363,14 @@ function Invoke-TexBuild {
             Write-Log 'the PDF driver failed even though xelatex exited 0:'
             $driver | ForEach-Object { [Console]::Error.WriteLine($_) }
             Write-ToolOutput $r.Output
+            Show-DriverFailure $r.Output $srcDir
             return 2
         }
     }
     if (-not (Test-PdfStructure $pdf)) {
         Write-Log "$pdf is truncated (no %%EOF); the driver did not finish"
         Write-ToolOutput $r.Output
+        Show-DriverFailure $r.Output $srcDir
         return 2
     }
     Copy-Item -LiteralPath $pdf -Destination $Destination -Force
@@ -320,7 +385,11 @@ function Test-PdfStructure {
     param([string]$Pdf)
     $item = Get-Item -LiteralPath $Pdf -ErrorAction SilentlyContinue
     if (-not $item -or $item.Length -lt 100) { return $false }
-    $bytes = [IO.File]::ReadAllBytes($Pdf)
+    # Read through the item's full path. The .NET file APIs resolve a
+    # relative path against [Environment]::CurrentDirectory, which
+    # Push-Location does not touch - and the TeX build calls this with a
+    # bare "<stem>.pdf" from inside the pushed source directory.
+    $bytes = [IO.File]::ReadAllBytes($item.FullName)
     $head = [Text.Encoding]::ASCII.GetString($bytes, 0, [Math]::Min(8, $bytes.Length))
     if ($head -notlike '%PDF-*') { return $false }
     $tailLen = [Math]::Min(2048, $bytes.Length)
@@ -349,7 +418,7 @@ function Invoke-HtmlBuild {
                 # webfonts finish loading, which produces fallback boxes for
                 # Persian. --disable-gpu paints raster images as black
                 # rectangles; do not pass it.
-                $r = Invoke-Tool $browser @(
+                $r = Invoke-Browser $browser @(
                     '--headless=new',
                     '--no-pdf-header-footer',
                     '--virtual-time-budget=10000',

@@ -117,7 +117,7 @@ jobs:
           if ! diff -r "$SKILL_DIR" "/tmp/unpacked/$SKILL_DIR" \
                -x '__pycache__' -x '*.pyc' -x '.DS_Store'; then
             echo "the committed .skill is stale; repackage with:"
-            echo "  zip -r $SKILL_DIR.skill $SKILL_DIR \\"
-            echo "    -x '*.DS_Store' -x '*__pycache__*'"
+            echo "  git archive --format=zip -o $SKILL_DIR.skill \\"
+            echo "    HEAD $SKILL_DIR"
             exit 1
           fi
