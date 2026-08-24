@@ -23,22 +23,57 @@ jobs:
       - name: Checker regression tests
         run: bash tests/run.sh
 
-      - name: Skill is cloneable into /home/$USER/.cursor/skills
+      - name: Skill loads in Claude Code, Cursor, and Codex
+        env:
+          SKILL_DIR: scientific-fa-translation-skill
         run: |
           set -e
-          test -f SKILL.md
-          grep -q '^name: scientific-fa-translation-skill$' SKILL.md
-          if [ -f scientific-fa-translation/SKILL.md ]; then
-            echo "nested scientific-fa-translation/SKILL.md would be invisible"
-            echo "after: cd /home/\$USER/.cursor/skills && git clone <this-repo>"
+          # All three tools read <skills-dir>/<name>/SKILL.md, one level deep.
+          test -f "$SKILL_DIR/SKILL.md"
+          grep -q "^name: $SKILL_DIR\$" "$SKILL_DIR/SKILL.md"
+          if [ -f SKILL.md ]; then
+            echo "SKILL.md at the repo root would ship tests/ and CI as skill"
+            echo "content; keep the payload in $SKILL_DIR/"
+            exit 1
+          fi
+          # Each host tool needs its own repo-level guidance entry point.
+          for route in AGENTS.md CLAUDE.md \
+                       .cursor/rules/scientific-fa-translation.mdc; do
+            if [ ! -f "$route" ]; then
+              echo "missing guidance file: $route"
+              exit 1
+            fi
+          done
+          # check-fa.py resolves ../references/term-pairs.tsv from scripts/.
+          test -f "$SKILL_DIR/scripts/check-fa.py"
+          test -f "$SKILL_DIR/references/term-pairs.tsv"
+          # Prose paths must stay portable across Linux/macOS/WSL/Git Bash.
+          if git grep -nI -- '/home/\$USER' -- '*.md' '*.mdc'; then
+            echo "use \$HOME/... in prose, not /home/\$USER/..."
             exit 1
           fi
           missing=0
           for ref in $(grep -oE '(references|scripts|assets)/[A-Za-z0-9._-]+' \
-                       SKILL.md | sort -u); do
-            if [ ! -e "$ref" ]; then
+                       "$SKILL_DIR/SKILL.md" | sort -u); do
+            if [ ! -e "$SKILL_DIR/$ref" ]; then
               echo "SKILL.md references a missing path: $ref"
               missing=1
             fi
           done
           exit $missing
+
+      - name: Packaged .skill matches the skill directory
+        env:
+          SKILL_DIR: scientific-fa-translation-skill
+        run: |
+          set -e
+          test -f "$SKILL_DIR.skill"
+          rm -rf /tmp/unpacked && mkdir -p /tmp/unpacked
+          unzip -q "$SKILL_DIR.skill" -d /tmp/unpacked
+          if ! diff -r "$SKILL_DIR" "/tmp/unpacked/$SKILL_DIR" \
+               -x '__pycache__' -x '*.pyc' -x '.DS_Store'; then
+            echo "the committed .skill is stale; repackage with:"
+            echo "  zip -r $SKILL_DIR.skill $SKILL_DIR \\"
+            echo "    -x '*.DS_Store' -x '*__pycache__*'"
+            exit 1
+          fi

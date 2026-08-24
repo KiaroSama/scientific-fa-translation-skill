@@ -7,7 +7,7 @@ description: >
   against these rules. Use when the user asks to ترجمه, translate a
   paper/article/book/docs, راست‌چین, RTL, PDF, چاپ, Persian scientific
   translation, or invokes scientific-fa-translation /
-  scientific-fa-translation-skill.
+  scientific-fa-translation-skill. Works in Cursor, Claude Code, and Codex.
   Do NOT use for coding, explaining code, commit messages, UI copy,
   literary translation, or casual Persian chat.
 ---
@@ -16,7 +16,8 @@ description: >
 
 English → academic Persian for papers, articles, books, and technical
 documentation. Accuracy, consistent terminology, and print-ready RTL outrank
-literary fluency. Cursor chat is not the RTL surface.
+literary fluency. Agent chat — Cursor, Claude Code, or Codex — is not the
+RTL surface.
 
 ## When to use
 
@@ -38,7 +39,7 @@ Override only when the user says so.
 | Register | Formal فارسی معیار. Clear and readable, not ornate. No colloquial forms. |
 | Terminology | `journal` for papers, theses, review articles; `system-docs` for install guides, specs, RFCs, runbooks. Announce. Checker `--level` must match. |
 | First mention | No gloss for English terms unless the level or glossary says otherwise |
-| Output | Printable PDF at `/home/$USER/Documents/books/<slug>.pdf`. Chat is a short pointer, not RTL. |
+| Output | Printable PDF at `$HOME/Documents/books/<slug>.pdf` (`%USERPROFILE%\Documents\books` on native Windows). Chat is a short pointer, not RTL. |
 | PDF engine | XeLaTeX + `xepersian`; Chromium then WeasyPrint on the HTML template when TeX is absent |
 | HTML | Only on request, or as that fallback |
 | Digits | Western (`3.14`, not `۳٫۱۴`) |
@@ -133,9 +134,11 @@ Persian period must belong to the Persian sentence.
 
 ## Output
 
-Default: printable PDF at `/home/$USER/Documents/books/<slug>.pdf`
-(`$HOME/Documents/books`, created if needed). Report that absolute path, the
-page count, and the engine used.
+Default: printable PDF at `$HOME/Documents/books/<slug>.pdf` (created if
+needed). `scripts/build-pdf.sh` resolves `$HOME` itself, so the same command
+works on Linux, macOS, WSL, and Git Bash; on native Windows the same
+directory is `%USERPROFILE%\Documents\books`. Report the resolved absolute
+path, the page count, and the engine used.
 
 1. Read `references/pdf-output.md`. Prefer `assets/rtl-document.tex`.
 2. Persian prose in the `.tex`; English runs in `\lr{…}` / `\en{…}`.
@@ -176,5 +179,5 @@ Do not re-check these by hand. `--pairs` merges onto the house list.
 - [ ] Claim-changing ambiguities were asked, not guessed; the rest are
       reported
 
-**Delivery** — final PDF at `/home/$USER/Documents/books/<slug>.pdf`, chat is a short
+**Delivery** — final PDF at `$HOME/Documents/books/<slug>.pdf`, chat is a short
 pointer with the path, page count, engine, and queued questions.

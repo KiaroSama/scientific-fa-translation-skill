@@ -7,7 +7,10 @@
 set -uo pipefail
 
 here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-lint="$here/../scripts/check-fa.py"
+# The skill payload lives in its own directory so it can be copied straight
+# into ~/.claude/skills, ~/.cursor/skills, or ~/.codex/skills.
+skill="$here/../scientific-fa-translation-skill"
+lint="$skill/scripts/check-fa.py"
 fixtures="$here/fixtures"
 fail=0
 
@@ -67,8 +70,8 @@ expect_clean "$fixtures/journal.tex" --level journal --domains all --strict
 
 # The shipped templates must not trigger errors. Placeholder TITLE sits in
 # an isolate (TeX) or in <title> (HTML).
-expect_no_errors "$here/../assets/rtl-document.tex"
-expect_no_errors "$here/../assets/rtl-document.html"
+expect_no_errors "$skill/assets/rtl-document.tex"
+expect_no_errors "$skill/assets/rtl-document.html"
 
 expect_checks "$fixtures/bad.tex" \
   arabic-letters eastern-digits zwnj-verb zwnj-plural latin-punct \
@@ -164,7 +167,7 @@ path.write_bytes(
     + chunk(b"IEND", b"")
 )
 PY
-  prep="$here/../scripts/prepare-figures.py"
+  prep="$skill/scripts/prepare-figures.py"
   check_out=$(python3 "$prep" "$alpha" --check 2>&1) || check_rc=$?
   if [[ ${check_rc:-0} -ne 0 ]] && grep -q alpha <<<"$check_out"; then
     echo "ok   prepare-figures --check reports alpha"
@@ -186,7 +189,7 @@ else
   echo "skip prepare-figures (no Pillow)"
 fi
 
-help_out=$(python3 "$here/../scripts/crop-source-figures.py" --help 2>&1) || help_rc=$?
+help_out=$(python3 "$skill/scripts/crop-source-figures.py" --help 2>&1) || help_rc=$?
 if [[ ${help_rc:-0} -eq 0 ]] && grep -q crop-source-figures <<<"$help_out"; then
   echo "ok   crop-source-figures.py --help"
 else
@@ -195,7 +198,7 @@ else
   fail=1
 fi
 
-help_out=$(python3 "$here/../scripts/extract-pdf-pages.py" --help 2>&1) || help_rc=$?
+help_out=$(python3 "$skill/scripts/extract-pdf-pages.py" --help 2>&1) || help_rc=$?
 if [[ ${help_rc:-0} -eq 0 ]] && grep -q extract-pdf-pages <<<"$help_out"; then
   echo "ok   extract-pdf-pages.py --help"
 else

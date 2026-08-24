@@ -1,19 +1,24 @@
 ---
-description: Load scientific Persian translation skill for papers, RTL, and PDFs.
+description: Repository guidance for the scientific Persian translation skill.
 alwaysApply: true
 ---
 
-Routing only. The policy lives in the skill; do not restate it here, so
-there is one place to change it.
+Guidance for Cursor when working **on** this repository. The skill's own
+instructions are in `scientific-fa-translation-skill/SKILL.md`; do not
+restate them here, so there is one place to change them. `CLAUDE.md` and
+`AGENTS.md` carry the same guidance for Claude Code and Codex.
 
-If the user asks to translate a scientific document, article, book, or
-technical docs into Persian, or mentions ترجمه علمی, RTL, راست‌چین, PDF, or
-چاپ, read `SKILL.md` and follow it. Do not wait for a slash command. If
-the user asks whether a finished Persian translation follows the rules,
-that is the same skill's review mode.
+The skill payload is the `scientific-fa-translation-skill/` directory.
+Install it by copying that directory — not the repo root — into
+`~/.cursor/skills/`, exactly one level deep. The frontmatter `name` must
+keep matching the directory name.
 
-Cursor chat is not the RTL surface: write a PDF to `/home/$USER/Documents/books` and
-keep chat to a short pointer.
+Repo rules: keep `SKILL.md` short and tool-neutral; the terminology policy
+lives only in `references/terminology.md`; a machine-checkable rule goes in
+`scripts/check-fa.py` with a fixture in `tests/fixtures/`, then
+`bash tests/run.sh`. Paths in prose use `$HOME/...`.
 
-Skip this for coding, commits, UI copy, literary translation, and casual
-Persian chat.
+If a user asks *in this workspace* to translate a scientific document into
+Persian, read `scientific-fa-translation-skill/SKILL.md` and follow it.
+Agent chat is not the RTL surface: write a PDF to `$HOME/Documents/books`
+and keep chat to a short pointer.

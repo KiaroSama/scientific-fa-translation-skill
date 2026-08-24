@@ -57,7 +57,7 @@ that the check was visual and therefore partial.
 
 5. **Completeness.** Figure count against `manifest.txt`, section list
    against `inventory.md`, page count sanity, and the deliverable actually
-   at `/home/$USER/Documents/books/<slug>.pdf`. For a book, the printed
+   at `$HOME/Documents/books/<slug>.pdf`. For a book, the printed
    pages must include `فهرست مطالب` matching the source contents — not
    only a PDF outline, and not omitted because it looked like chrome.
 

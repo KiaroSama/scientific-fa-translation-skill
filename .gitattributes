@@ -1,0 +1,8 @@
+# Text is stored LF in the repository. The shell scripts and the RTL
+# templates must not gain CR bytes when the repo is cloned on Windows.
+* text=auto eol=lf
+
+# The packaged skill is a zip; never run line-ending conversion on it.
+*.skill binary
+*.png   binary
+*.pdf   binary

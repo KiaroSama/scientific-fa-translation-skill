@@ -5,7 +5,7 @@ English terms, digits, math, and URLs are LTR. The Unicode Bidirectional
 Algorithm will misplace punctuation and parentheses unless every LTR run
 is isolated.
 
-**Cursor chat is not the RTL surface.** Do not right-align the
+**Agent chat is not the RTL surface.** Do not right-align the
 conversation. For papers, articles, and books the deliverable is a
 PDF (`references/pdf-output.md`) with maximum bidi precision.
 

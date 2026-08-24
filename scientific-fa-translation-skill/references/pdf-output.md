@@ -1,8 +1,8 @@
 # Printable PDF output
 
-Cursor chat is **not** the RTL surface. Do not spend effort right-aligning
-the conversation. The deliverable is a printable PDF with maximum bidi
-precision.
+Agent chat is **not** the RTL surface — not in Cursor, not in Claude Code,
+not in Codex. Do not spend effort right-aligning the conversation. The
+deliverable is a printable PDF with maximum bidi precision.
 
 Read this file whenever the output is a paper, article, book, or the user
 asks for PDF / چاپ.
@@ -10,10 +10,12 @@ asks for PDF / چاپ.
 ## Destination (locked)
 
 ```text
-/home/$USER/Documents/books/<slug>.pdf
+$HOME/Documents/books/<slug>.pdf
 ```
 
-That is `$HOME/Documents/books`; create it if needed. `<slug>` is a
+Create it if needed. On native Windows that same directory is
+`%USERPROFILE%\Documents\books`; the shell scripts expect WSL or Git Bash,
+where `$HOME` already resolves there. `<slug>` is a
 filesystem-safe stem from the source title (`attention-is-all-you-need`).
 Re-running the same document overwrites the same slug; a different work gets
 a different slug. Never leave the only copy in the workspace or `/tmp`.
@@ -154,11 +156,11 @@ Manual equivalent, with the flag that matters — without a virtual-time
 budget Chromium can print before webfonts finish loading:
 
 ```bash
-mkdir -p /home/$USER/Documents/books
+mkdir -p $HOME/Documents/books
 chromium --headless=new --no-pdf-header-footer \
   --virtual-time-budget=10000 \
   --run-all-compositor-stages-before-draw \
-  --print-to-pdf="/home/$USER/Documents/books/<slug>.pdf" \
+  --print-to-pdf="$HOME/Documents/books/<slug>.pdf" \
   "file://$(realpath translation.html)"
 ```
 
@@ -174,9 +176,9 @@ with sudo. Then put that venv on `PATH` so `build-pdf.sh` can see
 `weasyprint`:
 
 ```bash
-python3 -m venv /home/$USER/.venvs/weasyprint
-/home/$USER/.venvs/weasyprint/bin/pip install weasyprint
-export PATH="/home/$USER/.venvs/weasyprint/bin:$PATH"
+python3 -m venv $HOME/.venvs/weasyprint
+$HOME/.venvs/weasyprint/bin/pip install weasyprint
+export PATH="$HOME/.venvs/weasyprint/bin:$PATH"
 ```
 
 It reads `@font-face` from disk, so it must run with the HTML file's
@@ -208,7 +210,7 @@ The full build is the source of truth. A “pages 1–20” or “this chapter�
 PDF is an extract of that file, not a second translation.
 
 ```bash
-scripts/extract-pdf-pages.py doc.pdf /home/$USER/Documents/books/<slug>-1-20.pdf 1-20
+scripts/extract-pdf-pages.py doc.pdf $HOME/Documents/books/<slug>-1-20.pdf 1-20
 ```
 
 Extract a **contiguous range in one call**. Looping `insert_pdf` (or
