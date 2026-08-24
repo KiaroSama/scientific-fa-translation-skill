@@ -73,8 +73,17 @@ find_chrome() {
 show_tex_error() {
   local logfile=$1
   [[ -f $logfile ]] || return 0
-  log "--- first TeX errors in ${logfile} ---"
-  grep -n '^!' "$logfile" | head -20 >&2 || true
+  local errs
+  errs=$(grep -n '^!' "$logfile" | head -20)
+  if [[ -n $errs ]]; then
+    log "--- first TeX errors in ${logfile} ---"
+    printf '%s\n' "$errs" >&2
+  else
+    # A truncated log with no '!' line usually means the engine died mid-run
+    # rather than rejecting the document - say so instead of printing an
+    # empty section under a heading that promises errors.
+    log "no '!' error line in ${logfile}; the engine stopped mid-run"
+  fi
   log "--- last 25 log lines ---"
   tail -25 "$logfile" >&2
 }
@@ -85,6 +94,12 @@ compile_tex() {
   local pdf="${stem_src}.pdf" logfile="${stem_src}.log"
   local out rc use_latexmk=0
   command -v latexmk >/dev/null 2>&1 && use_latexmk=1
+
+  # Clear artefacts from a previous run first. Without this a stale .log
+  # makes "latexmk left no .log" read as "latexmk reached the compiler", so
+  # the fallback never fires and the old log gets reported as this build's
+  # error; a stale .pdf could likewise be shipped as a success.
+  rm -f "$logfile" "$pdf"
 
   if [[ $use_latexmk -eq 1 ]]; then
     log "engine: latexmk -xelatex"

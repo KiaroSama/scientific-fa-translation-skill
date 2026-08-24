@@ -237,11 +237,17 @@ STUB
 chmod +x "$stub"/*
 
 expect_build() {
-  local label=$1 mode=$2 want_rc=$3
+  local label=$1 mode=$2 want_rc=$3 stale=${4:-}
   shift 3
+  [[ -n $stale ]] && shift
   local out rc
   rm -f "$work"/*.log "$work"/*.pdf
   cp "$skill/assets/rtl-document.tex" "$work/probe.tex"
+  # Leave junk from an imaginary earlier run behind.
+  if [[ $stale == stale ]]; then
+    printf 'stale log from a previous run\n' >"$work/probe.log"
+    printf '%%PDF-1.4 stale\n' >"$work/probe.pdf"
+  fi
   out=$(PATH="$stub:$PATH" XELATEX_MODE="$mode" \
         bash "$skill/scripts/build-pdf.sh" "$work/probe.tex" "fa-selftest" 2>&1)
   rc=$?
@@ -272,6 +278,10 @@ expect_build "prints the TeX error when a .log exists" logfail 1 \
 # No .log anywhere: never claim an error was printed when none was.
 expect_build "prints engine output when no .log exists" dead 1 \
   "no probe.log was written" "xelatex: cannot execute"
+# A leftover .log from an earlier run must not be mistaken for this run's
+# output, or the latexmk fallback silently stops working.
+expect_build "is not fooled by a stale .log" ok 0 stale \
+  "latexmk wrote no .log" "retrying with xelatex"
 
 if [[ $fail -eq 0 ]]; then
   echo "all tests passed"

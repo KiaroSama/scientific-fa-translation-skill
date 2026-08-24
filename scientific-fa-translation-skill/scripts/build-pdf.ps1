@@ -197,11 +197,19 @@ function Find-Chromium {
 function Show-TexError {
     param([string]$LogFile)
     if (-not (Test-Path -LiteralPath $LogFile -PathType Leaf)) { return }
-    Write-Log "--- first TeX errors in $LogFile ---"
-    Get-Content -LiteralPath $LogFile -Encoding UTF8 |
+    $errs = Get-Content -LiteralPath $LogFile -Encoding UTF8 |
         Where-Object { $_ -like '!*' } |
-        Select-Object -First 20 |
-        ForEach-Object { [Console]::Error.WriteLine($_) }
+        Select-Object -First 20
+    if ($errs) {
+        Write-Log "--- first TeX errors in $LogFile ---"
+        $errs | ForEach-Object { [Console]::Error.WriteLine($_) }
+    }
+    else {
+        # A truncated log with no '!' line usually means the engine died
+        # mid-run rather than rejecting the document - say so instead of
+        # printing an empty section under a heading that promises errors.
+        Write-Log "no '!' error line in $LogFile; the engine stopped mid-run"
+    }
     Write-Log '--- last 25 log lines ---'
     Get-Content -LiteralPath $LogFile -Encoding UTF8 -Tail 25 |
         ForEach-Object { [Console]::Error.WriteLine($_) }
@@ -217,6 +225,13 @@ function Invoke-TexBuild {
     $latexmk = Get-Tool 'latexmk'
     $useLatexmk = [bool]$latexmk
     $r = $null
+
+    # Clear artefacts from a previous run first. Without this a stale .log
+    # makes "latexmk left no .log" read as "latexmk reached the compiler",
+    # so the fallback never fires and the old log gets reported as this
+    # build's error; a stale .pdf could likewise be shipped as a success.
+    Remove-Item -LiteralPath $log -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $pdf -Force -ErrorAction SilentlyContinue
 
     if ($useLatexmk) {
         Write-Log 'engine: latexmk -xelatex'
