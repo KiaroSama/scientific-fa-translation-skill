@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
   pull_request:
+  # A fork starts with its workflows switched off, so the first run after
+  # enabling them has to be startable by hand rather than by waiting for
+  # the next push.
+  workflow_dispatch:
 
 jobs:
   check:
