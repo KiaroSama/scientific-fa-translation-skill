@@ -43,17 +43,38 @@
   \IfFontExistsTF{Shabnam}{\settextfont[Ligatures=TeX]{Shabnam}}{%
     \IfFontExistsTF{Sahel}{\settextfont[Ligatures=TeX]{Sahel}}{%
       \IfFontExistsTF{Amiri}{\settextfont[Ligatures=TeX]{Amiri}}{%
-        \settextfont[Ligatures=TeX]{DejaVu Sans}}}}}}
+        \IfFontExistsTF{Noto Naskh Arabic}{%
+          \settextfont[Ligatures=TeX]{Noto Naskh Arabic}}{%
+          \IfFontExistsTF{Tahoma}{\settextfont[Ligatures=TeX]{Tahoma}}{%
+            \settextfont[Ligatures=TeX]{DejaVu Sans}}}}}}}}
 % Latin text and digit face — Latin, so digits stay Western.
-\IfFontExistsTF{TeX Gyre Termes}{%
-  \setlatintextfont{TeX Gyre Termes}\setdigitfont{TeX Gyre Termes}}{%
-  \IfFontExistsTF{Liberation Serif}{%
-    \setlatintextfont{Liberation Serif}\setdigitfont{Liberation Serif}}{%
-    \setlatintextfont{DejaVu Serif}\setdigitfont{DejaVu Serif}}}
-% Monospace for listings.
-\IfFontExistsTF{TeX Gyre Cursor}{\setmonofont[Scale=0.92]{TeX Gyre Cursor}}{%
-  \IfFontExistsTF{DejaVu Sans Mono}{\setmonofont[Scale=0.90]{DejaVu Sans Mono}}{%
-    \setmonofont[Scale=0.90]{Liberation Mono}}}
+%
+% Every chain must cover Windows as well as Linux, and the LAST entry is
+% unguarded — if that face is missing too, fontspec aborts the build. A
+% chain made only of Linux faces therefore cannot compile on Windows at
+% all, which is what "DejaVu Serif" as the tail did.
+%
+% OS-native faces also come FIRST, and that ordering is not cosmetic. On
+% MiKTeX \IfFontExistsTF does not answer "no" for a face that is not
+% installed: it tries to *manufacture* a METAFONT font for it, the name is
+% truncated on the way ("TeX Gyre Term.cfg", "Liberation Ser.cfg"), makemf
+% fails, TeX carries on, and the run dies much later in the driver with
+% "dvipdfmx:fatal: Invalid font: -1 (4)". Testing a real system font first
+% never reaches that path. On Linux fontconfig answers honestly, so the
+% TeX Gyre / DejaVu tail still wins there.
+\IfFontExistsTF{Times New Roman}{%
+  \setlatintextfont{Times New Roman}\setdigitfont{Times New Roman}}{%
+  \IfFontExistsTF{TeX Gyre Termes}{%
+    \setlatintextfont{TeX Gyre Termes}\setdigitfont{TeX Gyre Termes}}{%
+    \IfFontExistsTF{Liberation Serif}{%
+      \setlatintextfont{Liberation Serif}\setdigitfont{Liberation Serif}}{%
+      \setlatintextfont{DejaVu Serif}\setdigitfont{DejaVu Serif}}}}
+% Monospace for listings. Same ordering rule.
+\IfFontExistsTF{Consolas}{\setmonofont[Scale=0.92]{Consolas}}{%
+  \IfFontExistsTF{Courier New}{\setmonofont[Scale=0.92]{Courier New}}{%
+    \IfFontExistsTF{TeX Gyre Cursor}{\setmonofont[Scale=0.92]{TeX Gyre Cursor}}{%
+      \IfFontExistsTF{Liberation Mono}{\setmonofont[Scale=0.90]{Liberation Mono}}{%
+        \setmonofont[Scale=0.90]{DejaVu Sans Mono}}}}}
 
 \newcommand{\en}[1]{\lr{#1}}
 

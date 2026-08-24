@@ -302,6 +302,76 @@ else
   fail=1
 fi
 
+# The .tex template resolves fonts with \IfFontExistsTF chains whose last
+# entry is unguarded: if that face is missing too, fontspec aborts the
+# build. A chain made only of Linux faces therefore cannot compile on
+# Windows, which is exactly how "DejaVu Serif" broke a MiKTeX build. Each
+# chain must name at least one face that ships with Windows.
+#
+# Strip comment lines: a face named only in the prose above a chain does not
+# make the chain compile, and matching it would make this test toothless.
+tex_prose=$(grep -v '^[[:space:]]*%' "$here/../assets/rtl-document.tex")
+check_font_chain() {
+  local label=$1 setter=$2
+  shift 2
+  local found=0 face
+  # -F: the setter names start with a backslash, which grep would otherwise
+  # read as a regex escape ('\s' matches whitespace, not a literal "\s").
+  if ! grep -qF -- "$setter" <<<"$tex_prose"; then
+    echo "FAIL font chain $label: no $setter in the template"
+    fail=1
+    return
+  fi
+  for face in "$@"; do
+    grep -qF -- "$face" <<<"$tex_prose" && found=1
+  done
+  if [[ $found -eq 1 ]]; then
+    echo "ok   font chain $label reaches a Windows face"
+  else
+    echo "FAIL font chain $label is Linux-only; it cannot compile on Windows"
+    echo "     add one of: $*"
+    fail=1
+  fi
+}
+check_font_chain "persian"   '\settextfont'      'Tahoma' 'Segoe UI' 'Arial'
+check_font_chain "latin"     '\setlatintextfont' 'Times New Roman' 'Cambria' 'Arial'
+check_font_chain "monospace" '\setmonofont'      'Consolas' 'Courier New'
+
+# MiKTeX answers \IfFontExistsTF "yes" for faces it does not have and then
+# dies in the driver, so the OS-native face must be tested FIRST, not last.
+check_font_order() {
+  local label=$1 native=$2 trap_face=$3
+  local native_at trap_at
+  native_at=$(grep -nF -- "$native" <<<"$tex_prose" | head -1 | cut -d: -f1)
+  trap_at=$(grep -nF -- "$trap_face" <<<"$tex_prose" | head -1 | cut -d: -f1)
+  if [[ -z $native_at || -z $trap_at ]]; then
+    echo "FAIL font order $label: expected both '$native' and '$trap_face'"
+    fail=1
+  elif [[ $native_at -lt $trap_at ]]; then
+    echo "ok   font order $label tests the OS face before $trap_face"
+  else
+    echo "FAIL font order $label: '$trap_face' is tested before '$native';"
+    echo "     on MiKTeX that reaches makemf and kills the PDF driver"
+    fail=1
+  fi
+}
+check_font_order "latin"     'Times New Roman' 'TeX Gyre Termes'
+check_font_order "monospace" 'Consolas'        'TeX Gyre Cursor'
+
+# build-pdf.ps1: the browser must not go through Invoke-Tool. Chromium is a
+# GUI-subsystem binary, and PowerShell does not wait for those - `& msedge`
+# returns before the PDF exists and never sets $LASTEXITCODE, which
+# Invoke-Tool reports as exit 127. Only Start-Process -Wait blocks.
+ps1="$here/../scripts/build-pdf.ps1"
+if grep -q 'Invoke-Browser \$browser' "$ps1" &&
+   grep -q 'Start-Process' "$ps1" && grep -q -- '-Wait' "$ps1"; then
+  echo "ok   build-pdf.ps1 waits for the browser"
+else
+  echo "FAIL build-pdf.ps1 must launch the browser with Start-Process -Wait;"
+  echo "     & msedge.exe returns before the PDF is written"
+  fail=1
+fi
+
 if [[ $fail -eq 0 ]]; then
   echo "all tests passed"
 else

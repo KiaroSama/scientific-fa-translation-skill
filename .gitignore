@@ -1,2 +1,21 @@
 __pycache__/
 *.pyc
+
+# TeX and browser build output. Running build-pdf against
+# assets/rtl-document.tex leaves these beside the template.
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.xdv
+assets/*.pdf
+verify-*.png
+
+# Fonts are fetched on demand by scripts/fetch-vazirmatn.*, never tracked.
+# Vazirmatn is SIL OFL 1.1: committing the TTFs would mean committing the
+# licence beside them, and the whole point of the fetch script is that the
+# repo does not carry binaries it can obtain.
+fonts/

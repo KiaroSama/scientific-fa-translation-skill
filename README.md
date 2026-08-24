@@ -70,6 +70,16 @@ scripts/build-pdf.sh doc.tex my-slug --verify
 bash tests/run.sh
 ```
 
+On Windows, run the PowerShell twin of the same name instead — same
+behaviour, only the extension and the flag style change. They run on the
+Windows PowerShell 5.1 that ships with the OS as well as on PowerShell 7:
+
+```powershell
+.\scripts\preflight.ps1
+python scripts\check-fa.py doc.tex --level system-docs --strict
+.\scripts\build-pdf.ps1 doc.tex my-slug -Verify
+```
+
 Layout:
 
 ```text
@@ -86,6 +96,7 @@ references/source-ingest.md    fetching and extracting the source
 references/long-documents.md   sectioning, resume, ambiguity queue
 references/review.md           reviewing a finished translation
 scripts/preflight.sh           what this machine can build
+scripts/preflight.ps1          the Windows twin (likewise for the two below)
 scripts/check-fa.py            mechanical checker
 scripts/prepare-figures.py     flatten alpha; catch pdfimages negatives
 scripts/crop-source-figures.py crop artwork; never embed a full PDF page
