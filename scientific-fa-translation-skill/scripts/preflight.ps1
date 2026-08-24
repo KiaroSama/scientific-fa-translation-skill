@@ -186,6 +186,26 @@ if ($xelatex) {
         $ver = "$($v.Output | Select-Object -First 1)"
         Write-Ok 'xelatex + xepersian' $ver
         $tex = $true
+
+        # MiKTeX installs missing packages on the fly and, by default, asks
+        # first with a modal dialog. That is fine for a human at a keyboard
+        # and fatal for an unattended or agent-driven build, which simply
+        # hangs on an invisible window. AutoInstall: 1 = yes, 0 = no,
+        # anything else (2) = ask.
+        if ($ver -match '(?i)miktex') {
+            $initexmf = Get-Tool 'initexmf'
+            if ($initexmf) {
+                $a = Invoke-Tool $initexmf @('--show-config-value=[MPM]AutoInstall')
+                $auto = "$($a.Output | Select-Object -First 1)".Trim()
+                if ($auto -eq '1') {
+                    Write-Ok 'MiKTeX auto-install' 'missing packages install without prompting'
+                }
+                else {
+                    Write-No 'MiKTeX auto-install' "set to '$auto'; a build will stop on a dialog"
+                    Write-Output '        fix: initexmf --set-config-value "[MPM]AutoInstall=1"'
+                }
+            }
+        }
     }
 }
 else {

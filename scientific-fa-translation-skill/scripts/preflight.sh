@@ -22,8 +22,21 @@ if have xelatex; then
   if have kpsewhich && [ -z "$(kpsewhich xepersian.sty 2>/dev/null)" ]; then
     no "xepersian.sty" "xelatex is present but the Persian package is not"
   else
-    ok "xelatex + xepersian" "$(xelatex --version 2>/dev/null | head -1)"
+    xe_ver=$(xelatex --version 2>/dev/null | head -1)
+    ok "xelatex + xepersian" "$xe_ver"
     tex=1
+    # MiKTeX installs missing packages on the fly and asks first by default.
+    # That is fine for a human and fatal for an unattended build, which
+    # blocks on the prompt. AutoInstall: 1 = yes, 0 = no, else = ask.
+    if printf '%s' "$xe_ver" | grep -qi miktex && have initexmf; then
+      auto=$(initexmf --show-config-value='[MPM]AutoInstall' 2>/dev/null | head -1)
+      if [[ ${auto:-} == 1 ]]; then
+        ok "MiKTeX auto-install" "missing packages install without prompting"
+      else
+        no "MiKTeX auto-install" "set to '${auto:-unset}'; a build will stop on a prompt"
+        echo "        fix: initexmf --set-config-value \"[MPM]AutoInstall=1\""
+      fi
+    fi
   fi
 else
   no "xelatex" "preferred engine unavailable"

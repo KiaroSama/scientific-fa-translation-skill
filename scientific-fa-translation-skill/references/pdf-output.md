@@ -111,6 +111,22 @@ Windows specifics worth knowing:
   unavailable. `winget install oschwartz10612.Poppler`.
 - **TeX.** MiKTeX (`winget install MiKTeX.MiKTeX`) can install `xepersian`
   and `bidi` on demand; TeX Live for Windows works as well.
+- **MiKTeX's on-the-fly installer will stall an unattended build.** The
+  basic install carries only a small package set, and MiKTeX fetches the
+  rest during the first compile — `fancyvrb`, `bidi`, and the xepersian
+  dependencies among them. Out of the box it *asks first*, with a modal
+  dialog per package. A person clicks Install; an agent-driven build hangs
+  on a window it cannot see, with no error and no `.log`. Turn the prompt
+  off once, before the first build:
+
+  ```powershell
+  initexmf --set-config-value "[MPM]AutoInstall=1"
+  ```
+
+  `preflight` reports this setting whenever it detects MiKTeX, so check it
+  there rather than discovering it as a hung build. The first compile
+  afterwards is still slow — it is downloading packages — so give it time
+  before deciding it is stuck.
 - **Fonts.** There is no `fc-list`, so `preflight.ps1` reads the font
   registry instead, and `fetch-vazirmatn.ps1` copies an installed
   Vazirmatn from `C:\Windows\Fonts` or the per-user font directory before
