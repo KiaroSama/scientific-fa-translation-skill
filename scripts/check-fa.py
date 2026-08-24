@@ -32,6 +32,18 @@ import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 
+# Every finding this tool prints quotes Persian, and on Windows an
+# unredirected stdout defaults to the console ANSI code page (cp1252), which
+# cannot encode a single Persian letter. The first finding then dies with
+# UnicodeEncodeError and every check after it goes unreported - a lint that
+# exits non-zero for the wrong reason and hides the rest of its own output.
+# Force UTF-8 rather than depending on the locale.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError):  # not a TextIOWrapper (test capture)
+        pass
+
 ZWNJ = "\u200c"
 FA_RANGE = "\u0600-\u06ff\ufb50-\ufdff\ufe70-\ufeff"
 FA_CHAR = re.compile(f"[{FA_RANGE}]")

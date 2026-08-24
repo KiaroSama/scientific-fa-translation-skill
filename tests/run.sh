@@ -204,6 +204,22 @@ else
   fail=1
 fi
 
+# check-fa.py prints Persian, so it must not depend on the console encoding.
+# On Windows an unredirected stdout is cp1252 and the first finding dies with
+# UnicodeEncodeError, taking every later check down with it.
+cp1252_out=$(PYTHONIOENCODING=cp1252 python3 "$lint" "$fixtures/bad.tex"              --domains all 2>&1) || true
+if grep -q UnicodeEncodeError <<<"$cp1252_out"; then
+  echo "FAIL check-fa.py dies on a non-UTF-8 stdout (Windows console)"
+  echo "$cp1252_out" | sed 's/^/    /' | tail -5
+  fail=1
+elif grep -q full-page-figure <<<"$cp1252_out"; then
+  echo "ok   check-fa.py forces UTF-8 output"
+else
+  echo "FAIL check-fa.py under cp1252 did not report the last check"
+  echo "$cp1252_out" | sed 's/^/    /' | tail -5
+  fail=1
+fi
+
 if [[ $fail -eq 0 ]]; then
   echo "all tests passed"
 else
