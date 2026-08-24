@@ -22,22 +22,37 @@
 \usepackage{xepersian}
 
 % Font resolution without hand-editing: first face that exists wins.
+%
+% Every chain must cover Windows as well as Linux, and the LAST entry is
+% unguarded — if it is missing too, fontspec aborts the build. So the
+% guarded middle of each chain carries the Windows faces (Times New Roman,
+% Courier New, Tahoma all ship with the OS) and the unguarded tail is the
+% Linux-typical DejaVu, which those Windows guards never fall through to.
+% Do not leave a Linux-only face as the last entry.
+%
 % Persian text face.
 \IfFontExistsTF{Vazirmatn}{\settextfont[Ligatures=TeX]{Vazirmatn}}{%
   \IfFontExistsTF{Shabnam}{\settextfont[Ligatures=TeX]{Shabnam}}{%
     \IfFontExistsTF{Sahel}{\settextfont[Ligatures=TeX]{Sahel}}{%
       \IfFontExistsTF{Amiri}{\settextfont[Ligatures=TeX]{Amiri}}{%
-        \settextfont[Ligatures=TeX]{DejaVu Sans}}}}}
+        \IfFontExistsTF{Noto Naskh Arabic}{%
+          \settextfont[Ligatures=TeX]{Noto Naskh Arabic}}{%
+          \IfFontExistsTF{Tahoma}{\settextfont[Ligatures=TeX]{Tahoma}}{%
+            \settextfont[Ligatures=TeX]{DejaVu Sans}}}}}}}
 % Latin text and digit face — Latin, so digits stay Western.
 \IfFontExistsTF{TeX Gyre Termes}{%
   \setlatintextfont{TeX Gyre Termes}\setdigitfont{TeX Gyre Termes}}{%
   \IfFontExistsTF{Liberation Serif}{%
     \setlatintextfont{Liberation Serif}\setdigitfont{Liberation Serif}}{%
-    \setlatintextfont{DejaVu Serif}\setdigitfont{DejaVu Serif}}}
+    \IfFontExistsTF{Times New Roman}{%
+      \setlatintextfont{Times New Roman}\setdigitfont{Times New Roman}}{%
+      \setlatintextfont{DejaVu Serif}\setdigitfont{DejaVu Serif}}}}
 % Monospace for listings.
 \IfFontExistsTF{TeX Gyre Cursor}{\setmonofont[Scale=0.92]{TeX Gyre Cursor}}{%
-  \IfFontExistsTF{DejaVu Sans Mono}{\setmonofont[Scale=0.90]{DejaVu Sans Mono}}{%
-    \setmonofont[Scale=0.90]{Liberation Mono}}}
+  \IfFontExistsTF{Consolas}{\setmonofont[Scale=0.92]{Consolas}}{%
+    \IfFontExistsTF{Courier New}{\setmonofont[Scale=0.92]{Courier New}}{%
+      \IfFontExistsTF{Liberation Mono}{\setmonofont[Scale=0.90]{Liberation Mono}}{%
+        \setmonofont[Scale=0.90]{DejaVu Sans Mono}}}}}
 
 \newcommand{\en}[1]{\lr{#1}}
 

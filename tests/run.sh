@@ -283,6 +283,41 @@ expect_build "prints engine output when no .log exists" dead 1 \
 expect_build "is not fooled by a stale .log" ok 0 stale \
   "latexmk wrote no .log" "retrying with xelatex"
 
+# The .tex template resolves fonts with \IfFontExistsTF chains whose last
+# entry is unguarded: if that face is missing, fontspec aborts the build.
+# A chain made only of Linux faces therefore cannot compile on Windows,
+# which is exactly how "DejaVu Serif" broke a MiKTeX build. Each chain must
+# name at least one face that ships with Windows.
+tex_template="$skill/assets/rtl-document.tex"
+# Strip comment lines: a face named only in the prose above the chain does
+# not make the chain compile, and matching it would make this test toothless.
+tex_code=$(grep -v '^[[:space:]]*%' "$tex_template")
+check_font_chain() {
+  local label=$1 setter=$2
+  shift 2
+  local found=0 face
+  # -F: the setter names start with a backslash, which grep would otherwise
+  # read as a regex escape ('\s' matches whitespace, not a literal "\s").
+  if ! grep -qF -- "$setter" <<<"$tex_code"; then
+    echo "FAIL font chain $label: no $setter in the template"
+    fail=1
+    return
+  fi
+  for face in "$@"; do
+    grep -qF -- "$face" <<<"$tex_code" && found=1
+  done
+  if [[ $found -eq 1 ]]; then
+    echo "ok   font chain $label reaches a Windows face"
+  else
+    echo "FAIL font chain $label is Linux-only; it cannot compile on Windows"
+    echo "     add one of: $*"
+    fail=1
+  fi
+}
+check_font_chain "persian"  '\settextfont'      'Tahoma' 'Segoe UI' 'Arial'
+check_font_chain "latin"    '\setlatintextfont' 'Times New Roman' 'Cambria' 'Arial'
+check_font_chain "monospace" '\setmonofont'     'Consolas' 'Courier New'
+
 if [[ $fail -eq 0 ]]; then
   echo "all tests passed"
 else

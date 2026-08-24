@@ -1,2 +1,16 @@
 __pycache__/
 *.pyc
+
+# TeX and build output. Running build-pdf against assets/rtl-document.tex
+# leaves these beside the template; none of them belong in the repo or in
+# the packaged .skill.
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.xdv
+assets/*.pdf
+verify-*.png
