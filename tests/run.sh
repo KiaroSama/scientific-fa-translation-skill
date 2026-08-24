@@ -337,6 +337,27 @@ check_font_chain "persian"  '\settextfont'      'Tahoma' 'Segoe UI' 'Arial'
 check_font_chain "latin"    '\setlatintextfont' 'Times New Roman' 'Cambria' 'Arial'
 check_font_chain "monospace" '\setmonofont'     'Consolas' 'Courier New'
 
+# MiKTeX answers \IfFontExistsTF "yes" for faces it does not have and then
+# dies in the driver, so the OS-native face must be tested FIRST, not last.
+check_font_order() {
+  local label=$1 native=$2 trap_face=$3
+  local native_at trap_at
+  native_at=$(grep -nF -- "$native" <<<"$tex_code" | head -1 | cut -d: -f1)
+  trap_at=$(grep -nF -- "$trap_face" <<<"$tex_code" | head -1 | cut -d: -f1)
+  if [[ -z $native_at || -z $trap_at ]]; then
+    echo "FAIL font order $label: expected both '$native' and '$trap_face'"
+    fail=1
+  elif [[ $native_at -lt $trap_at ]]; then
+    echo "ok   font order $label tests the OS face before $trap_face"
+  else
+    echo "FAIL font order $label: '$trap_face' is tested before '$native';"
+    echo "     on MiKTeX that reaches makemf and kills the PDF driver"
+    fail=1
+  fi
+}
+check_font_order "latin"     'Times New Roman' 'TeX Gyre Termes'
+check_font_order "monospace" 'Consolas'        'TeX Gyre Cursor'
+
 if [[ $fail -eq 0 ]]; then
   echo "all tests passed"
 else

@@ -152,6 +152,20 @@ function Write-ToolOutput {
     $Output | ForEach-Object { [Console]::Error.WriteLine($_) }
 }
 
+function Write-ToolFailure {
+    # A tool that fails silently still has to be reportable: without the
+    # exit code there is nothing to act on, and "build failed" alone is not
+    # a diagnosis.
+    param([string]$What, $Result)
+    Write-Log "$What failed with exit code $($Result.ExitCode)"
+    if ($null -eq $Result.Output -or @($Result.Output).Count -eq 0) {
+        Write-Log '  (the tool printed nothing on stdout or stderr)'
+    }
+    else {
+        Write-ToolOutput $Result.Output
+    }
+}
+
 function Test-XeLaTeX {
     if (-not (Get-Tool 'xelatex')) { return $false }
     # xepersian is the part that is usually missing on a bare TeX install.
@@ -349,12 +363,19 @@ function Invoke-HtmlBuild {
                 Remove-Item -LiteralPath $profileDir -Recurse -Force -ErrorAction SilentlyContinue
             }
             if ($r.ExitCode -ne 0) {
-                Write-ToolOutput $r.Output
+                Write-ToolFailure "$([IO.Path]::GetFileName($browser)) --print-to-pdf" $r
+                Write-Log "  source: $Html"
+                Write-Log "  target: $Destination"
                 return 2
             }
             # Headless Chromium can exit 0 without writing the file.
             if (-not (Test-Path -LiteralPath $Destination -PathType Leaf)) {
                 Write-Log "the browser exited 0 but wrote no PDF: $Destination"
+                Write-ToolOutput $r.Output
+                return 2
+            }
+            if (-not (Test-PdfStructure $Destination)) {
+                Write-Log "the browser wrote a truncated PDF: $Destination"
                 Write-ToolOutput $r.Output
                 return 2
             }
@@ -367,7 +388,7 @@ function Invoke-HtmlBuild {
         Write-Log 'engine: weasyprint (keeps its bidi warnings; read them)'
         $r = Invoke-Tool $weasyprint @($Html, $Destination)
         if ($r.ExitCode -ne 0) {
-            Write-ToolOutput $r.Output
+            Write-ToolFailure 'weasyprint' $r
             return 2
         }
         return 0

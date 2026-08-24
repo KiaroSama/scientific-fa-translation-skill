@@ -111,6 +111,20 @@ Windows specifics worth knowing:
   unavailable. `winget install oschwartz10612.Poppler`.
 - **TeX.** MiKTeX (`winget install MiKTeX.MiKTeX`) can install `xepersian`
   and `bidi` on demand; TeX Live for Windows works as well.
+- **`\IfFontExistsTF` lies on MiKTeX.** Asked about a face that is not
+  installed, MiKTeX does not answer "no" — it tries to *manufacture* a
+  METAFONT font for it. The name is truncated on the way
+  (`Couldn't open 'TeX Gyre Term.cfg'`), `makemf` fails, TeX carries on,
+  and the run dies much later in the driver with
+  `dvipdfmx:fatal: Invalid font: -1 (4)` and a truncated PDF. So a font
+  chain must test an **OS-native face first** — `Times New Roman`,
+  `Consolas` — and keep the TeX Gyre / Liberation / DejaVu names as the
+  tail that only Linux reaches, where fontconfig answers honestly.
+  `assets/rtl-document.tex` is ordered that way; preserve it.
+- **latexmk needs Perl, which MiKTeX does not ship.** `build-pdf` detects
+  this (latexmk dies without writing a `.log`) and falls back to calling
+  `xelatex` twice, so no action is required. Install Strawberry Perl only
+  if you want latexmk's bibliography reruns.
 - **MiKTeX's on-the-fly installer will stall an unattended build.** The
   basic install carries only a small package set, and MiKTeX fetches the
   rest during the first compile — `fancyvrb`, `bidi`, and the xepersian

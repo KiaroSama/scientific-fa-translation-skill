@@ -40,17 +40,25 @@
           \IfFontExistsTF{Tahoma}{\settextfont[Ligatures=TeX]{Tahoma}}{%
             \settextfont[Ligatures=TeX]{DejaVu Sans}}}}}}}
 % Latin text and digit face — Latin, so digits stay Western.
-\IfFontExistsTF{TeX Gyre Termes}{%
-  \setlatintextfont{TeX Gyre Termes}\setdigitfont{TeX Gyre Termes}}{%
-  \IfFontExistsTF{Liberation Serif}{%
-    \setlatintextfont{Liberation Serif}\setdigitfont{Liberation Serif}}{%
-    \IfFontExistsTF{Times New Roman}{%
-      \setlatintextfont{Times New Roman}\setdigitfont{Times New Roman}}{%
+%
+% OS-native faces come FIRST, and that ordering is not cosmetic. On MiKTeX
+% \IfFontExistsTF answers "yes" for a face that is not installed: MiKTeX
+% tries to manufacture a METAFONT font for it, the name gets truncated
+% ("TeX Gyre Term.cfg", "Liberation Ser.cfg"), makemf fails, and the run
+% dies later in the driver with "dvipdfmx:fatal: Invalid font: -1 (4)".
+% Testing a real system font first never reaches that path. On Linux,
+% fontconfig answers honestly, so the TeX Gyre / DejaVu tail still wins.
+\IfFontExistsTF{Times New Roman}{%
+  \setlatintextfont{Times New Roman}\setdigitfont{Times New Roman}}{%
+  \IfFontExistsTF{TeX Gyre Termes}{%
+    \setlatintextfont{TeX Gyre Termes}\setdigitfont{TeX Gyre Termes}}{%
+    \IfFontExistsTF{Liberation Serif}{%
+      \setlatintextfont{Liberation Serif}\setdigitfont{Liberation Serif}}{%
       \setlatintextfont{DejaVu Serif}\setdigitfont{DejaVu Serif}}}}
-% Monospace for listings.
-\IfFontExistsTF{TeX Gyre Cursor}{\setmonofont[Scale=0.92]{TeX Gyre Cursor}}{%
-  \IfFontExistsTF{Consolas}{\setmonofont[Scale=0.92]{Consolas}}{%
-    \IfFontExistsTF{Courier New}{\setmonofont[Scale=0.92]{Courier New}}{%
+% Monospace for listings. Same ordering rule.
+\IfFontExistsTF{Consolas}{\setmonofont[Scale=0.92]{Consolas}}{%
+  \IfFontExistsTF{Courier New}{\setmonofont[Scale=0.92]{Courier New}}{%
+    \IfFontExistsTF{TeX Gyre Cursor}{\setmonofont[Scale=0.92]{TeX Gyre Cursor}}{%
       \IfFontExistsTF{Liberation Mono}{\setmonofont[Scale=0.90]{Liberation Mono}}{%
         \setmonofont[Scale=0.90]{DejaVu Sans Mono}}}}}
 
