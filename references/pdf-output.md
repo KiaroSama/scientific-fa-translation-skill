@@ -55,7 +55,23 @@ the `.tex` and figures so the user can compile later.
 ## XeLaTeX + xepersian
 
 Start from `assets/rtl-document.tex`. Load `graphicx`, `hyperref`, and
-`geometry` **before** `xepersian`. The template resolves fonts itself with
+`geometry` **before** `xepersian`. Put the font beside the document first —
+the same `fonts/` the HTML template embeds, and the only form a *variable*
+font can be used in at all:
+
+```bash
+scripts/fetch-vazirmatn.sh fonts       # run in the document's directory
+```
+
+A family name is not enough when the only installed cut is a variable font:
+XeTeX hands the driver a named instance of it, `xdvipdfmx` refuses it with
+`Invalid TTC index (not TTC font)` and `dvipdfmx:fatal: Invalid font: -1 (4)`,
+and the build stops. The identical file loaded by **path** carries no
+instance index and embeds normally. Google Fonts ships Vazirmatn as
+`Vazirmatn-VariableFont_wght.ttf`, so this is the common case on Windows.
+`build-pdf.sh` prints the remedy when it recognises the driver error.
+
+The template resolves the rest itself with
 `\IfFontExistsTF`, so there is nothing to hand-edit — but confirm the chosen
 face covers Persian:
 

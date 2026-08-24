@@ -220,6 +220,88 @@ else
   fail=1
 fi
 
+# build-pdf.sh must not hand back a PDF the driver never finished. xelatex
+# exits 0 while xdvipdfmx dies, so a truncated file with a %PDF header and
+# no trailer used to be copied to the destination as a success. Stubs stand
+# in for the toolchain so this runs anywhere.
+stub=$(mktemp -d)
+work=$(mktemp -d)
+trap 'rm -rf "$stub" "$work"' EXIT
+
+cat >"$stub/kpsewhich" <<'STUB'
+#!/bin/sh
+echo "/usr/share/texmf/tex/xelatex/xepersian/xepersian.sty"
+STUB
+cat >"$stub/xelatex" <<'STUB'
+#!/bin/sh
+for a; do case "$a" in *.tex) s=$(basename "$a" .tex);; esac; done
+case "$XELATEX_MODE" in
+  ok)       echo "log line" > "$s.log"
+            printf '%%PDF-1.7\n1 0 obj\n<<>>\nendobj\ntrailer\n%%%%EOF\n' > "$s.pdf"
+            exit 0 ;;
+  # Exit 0, but the driver died: the log says so and the PDF is truncated.
+  driver)   printf 'Error 1 (driver return code) generating output;\n' > "$s.log"
+            printf '%%PDF-1.7\n1 0 obj\n<</Filter/FlateD' > "$s.pdf"
+            exit 0 ;;
+  # The same, with the message a variable font actually produces.
+  varfont)  printf 'Error 1 (driver return code) generating output;\n' > "$s.log"
+            echo "xdvipdfmx:warning: Invalid TTC index (not TTC font): Vazirmatn-VariableFont_wght.ttf"
+            echo "xdvipdfmx:fatal: Invalid font: -1 (4)"
+            printf '%%PDF-1.7\n1 0 obj\n<</Filter/FlateD' > "$s.pdf"
+            exit 0 ;;
+  *)        echo "xelatex: cannot execute" >&2; exit 127 ;;
+esac
+STUB
+chmod +x "$stub"/*
+
+expect_build() {
+  local label=$1 mode=$2 want_rc=$3
+  shift 3
+  local out rc
+  rm -f "$work"/*.log "$work"/*.pdf
+  cp "$here/../assets/rtl-document.tex" "$work/probe.tex"
+  out=$(PATH="$stub:$PATH" XELATEX_MODE="$mode" \
+        bash "$here/../scripts/build-pdf.sh" "$work/probe.tex" "fa-selftest" 2>&1)
+  rc=$?
+  local missing=() phrase
+  for phrase in "$@"; do
+    grep -qF -- "$phrase" <<<"$out" || missing+=("$phrase")
+  done
+  if [[ $rc -ne $want_rc ]]; then
+    echo "FAIL build-pdf $label: exit $rc, wanted $want_rc"
+    echo "$out" | sed 's/^/    /'
+    fail=1
+  elif [[ ${#missing[@]} -gt 0 ]]; then
+    echo "FAIL build-pdf $label: missing from output: ${missing[*]}"
+    echo "$out" | sed 's/^/    /'
+    fail=1
+  else
+    echo "ok   build-pdf $label"
+  fi
+}
+
+expect_build "succeeds on a complete PDF" ok 0 "engine: xelatex"
+expect_build "fails when the PDF driver dies behind a zero exit code" driver 1 \
+  "the PDF driver failed even though xelatex exited 0" "driver return code"
+# "Invalid font: -1 (4)" is unactionable on its own. The driver is refusing a
+# named instance of a variable font, and the fix is to load the file by path
+# instead - say that, and name the command that puts it there.
+expect_build "explains a variable-font driver failure" varfont 1 \
+  "that is a variable font" "fetch-vazirmatn.sh"
+
+# The .tex template must try the local fonts/ directory before any family
+# name: a variable font picked by name cannot be embedded at all.
+tex_code=$(grep -v '^[[:space:]]*%' "$here/../assets/rtl-document.tex")
+file_at=$(grep -nF -- 'fonts/Vazirmatn-Regular.ttf' <<<"$tex_code" | head -1 | cut -d: -f1)
+name_at=$(grep -nF -- '{Vazirmatn}' <<<"$tex_code" | head -1 | cut -d: -f1)
+if [[ -n $file_at && -n $name_at && $file_at -lt $name_at ]]; then
+  echo "ok   font chain persian tries fonts/ before the family name"
+else
+  echo "FAIL font chain persian must test fonts/Vazirmatn-Regular.ttf before"
+  echo "     {Vazirmatn}; a variable font picked by name cannot be embedded"
+  fail=1
+fi
+
 if [[ $fail -eq 0 ]]; then
   echo "all tests passed"
 else

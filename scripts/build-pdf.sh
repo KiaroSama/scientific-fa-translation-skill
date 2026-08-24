@@ -77,23 +77,70 @@ show_tex_error() {
   tail -25 "$logfile" >&2
 }
 
+# xdvipdfmx cannot embed a *named instance* of a variable font, and a named
+# instance is exactly what XeTeX hands it for any family that is installed
+# only as a variable face. What it prints is "Invalid TTC index" and
+# "Invalid font: -1 (4)", which says nothing about fonts to anyone who has
+# not met it before. Translate it.
+explain_driver_failure() {
+  case $1 in
+    *'Invalid TTC index'*|*'Invalid font: -1'*) ;;
+    *) return 0 ;;
+  esac
+  log 'that is a variable font: XeTeX selected a named instance of it and'
+  log '  the PDF driver cannot embed one. The same file loaded by path'
+  log '  works, so put the TTFs beside the document and rebuild:'
+  log "    scripts/fetch-vazirmatn.sh ${src_dir}/fonts"
+}
+
+# A PDF that exists is not a PDF that is complete. XeLaTeX exits 0 while the
+# xdvipdfmx driver dies, leaving a header with no trailer; poppler then
+# reports "Couldn't find trailer dictionary" and the page count is unknown.
+pdf_is_complete() {
+  local f=$1
+  [[ -s $f ]] || return 1
+  head -c 8 "$f" | grep -q '%PDF-' || return 1
+  tail -c 2048 "$f" | grep -q '%%EOF' || return 1
+  return 0
+}
+
 # 0 = built, 1 = engine unavailable, 2 = engine present but failed.
 compile_tex() {
   have_xelatex || return 1
-  local pdf="${stem_src}.pdf"
+  local pdf="${stem_src}.pdf" logfile="${stem_src}.log"
+  local out
+  # Keep the engine output instead of discarding it. The PDF driver reports
+  # its own failure on stderr rather than in the .log, so throwing it away
+  # leaves nothing to diagnose.
   if command -v latexmk >/dev/null 2>&1; then
     log "engine: latexmk -xelatex"
-    latexmk -xelatex -interaction=nonstopmode -halt-on-error \
-            -silent "$src_base" >/dev/null 2>&1 || {
-      show_tex_error "${stem_src}.log"; return 2; }
+    out=$(latexmk -xelatex -interaction=nonstopmode -halt-on-error \
+            -silent "$src_base" 2>&1) || {
+      printf '%s\n' "$out" >&2; show_tex_error "$logfile"; return 2; }
   else
     log "engine: xelatex (two passes)"
-    xelatex -interaction=nonstopmode -halt-on-error "$src_base" \
-      >/dev/null 2>&1 || { show_tex_error "${stem_src}.log"; return 2; }
-    xelatex -interaction=nonstopmode -halt-on-error "$src_base" \
-      >/dev/null 2>&1 || { show_tex_error "${stem_src}.log"; return 2; }
+    out=$(xelatex -interaction=nonstopmode -halt-on-error "$src_base" 2>&1) || {
+      printf '%s\n' "$out" >&2; show_tex_error "$logfile"; return 2; }
+    out=$(xelatex -interaction=nonstopmode -halt-on-error "$src_base" 2>&1) || {
+      printf '%s\n' "$out" >&2; show_tex_error "$logfile"; return 2; }
   fi
   [[ -f $pdf ]] || { log "expected PDF missing: ${src_dir}/${pdf}"; return 2; }
+  # A zero exit code from xelatex only means TeX itself was happy. The PDF
+  # driver runs afterwards and reports its own failure in the log while
+  # xelatex still exits 0, so check for that before believing it.
+  if [[ -f $logfile ]] && grep -q 'driver return code' "$logfile"; then
+    log "the PDF driver failed even though xelatex exited 0:"
+    grep -n 'driver return code' "$logfile" >&2
+    printf '%s\n' "$out" >&2
+    explain_driver_failure "$out"
+    return 2
+  fi
+  if ! pdf_is_complete "$pdf"; then
+    log "${pdf} is truncated (no %%EOF); the driver did not finish"
+    printf '%s\n' "$out" >&2
+    explain_driver_failure "$out"
+    return 2
+  fi
   cp -f "$pdf" "$dest" || return 2
   return 0
 }
