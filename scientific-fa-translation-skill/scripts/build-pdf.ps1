@@ -213,15 +213,30 @@ function Invoke-TexBuild {
     if (-not (Test-XeLaTeX)) { return 1 }
     $pdf = "$Stem.pdf"
     $log = "$Stem.log"
+    $xelatex = Get-Tool 'xelatex'
     $latexmk = Get-Tool 'latexmk'
-    if ($latexmk) {
+    $useLatexmk = [bool]$latexmk
+    $r = $null
+
+    if ($useLatexmk) {
         Write-Log 'engine: latexmk -xelatex'
         $r = Invoke-Tool $latexmk @(
             '-xelatex', '-interaction=nonstopmode', '-halt-on-error',
             '-silent', $SourceName)
+        if ($r.ExitCode -ne 0 -and -not (Test-Path -LiteralPath $log -PathType Leaf)) {
+            # No .log at all means the compiler was never reached - a
+            # latexmk problem (MiKTeX ships it as a Perl script, so a
+            # missing Perl kills it) rather than a broken document. Any
+            # real TeX error writes a .log first, so retrying here cannot
+            # hide one.
+            Write-Log 'latexmk wrote no .log, so it never reached the compiler:'
+            Write-ToolOutput $r.Output
+            Write-Log 'retrying with xelatex directly'
+            $useLatexmk = $false
+        }
     }
-    else {
-        $xelatex = Get-Tool 'xelatex'
+
+    if (-not $useLatexmk) {
         Write-Log 'engine: xelatex (two passes)'
         $r = Invoke-Tool $xelatex @(
             '-interaction=nonstopmode', '-halt-on-error', $SourceName)
@@ -230,7 +245,18 @@ function Invoke-TexBuild {
                 '-interaction=nonstopmode', '-halt-on-error', $SourceName)
         }
     }
-    if ($r.ExitCode -ne 0) { Show-TexError $log; return 2 }
+
+    if ($r.ExitCode -ne 0) {
+        if (Test-Path -LiteralPath $log -PathType Leaf) {
+            Show-TexError $log
+        }
+        else {
+            # Never claim "the error is above" when nothing was printed.
+            Write-Log "no $log was written; the engine's own output follows"
+            Write-ToolOutput $r.Output
+        }
+        return 2
+    }
     if (-not (Test-Path -LiteralPath $pdf -PathType Leaf)) {
         Write-Log "expected PDF missing: $pdf"
         return 2
@@ -395,9 +421,9 @@ try {
             else {
                 $rc = Invoke-TexBuild $srcName $srcStem $dest
                 if ($rc -eq 2) {
-                    Write-Log 'XeLaTeX is installed but the document failed to compile.'
-                    Write-Log 'Fix the TeX error above. Not falling back - a fallback here'
-                    Write-Log '  would hide a real error in the .tex.'
+                    Write-Log 'XeLaTeX is installed but the build failed.'
+                    Write-Log 'Fix the problem reported above. Not falling back to HTML - a'
+                    Write-Log '  fallback here would hide a real error in the .tex.'
                     exit 1
                 }
                 if ($rc -eq 1) {

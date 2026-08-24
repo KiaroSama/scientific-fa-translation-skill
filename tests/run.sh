@@ -207,6 +207,72 @@ else
   fail=1
 fi
 
+# build-pdf.sh diagnostics. A build that fails must always say WHY: when a
+# .log exists show the TeX error, and when none exists show the engine's own
+# output instead of claiming an error was printed. Stubs stand in for the
+# toolchain so this runs anywhere.
+stub=$(mktemp -d)
+work=$(mktemp -d)
+trap 'rm -rf "$stub" "$work"' EXIT
+
+cat >"$stub/kpsewhich" <<'STUB'
+#!/bin/sh
+echo "/usr/share/texmf/tex/xelatex/xepersian/xepersian.sty"
+STUB
+# latexmk is a Perl script; on a broken Perl it dies before writing a .log.
+cat >"$stub/latexmk" <<'STUB'
+#!/bin/sh
+echo "Can't locate strict.pm in @INC" >&2
+exit 2
+STUB
+cat >"$stub/xelatex" <<'STUB'
+#!/bin/sh
+for a; do case "$a" in *.tex) s=$(basename "$a" .tex);; esac; done
+case "$XELATEX_MODE" in
+  ok)      echo "log line" > "$s.log"; printf '%%PDF-1.4\n' > "$s.pdf"; exit 0 ;;
+  logfail) printf '! Undefined control sequence.\nl.42 \\bogus\n' > "$s.log"; exit 1 ;;
+  *)       echo "xelatex: cannot execute" >&2; exit 127 ;;
+esac
+STUB
+chmod +x "$stub"/*
+
+expect_build() {
+  local label=$1 mode=$2 want_rc=$3
+  shift 3
+  local out rc
+  rm -f "$work"/*.log "$work"/*.pdf
+  cp "$skill/assets/rtl-document.tex" "$work/probe.tex"
+  out=$(PATH="$stub:$PATH" XELATEX_MODE="$mode" \
+        bash "$skill/scripts/build-pdf.sh" "$work/probe.tex" "fa-selftest" 2>&1)
+  rc=$?
+  local missing=() phrase
+  for phrase in "$@"; do
+    grep -qF -- "$phrase" <<<"$out" || missing+=("$phrase")
+  done
+  if [[ $rc -ne $want_rc ]]; then
+    echo "FAIL build-pdf $label: exit $rc, wanted $want_rc"
+    echo "$out" | sed 's/^/    /'
+    fail=1
+  elif [[ ${#missing[@]} -gt 0 ]]; then
+    echo "FAIL build-pdf $label: missing from output: ${missing[*]}"
+    echo "$out" | sed 's/^/    /'
+    fail=1
+  else
+    echo "ok   build-pdf $label"
+  fi
+}
+
+# latexmk dies without a .log: report its output, then fall back to xelatex.
+# Falling back is safe precisely because a real TeX error writes a .log.
+expect_build "falls back when latexmk never reaches the compiler" ok 0 \
+  "latexmk wrote no .log" "Can't locate strict.pm" "retrying with xelatex"
+# A .log exists: the TeX error itself must be surfaced.
+expect_build "prints the TeX error when a .log exists" logfail 1 \
+  "Undefined control sequence" "first TeX errors"
+# No .log anywhere: never claim an error was printed when none was.
+expect_build "prints engine output when no .log exists" dead 1 \
+  "no probe.log was written" "xelatex: cannot execute"
+
 if [[ $fail -eq 0 ]]; then
   echo "all tests passed"
 else

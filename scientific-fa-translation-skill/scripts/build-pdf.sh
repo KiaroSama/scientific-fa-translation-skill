@@ -82,18 +82,43 @@ show_tex_error() {
 # 0 = built, 1 = engine unavailable, 2 = engine present but failed.
 compile_tex() {
   have_xelatex || return 1
-  local pdf="${stem_src}.pdf"
-  if command -v latexmk >/dev/null 2>&1; then
+  local pdf="${stem_src}.pdf" logfile="${stem_src}.log"
+  local out rc use_latexmk=0
+  command -v latexmk >/dev/null 2>&1 && use_latexmk=1
+
+  if [[ $use_latexmk -eq 1 ]]; then
     log "engine: latexmk -xelatex"
-    latexmk -xelatex -interaction=nonstopmode -halt-on-error \
-            -silent "$src_base" >/dev/null 2>&1 || {
-      show_tex_error "${stem_src}.log"; return 2; }
-  else
+    out=$(latexmk -xelatex -interaction=nonstopmode -halt-on-error \
+                  -silent "$src_base" 2>&1); rc=$?
+    if [[ $rc -ne 0 && ! -f $logfile ]]; then
+      # No .log at all means the compiler was never reached - a latexmk
+      # problem (it is a Perl script, so a missing Perl kills it) rather
+      # than a broken document. Any real TeX error writes a .log first, so
+      # retrying here cannot hide one.
+      log "latexmk wrote no .log, so it never reached the compiler:"
+      printf '%s\n' "$out" >&2
+      log "retrying with xelatex directly"
+      use_latexmk=0
+    fi
+  fi
+
+  if [[ $use_latexmk -eq 0 ]]; then
     log "engine: xelatex (two passes)"
-    xelatex -interaction=nonstopmode -halt-on-error "$src_base" \
-      >/dev/null 2>&1 || { show_tex_error "${stem_src}.log"; return 2; }
-    xelatex -interaction=nonstopmode -halt-on-error "$src_base" \
-      >/dev/null 2>&1 || { show_tex_error "${stem_src}.log"; return 2; }
+    out=$(xelatex -interaction=nonstopmode -halt-on-error "$src_base" 2>&1); rc=$?
+    if [[ $rc -eq 0 ]]; then
+      out=$(xelatex -interaction=nonstopmode -halt-on-error "$src_base" 2>&1); rc=$?
+    fi
+  fi
+
+  if [[ $rc -ne 0 ]]; then
+    if [[ -f $logfile ]]; then
+      show_tex_error "$logfile"
+    else
+      # Never claim "the error is above" when nothing was printed.
+      log "no ${logfile} was written; the engine's own output follows"
+      printf '%s\n' "$out" >&2
+    fi
+    return 2
   fi
   [[ -f $pdf ]] || { log "expected PDF missing: ${src_dir}/${pdf}"; return 2; }
   cp -f "$pdf" "$dest" || return 2
@@ -168,9 +193,9 @@ case "$ext" in
     else
       compile_tex; rc=$?
       if [[ $rc -eq 2 ]]; then
-        log "XeLaTeX is installed but the document failed to compile."
-        log "Fix the TeX error above. Not falling back — a fallback here"
-        log "  would hide a real error in the .tex."
+        log "XeLaTeX is installed but the build failed."
+        log "Fix the problem reported above. Not falling back to HTML — a"
+        log "  fallback here would hide a real error in the .tex."
         exit 1
       fi
       if [[ $rc -eq 1 ]]; then
