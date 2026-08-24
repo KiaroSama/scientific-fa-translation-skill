@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 <#
 .SYNOPSIS
     Report which PDF engines, fonts, and extraction tools exist on this
@@ -19,9 +20,12 @@
     .\preflight.ps1 -RequireTex
 
 .NOTES
-    Targets Windows PowerShell 5.1. Keep this file pure ASCII: 5.1 decodes
-    a BOM-less .ps1 with the system ANSI code page, where a UTF-8 em dash
-    becomes a curly quote that terminates a string and breaks the parse.
+    Runs on Windows PowerShell 5.1 and on PowerShell 7.x. Windows only:
+    under pwsh on Linux or macOS it stops and points at preflight.sh.
+
+    Keep this file pure ASCII: 5.1 decodes a BOM-less .ps1 with the system
+    ANSI code page, where a UTF-8 em dash becomes a curly quote that
+    terminates a string and breaks the parse.
 #>
 [CmdletBinding()]
 param(
@@ -50,21 +54,41 @@ function Get-Tool {
 }
 
 function Invoke-Tool {
-    # See the note in build-pdf.ps1: 2>&1 on a native command routes stderr
-    # through WriteError, which under $ErrorActionPreference='Stop' would
-    # throw on the first line. A missing Python module prints a traceback on
-    # stderr, so probing without this would abort the whole report.
+    # See the long note in build-pdf.ps1. Both assignments are
+    # function-scoped and revert on return.
+    #
+    # 5.1: 2>&1 routes native stderr through WriteError, which under
+    # $ErrorActionPreference='Stop' throws on the first line. A missing
+    # Python module prints a traceback on stderr, so probing without this
+    # would abort the whole report on a perfectly ordinary machine.
+    #
+    # $PSNativeCommandUseErrorActionPreference (7.3+) makes a non-zero exit
+    # code throw as well. It ships $false, but a profile or CI runner can
+    # set it, and this whole script is built on probing exit codes - so opt
+    # out explicitly. On 5.1 the variable is simply unused.
+    #
+    # $Exe must be a resolved path from Get-Tool, never a bare name: the
+    # call operator prefers an alias, function or cmdlet over the
+    # executable, and those leave $LASTEXITCODE stale.
     param([string]$Exe, [string[]]$Arguments)
-    $previous = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
-    try {
-        $out = & $Exe @Arguments 2>&1
-        $code = $LASTEXITCODE
-    }
-    finally {
-        $ErrorActionPreference = $previous
-    }
+    $PSNativeCommandUseErrorActionPreference = $false
+    $out = & $Exe @Arguments 2>&1
+    $code = if (Test-Path 'variable:LASTEXITCODE') { $LASTEXITCODE } else { 0 }
     return [pscustomobject]@{ ExitCode = $code; Output = $out }
+}
+
+function Test-Windows {
+    # 5.1 is Windows-only and has no $IsWindows; 7.x defines it everywhere.
+    if (Test-Path 'variable:IsWindows') { return [bool]$IsWindows }
+    return $true
+}
+
+if (-not (Test-Windows)) {
+    [Console]::Error.WriteLine('preflight: this script reads Windows registry fonts and Program Files.')
+    [Console]::Error.WriteLine('preflight: On Linux or macOS run the POSIX twin instead:')
+    [Console]::Error.WriteLine('preflight:   scripts/preflight.sh')
+    exit 2
 }
 
 function Get-Python {

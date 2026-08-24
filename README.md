@@ -139,9 +139,11 @@ python scripts\check-fa.py doc.tex --level system-docs --domains openstack --str
 .\scripts\build-pdf.ps1 doc.tex my-slug -Verify
 ```
 
-The `.ps1` scripts target PowerShell 5.1, so the shell that ships with
-Windows is enough. The `.py` helpers are cross-platform and need no port.
-`tests/run.sh` is POSIX-only — run it under WSL or Git Bash. See
+The `.ps1` scripts run on Windows PowerShell 5.1 and on PowerShell 7.x, so
+the shell that ships with Windows is enough and `pwsh` works too. They are
+Windows-only by design — under `pwsh` on Linux or macOS each exits 2 and
+points at its `.sh` twin. The `.py` helpers are cross-platform and need no
+port. `tests/run.sh` is POSIX-only — run it under WSL or Git Bash. See
 `references/pdf-output.md` for the Windows engine notes (Edge as the
 browser fallback, MiKTeX for TeX, poppler for `-Verify` rasterisation).
 

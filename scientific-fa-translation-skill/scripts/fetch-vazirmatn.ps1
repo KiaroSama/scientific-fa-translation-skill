@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 <#
 .SYNOPSIS
     Put Vazirmatn Regular + Bold (Western digits) into a fonts directory
@@ -22,9 +23,12 @@
     .\fetch-vazirmatn.ps1 fonts
 
 .NOTES
-    Targets Windows PowerShell 5.1. Keep this file pure ASCII: 5.1 decodes
-    a BOM-less .ps1 with the system ANSI code page, where a UTF-8 em dash
-    becomes a curly quote that terminates a string and breaks the parse.
+    Runs on Windows PowerShell 5.1 and on PowerShell 7.x. Windows only:
+    under pwsh on Linux or macOS it stops and points at fetch-vazirmatn.sh.
+
+    Keep this file pure ASCII: 5.1 decodes a BOM-less .ps1 with the system
+    ANSI code page, where a UTF-8 em dash becomes a curly quote that
+    terminates a string and breaks the parse.
 #>
 [CmdletBinding()]
 param(
@@ -59,6 +63,19 @@ $OtherWeights = '(?i)semi|extra|ultra|demi|thin|light|medium|black|italic'
 function Write-Log {
     param([string]$Message)
     [Console]::Error.WriteLine("fetch-vazirmatn: $Message")
+}
+
+function Test-Windows {
+    # 5.1 is Windows-only and has no $IsWindows; 7.x defines it everywhere.
+    if (Test-Path 'variable:IsWindows') { return [bool]$IsWindows }
+    return $true
+}
+
+if (-not (Test-Windows)) {
+    Write-Log 'this script reads the Windows font registry.'
+    Write-Log 'On Linux or macOS run the POSIX twin instead:'
+    Write-Log '  scripts/fetch-vazirmatn.sh [dest-dir]'
+    exit 2
 }
 
 function Test-HaveAll {

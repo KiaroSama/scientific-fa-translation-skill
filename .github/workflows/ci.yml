@@ -20,25 +20,45 @@ jobs:
       - name: Byte-compile python
         run: python3 -m py_compile $(git ls-files '*.py')
 
-      - name: PowerShell twins exist and stay ASCII
+      - name: PowerShell twins run on 5.1 and 7.x
         run: |
           set -e
-          # Windows PowerShell 5.1 decodes a BOM-less .ps1 with the system
-          # ANSI code page. A UTF-8 em dash then becomes U+201D, which the
-          # tokenizer treats as a double quote and the whole file fails to
-          # parse. Keeping the .ps1 files ASCII removes the dependency.
           fail=0
-          for f in $(git ls-files '*.ps1'); do
-            if LC_ALL=C grep -nP '[^\x00-\x7F]' "$f"; then
-              echo "$f: non-ASCII byte; PowerShell 5.1 will mis-decode it"
-              fail=1
-            fi
-          done
+
           # Every shell script in the skill needs a same-named .ps1 twin.
           for sh in scientific-fa-translation-skill/scripts/*.sh; do
             ps1="${sh%.sh}.ps1"
             if [ ! -f "$ps1" ]; then
               echo "missing PowerShell twin for $sh"
+              fail=1
+            fi
+          done
+
+          for f in $(git ls-files '*.ps1'); do
+            # 5.1 decodes a BOM-less .ps1 with the system ANSI code page. A
+            # UTF-8 em dash then becomes U+201D, which the tokenizer treats
+            # as a double quote, and the whole file fails to parse. Staying
+            # ASCII removes the dependency on encoding entirely.
+            if LC_ALL=C grep -nP '[^\x00-\x7F]' "$f"; then
+              echo "$f: non-ASCII byte; PowerShell 5.1 will mis-decode it"
+              fail=1
+            fi
+            # PowerShell-7-only syntax breaks 5.1 outright.
+            if grep -nE '\?\?|ForEach-Object[[:space:]]+-Parallel|Join-String|\$IsCoreCLR' "$f"; then
+              echo "$f: PowerShell 7-only syntax; the twins must also run on 5.1"
+              fail=1
+            fi
+            if ! grep -q '^#Requires -Version 5\.1' "$f"; then
+              echo "$f: missing '#Requires -Version 5.1'"
+              fail=1
+            fi
+            # 7.4+ defaults $PSNativeCommandUseErrorActionPreference to true,
+            # so a non-zero exit code throws. Any file that probes a native
+            # command for its exit code must opt out.
+            if grep -q '\$LASTEXITCODE' "$f" &&
+               ! grep -q 'PSNativeCommandUseErrorActionPreference = \$false' "$f"; then
+              echo "$f: reads \$LASTEXITCODE without opting out of"
+              echo "  \$PSNativeCommandUseErrorActionPreference (throws on 7.4+)"
               fail=1
             fi
           done

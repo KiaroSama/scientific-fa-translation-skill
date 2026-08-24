@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 <#
 .SYNOPSIS
     Compile a Persian print document and copy the PDF to
@@ -32,10 +33,12 @@
     .\build-pdf.ps1 doc.html my-slug -Engine chromium -Verify
 
 .NOTES
-    Targets Windows PowerShell 5.1; PowerShell 7 works too. This file is
-    deliberately pure ASCII: 5.1 decodes a BOM-less .ps1 with the system
-    ANSI code page, where a UTF-8 em dash turns into a curly quote that
-    terminates a string and breaks the parse. Keep it ASCII-only.
+    Runs on Windows PowerShell 5.1 and on PowerShell 7.x. Windows only:
+    under pwsh on Linux or macOS it stops and points at build-pdf.sh.
+
+    This file is deliberately pure ASCII: 5.1 decodes a BOM-less .ps1 with
+    the system ANSI code page, where a UTF-8 em dash turns into a curly
+    quote that terminates a string and breaks the parse. Keep it ASCII-only.
 
     The Python helpers in this directory (check-fa.py, prepare-figures.py,
     crop-source-figures.py, extract-pdf-pages.py) are cross-platform
@@ -43,7 +46,10 @@
 #>
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $true, Position = 0)]
+    # Not [Mandatory]: a mandatory parameter prompts before the platform
+    # guard below can run, so `pwsh ./build-pdf.ps1` on Linux would hang on
+    # a prompt instead of pointing at build-pdf.sh.
+    [Parameter(Position = 0)]
     [string]$Path,
 
     [Parameter(Position = 1)]
@@ -60,13 +66,30 @@ $ErrorActionPreference = 'Stop'
 # Persian filenames and TeX log lines are UTF-8; do not let the console
 # code page mangle them.
 try { [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false) } catch { }
-# Assignment, not indexing: indexing would mutate the caller's global
-# dictionary and leave '*:Encoding' set for the rest of their session.
-$PSDefaultParameterValues = @{ '*:Encoding' = 'utf8' }
 
 function Write-Log {
     param([string]$Message)
     [Console]::Error.WriteLine("build-pdf: $Message")
+}
+
+function Test-Windows {
+    # 5.1 is Windows-only and has no $IsWindows; 7.x defines it on every
+    # platform. Test-Path keeps StrictMode from throwing on 5.1.
+    if (Test-Path 'variable:IsWindows') { return [bool]$IsWindows }
+    return $true
+}
+
+if (-not (Test-Windows)) {
+    Write-Log 'this script drives Windows tooling (registry fonts, Edge, MiKTeX).'
+    Write-Log 'On Linux or macOS run the POSIX twin instead:'
+    Write-Log '  scripts/build-pdf.sh <file.tex|file.html> <slug> --verify'
+    exit 2
+}
+
+if (-not $Path) {
+    Write-Log 'usage: build-pdf.ps1 <file.tex|file.html> [slug] [-Verify]'
+    Write-Log '                     [-Engine tex|chromium|weasyprint]'
+    exit 2
 }
 
 function Get-Tool {
@@ -81,21 +104,34 @@ function Get-Tool {
 function Invoke-Tool {
     # Run an executable, capture merged stdout+stderr, return the exit code.
     #
-    # 2>&1 on a native command wraps each stderr line in an ErrorRecord and
-    # emits it through WriteError, which honours $ErrorActionPreference. Under
-    # 'Stop' the first stderr line would throw - and headless Chromium, latexmk
-    # -silent, and a failing `python -c import` all write to stderr on success
-    # paths. Relax the preference for the duration of the call only.
+    # $Exe must be a resolved path from Get-Tool, never a bare name: the call
+    # operator runs full command discovery, which prefers an alias, function
+    # or cmdlet over the executable, and those leave $LASTEXITCODE stale.
+    #
+    # Both assignments below are function-scoped, so they shadow the caller's
+    # values and revert on return - no finally needed.
+    #
+    # 5.1: 2>&1 on a native command wraps each stderr line in an ErrorRecord
+    # and emits it through WriteError, which honours $ErrorActionPreference.
+    # Under 'Stop' the first stderr line throws - and headless Chromium,
+    # latexmk -silent, and a failing `python -c import` all write to stderr
+    # on paths this function must treat as ordinary results. (7.2+ exempted
+    # redirected native stderr from $ErrorActionPreference, so this trap is
+    # 5.1-only, but the twins have to serve both.)
+    #
+    # $PSNativeCommandUseErrorActionPreference (7.3+) makes a non-zero *exit
+    # code* raise NativeCommandExitException, which honours
+    # $ErrorActionPreference too. It ships $false, but a profile or a CI
+    # runner can set it, so opt out explicitly: this function reports exit
+    # codes on purpose - kpsewhich 1 means "package not installed", not
+    # "abort". On 5.1 the variable is simply unused.
     param([string]$Exe, [string[]]$Arguments)
-    $previous = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
-    try {
-        $out = & $Exe @Arguments 2>&1
-        $code = $LASTEXITCODE
-    }
-    finally {
-        $ErrorActionPreference = $previous
-    }
+    $PSNativeCommandUseErrorActionPreference = $false
+    $out = & $Exe @Arguments 2>&1
+    # StrictMode throws on an unset $LASTEXITCODE, which is the state of a
+    # fresh session if discovery ever resolved something non-native.
+    $code = if (Test-Path 'variable:LASTEXITCODE') { $LASTEXITCODE } else { 0 }
     return [pscustomobject]@{ ExitCode = $code; Output = $out }
 }
 
@@ -108,8 +144,9 @@ function Write-ToolOutput {
 function Test-XeLaTeX {
     if (-not (Get-Tool 'xelatex')) { return $false }
     # xepersian is the part that is usually missing on a bare TeX install.
-    if (Get-Tool 'kpsewhich') {
-        $r = Invoke-Tool 'kpsewhich' @('xepersian.sty')
+    $kpse = Get-Tool 'kpsewhich'
+    if ($kpse) {
+        $r = Invoke-Tool $kpse @('xepersian.sty')
         if ($r.ExitCode -ne 0) { return $false }
     }
     return $true
@@ -160,18 +197,20 @@ function Invoke-TexBuild {
     if (-not (Test-XeLaTeX)) { return 1 }
     $pdf = "$Stem.pdf"
     $log = "$Stem.log"
-    if (Get-Tool 'latexmk') {
+    $latexmk = Get-Tool 'latexmk'
+    if ($latexmk) {
         Write-Log 'engine: latexmk -xelatex'
-        $r = Invoke-Tool 'latexmk' @(
+        $r = Invoke-Tool $latexmk @(
             '-xelatex', '-interaction=nonstopmode', '-halt-on-error',
             '-silent', $SourceName)
     }
     else {
+        $xelatex = Get-Tool 'xelatex'
         Write-Log 'engine: xelatex (two passes)'
-        $r = Invoke-Tool 'xelatex' @(
+        $r = Invoke-Tool $xelatex @(
             '-interaction=nonstopmode', '-halt-on-error', $SourceName)
         if ($r.ExitCode -eq 0) {
-            $r = Invoke-Tool 'xelatex' @(
+            $r = Invoke-Tool $xelatex @(
                 '-interaction=nonstopmode', '-halt-on-error', $SourceName)
         }
     }
@@ -232,9 +271,10 @@ function Invoke-HtmlBuild {
         }
     }
 
-    if (Get-Tool 'weasyprint') {
+    $weasyprint = Get-Tool 'weasyprint'
+    if ($weasyprint) {
         Write-Log 'engine: weasyprint (keeps its bidi warnings; read them)'
-        $r = Invoke-Tool 'weasyprint' @($Html, $Destination)
+        $r = Invoke-Tool $weasyprint @($Html, $Destination)
         if ($r.ExitCode -ne 0) {
             Write-ToolOutput $r.Output
             return 2
@@ -271,26 +311,29 @@ function Test-OutputPdf {
         return $false
     }
     $pages = $null
-    if (Get-Tool 'pdfinfo') {
-        $r = Invoke-Tool 'pdfinfo' @($Pdf)
+    $pdfinfo = Get-Tool 'pdfinfo'
+    if ($pdfinfo) {
+        $r = Invoke-Tool $pdfinfo @($Pdf)
         $line = $r.Output | Where-Object { $_ -match '^Pages:\s+(\d+)' } | Select-Object -First 1
         if ($line -and "$line" -match '^Pages:\s+(\d+)') { $pages = [int]$Matches[1] }
         if ($pages) { Write-Log "pages: $pages" } else { Write-Log 'pages: unknown' }
     }
-    if (Get-Tool 'pdffonts') {
+    $pdffonts = Get-Tool 'pdffonts'
+    if ($pdffonts) {
         Write-Log 'embedded fonts:'
-        $r = Invoke-Tool 'pdffonts' @($Pdf)
+        $r = Invoke-Tool $pdffonts @($Pdf)
         $r.Output | Select-Object -First 8 | ForEach-Object { [Console]::Error.WriteLine($_) }
         $embedded = $r.Output | Select-Object -Skip 2 | Where-Object { "$_" -match '\byes\b' }
         if (-not $embedded) {
             Write-Log 'VERIFY WARN: no embedded font; Persian may render as boxes'
         }
     }
-    if (Get-Tool 'pdftoppm') {
+    $pdftoppm = Get-Tool 'pdftoppm'
+    if ($pdftoppm) {
         $prefix = Join-Path $WorkDir "verify-$Stem"
-        Invoke-Tool 'pdftoppm' @('-png', '-r', '110', '-f', '1', '-l', '1', $Pdf, "$prefix-first") | Out-Null
+        Invoke-Tool $pdftoppm @('-png', '-r', '110', '-f', '1', '-l', '1', $Pdf, "$prefix-first") | Out-Null
         if ($pages -and $pages -gt 1) {
-            Invoke-Tool 'pdftoppm' @('-png', '-r', '110', '-f', "$pages", '-l', "$pages", $Pdf, "$prefix-last") | Out-Null
+            Invoke-Tool $pdftoppm @('-png', '-r', '110', '-f', "$pages", '-l', "$pages", $Pdf, "$prefix-last") | Out-Null
         }
         Write-Log "rasterised samples: $prefix-*.png -- look at them, do not"
         Write-Log '  judge RTL from pdftotext'

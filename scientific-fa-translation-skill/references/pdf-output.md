@@ -52,11 +52,42 @@ style change:
 | `scripts/fetch-vazirmatn.sh fonts` | `.\scripts\fetch-vazirmatn.ps1 fonts` |
 
 The `.py` helpers need no port — run them as `python scripts\check-fa.py …`.
-The `.ps1` scripts target PowerShell 5.1, so they work in the shell that
-ships with Windows; PowerShell 7 (`pwsh`) is fine too. If execution policy
-blocks them, start them with
-`powershell -ExecutionPolicy Bypass -File .\scripts\preflight.ps1` rather
-than relaxing the machine-wide policy.
+The `.ps1` scripts run on Windows PowerShell 5.1 *and* PowerShell 7.x, so
+the shell that ships with Windows is enough and `pwsh` is equally fine.
+They are Windows-only by design: under `pwsh` on Linux or macOS each one
+exits 2 and points at its `.sh` twin. If execution policy blocks them,
+start them with
+`powershell -ExecutionPolicy Bypass -File .\scripts\preflight.ps1` (or
+`pwsh -ExecutionPolicy Bypass -File …`) rather than relaxing the
+machine-wide policy.
+
+Three traps are already handled inside the scripts, and any new `.ps1` code
+must handle them too. All three are about probing a native command for its
+exit code, which the scripts do constantly:
+
+- **5.1** turns each stderr line of a native command into an `ErrorRecord`
+  that honours `$ErrorActionPreference`. Under `Stop` the first line
+  throws — and headless Chromium, `latexmk -silent`, and a failing
+  `python -c "import …"` all write to stderr on ordinary paths. PowerShell
+  7.2 exempted redirected native stderr from `$ErrorActionPreference`, so
+  this one is 5.1-only; the twins still have to serve both.
+- **`$PSNativeCommandUseErrorActionPreference`** (7.3+) makes a non-zero
+  *exit code* raise `NativeCommandExitException`, which honours
+  `$ErrorActionPreference` too. It ships `$false`, so this is insurance
+  rather than a fix for a current default — but a profile or a CI runner
+  can set it, and `kpsewhich` exiting 1 means "package not installed", not
+  "abort the script".
+- **Command discovery.** `& 'pdfinfo'` runs full discovery and prefers an
+  alias, function, or cmdlet over the executable; those leave
+  `$LASTEXITCODE` stale, or unset in a fresh session, where StrictMode
+  then throws on the read.
+
+All three are neutralised in one place — the `Invoke-Tool` helper sets
+`$ErrorActionPreference = 'Continue'` and
+`$PSNativeCommandUseErrorActionPreference = $false` as function-scoped
+locals (they revert on return), and reads `$LASTEXITCODE` defensively.
+Route every native call through it, and always hand it the resolved path
+from `Get-Tool`, never a bare command name.
 
 Windows specifics worth knowing:
 

@@ -77,11 +77,20 @@ relative to itself, so `scripts/` and `references/` must stay siblings.
   `.cursor/rules` entry).
 - Paths in prose use `$HOME/...`, never `/home/<user>/...`, so the same
   instruction reads correctly on Linux, macOS, WSL, and Git Bash.
-- The `.sh` scripts assume a POSIX shell; the `.ps1` twins target
-  PowerShell 5.1, so they run in the shell that ships with Windows. Do not
-  use PowerShell-7-only syntax (`??`, ternaries, `ForEach-Object
-  -Parallel`). `tests/run.sh` is POSIX-only — on Windows run it under WSL
-  or Git Bash.
+- The `.sh` scripts assume a POSIX shell; the `.ps1` twins must run on
+  **both** Windows PowerShell 5.1 and PowerShell 7.x. Do not use
+  PowerShell-7-only syntax (`??`, ternaries, `ForEach-Object -Parallel`),
+  and keep every `.ps1` pure ASCII — 5.1 decodes a BOM-less script with the
+  system ANSI code page, where a UTF-8 em dash becomes a curly quote that
+  terminates a string and breaks the parse. CI enforces both.
+- Route every native-command call in a `.ps1` through its `Invoke-Tool`
+  helper, and hand it a resolved path from `Get-Tool`, never a bare name.
+  Three traps make a bare call unsafe: on 5.1 `2>&1` turns native stderr
+  into `ErrorRecord`s that honour `$ErrorActionPreference`; a session that
+  sets `$PSNativeCommandUseErrorActionPreference` (7.3+) makes a non-zero
+  exit code throw; and command discovery can resolve a name to an alias or
+  cmdlet, leaving `$LASTEXITCODE` stale. See `references/pdf-output.md`.
+- `tests/run.sh` is POSIX-only — on Windows run it under WSL or Git Bash.
 
 ## Known toolchain issue
 
