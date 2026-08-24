@@ -54,8 +54,10 @@ log() { printf 'build-pdf: %s\n' "$*" >&2; }
 have_xelatex() {
   command -v xelatex >/dev/null 2>&1 || return 1
   # xepersian is the part that is usually missing on a bare TeX install.
+  # Exit code alone is not enough: MiKTeX's kpsewhich can exit 0 while
+  # printing nothing for a package the basic install does not carry.
   if command -v kpsewhich >/dev/null 2>&1; then
-    kpsewhich xepersian.sty >/dev/null 2>&1 || return 1
+    [ -n "$(kpsewhich xepersian.sty 2>/dev/null)" ] || return 1
   fi
   return 0
 }

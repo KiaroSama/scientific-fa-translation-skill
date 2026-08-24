@@ -157,8 +157,13 @@ function Test-XeLaTeX {
     # xepersian is the part that is usually missing on a bare TeX install.
     $kpse = Get-Tool 'kpsewhich'
     if ($kpse) {
+        # Exit code alone is not enough: MiKTeX's kpsewhich can exit 0 while
+        # printing nothing for a package the basic install does not carry.
+        # Require an actual path back.
         $r = Invoke-Tool $kpse @('xepersian.sty')
         if ($r.ExitCode -ne 0) { return $false }
+        $hit = $r.Output | Where-Object { "$_" -match 'xepersian\.sty' }
+        if (-not $hit) { return $false }
     }
     return $true
 }

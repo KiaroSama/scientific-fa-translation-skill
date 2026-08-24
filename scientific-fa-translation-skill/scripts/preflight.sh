@@ -17,7 +17,9 @@ tex=0 chrome=0 weasy=0 fa_font=0
 
 echo "PDF engines"
 if have xelatex; then
-  if have kpsewhich && ! kpsewhich xepersian.sty >/dev/null 2>&1; then
+  # A bare exit-code check is not enough: MiKTeX's kpsewhich can exit 0
+  # while printing nothing for a package it does not actually have.
+  if have kpsewhich && [ -z "$(kpsewhich xepersian.sty 2>/dev/null)" ]; then
     no "xepersian.sty" "xelatex is present but the Persian package is not"
   else
     ok "xelatex + xepersian" "$(xelatex --version 2>/dev/null | head -1)"

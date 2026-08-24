@@ -171,8 +171,12 @@ if ($xelatex) {
     $xepersianMissing = $false
     $kpse = Get-Tool 'kpsewhich'
     if ($kpse) {
+        # Exit code alone is not enough: MiKTeX's kpsewhich can exit 0 while
+        # printing nothing for a package the basic install does not carry.
+        # Require an actual path back.
         $r = Invoke-Tool $kpse @('xepersian.sty')
-        if ($r.ExitCode -ne 0) { $xepersianMissing = $true }
+        $hit = $r.Output | Where-Object { "$_" -match 'xepersian\.sty' }
+        if ($r.ExitCode -ne 0 -or -not $hit) { $xepersianMissing = $true }
     }
     if ($xepersianMissing) {
         Write-No 'xepersian.sty' 'xelatex is present but the Persian package is not'
